@@ -11,6 +11,7 @@ djangorestframework-simplejwt = "*"
 gunicorn = "*"
 django-debug-toolbar = "*"
 mysqlclient = "*"
+dj-database-url = "*"
 
 [dev-packages]
 
