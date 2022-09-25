@@ -3,7 +3,7 @@ from . import models
 
 @admin.register(models.Service)
 class ServiceAdmin(admin.ModelAdmin):
-    list_display = ['name', 'active']
+    list_display = ['name', 'description', 'active']
     list_per_page = 100
     ordering = ['name', 'active']
     search_fields = ['name', 'active']
@@ -14,7 +14,7 @@ class ServiceAdmin(admin.ModelAdmin):
 
 @admin.register(models.RetainerService)
 class RetainerServiceAdmin(admin.ModelAdmin):
-    list_display = ['name', 'active']
+    list_display = ['name', 'description', 'active']
     list_per_page = 100
     ordering = ['name', 'active']
     search_fields = ['name', 'active']
