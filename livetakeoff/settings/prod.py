@@ -10,8 +10,8 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('JWT',),
     'SIGNING_KEY': SECRET_KEY,
     'VERIFYING_KEY': None,
-    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=800),
-    'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=2),
+    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=10080),
+    'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=7),
 }
 
 ALLOWED_HOSTS = ['api-livetakeoff.herokuapp.com']
