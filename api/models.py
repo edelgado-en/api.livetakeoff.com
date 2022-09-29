@@ -1,5 +1,5 @@
-from tabnanny import verbose
 from django.db import models
+from django.utils.html import mark_safe
 
 class Service(models.Model):
     name = models.CharField(max_length=255, unique=True)
@@ -96,13 +96,13 @@ class Job(models.Model):
     aircraftType = models.ForeignKey(AircraftType, on_delete=models.PROTECT)
     airport = models.ForeignKey(Airport, on_delete=models.PROTECT)
     fbo = models.ForeignKey(FBO, on_delete=models.PROTECT)
-    estimatedETA = models.DateTimeField()
-    estimatedETD = models.DateTimeField()
-    completeBy = models.DateTimeField()
+    estimatedETA = models.DateTimeField(blank=True, null=True)
+    estimatedETD = models.DateTimeField(blank=True, null=True)
+    completeBy = models.DateTimeField(blank=True, null=True)
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='A')
-    services = models.ManyToManyField(Service, related_name='services')
-    retainerServices = models.ManyToManyField(RetainerService, related_name='retainerservices')
-    assignees = models.ManyToManyField('auth.User', related_name='assignees')
+    services = models.ManyToManyField(Service, related_name='services', blank=True)
+    retainerServices = models.ManyToManyField(RetainerService, related_name='retainerservices', blank=True)
+    assignees = models.ManyToManyField('auth.User', related_name='assignees', blank=True)
 
     def __str__(self) -> str:
         return str(self.id) + ' - ' + self.tailNumber + ' - ' + self.airport.initials + ' - ' + self.aircraftType.name
@@ -123,6 +123,12 @@ class JobPhotos(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+    @property
+    def image_preview(self):
+        if self.image:
+            return mark_safe('<img src="{}" width="300" height="300" />'.format(self.image.url))
+        return ""
     
     class Meta:
         verbose_name_plural = 'Job Photos'

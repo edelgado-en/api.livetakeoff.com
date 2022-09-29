@@ -89,3 +89,9 @@ class JobPhotosAdmin(admin.ModelAdmin):
     list_per_page = 100
     ordering = ['id', 'name']
     search_fields = ['id', 'job', 'name']
+
+    def image_preview(self, obj):
+        return obj.image_preview
+
+    image_preview.short_description = 'Photo Preview'
+    image_preview.allow_tags = True
