@@ -77,7 +77,7 @@ class FBOAdmin(admin.ModelAdmin):
 class JobAdmin(admin.ModelAdmin):
     list_display = ['id', 'customer', 'requestDate', 'tailNumber', 'aircraftType', 'airport', 'fbo', 'estimatedETA', 'estimatedETD', 'completeBy', 'status']
     list_per_page = 100
-    ordering = ['customer', 'aircraftType', 'tailNumber', 'airport', 'fbo', 'status']
+    ordering = ['customer', 'aircraftType', 'tailNumber', 'airport', 'fbo', 'status', 'completeBy']
     search_fields = ['customer', 'tailNumber', ]
 
     def has_delete_permission(self, request, obj=None):
@@ -85,7 +85,7 @@ class JobAdmin(admin.ModelAdmin):
 
 @admin.register(models.JobPhotos)
 class JobPhotosAdmin(admin.ModelAdmin):
-    list_display = ['id', 'job', 'name', 'image']
+    list_display = ['id', 'job', 'name', 'image', 'interior']
     list_per_page = 100
     ordering = ['id', 'name']
     search_fields = ['id', 'job', 'name']
