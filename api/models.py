@@ -1,3 +1,4 @@
+from tabnanny import verbose
 from django.db import models
 
 class Service(models.Model):
@@ -80,6 +81,7 @@ class Job(models.Model):
     STATUS_CHOICES = [
         ('A', 'Accepted'),
         ('S', 'Assigned'),
+        ('U', 'Submitted'),
         ('W', 'WIP'),
         ('C', 'Complete'),
         ('T', 'Cancelled'),
@@ -88,7 +90,7 @@ class Job(models.Model):
 
     ]
     #TODO: figure out how to do the purchase order number
-    customer = models.ForeignKey(Customer, on_delete=models.PROTECT)
+    customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name='jobs')
     requestDate = models.DateTimeField(auto_now_add=True)
     tailNumber = models.CharField(max_length=50)
     aircraftType = models.ForeignKey(AircraftType, on_delete=models.PROTECT)
@@ -103,10 +105,10 @@ class Job(models.Model):
     assignees = models.ManyToManyField('auth.User', related_name='assignees')
 
     def __str__(self) -> str:
-        return self.tailNumber + ' - ' + self.airport.initials + ' - ' + self.aircraftType.name
+        return str(self.id) + ' - ' + self.tailNumber + ' - ' + self.airport.initials + ' - ' + self.aircraftType.name
 
 class JobComments(models.Model):
-    job = models.ForeignKey(Job, on_delete=models.CASCADE)
+    job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='comments')
     comment = models.TextField()
     author = models.ForeignKey('auth.User', on_delete=models.PROTECT)
     created = models.DateTimeField(auto_now_add=True)
@@ -115,9 +117,13 @@ class JobComments(models.Model):
         return self.comment
 
 class JobPhotos(models.Model):
-    job = models.ForeignKey(Job, on_delete=models.CASCADE)
-    photourl = models.URLField()
+    job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='photos')
+    name = models.CharField(max_length=255, null=True)
+    image = models.ImageField(upload_to='images/', blank=True)
 
     def __str__(self) -> str:
-        return self.photo
+        return self.name
+    
+    class Meta:
+        verbose_name_plural = 'Job Photos'
     

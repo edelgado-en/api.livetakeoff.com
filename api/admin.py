@@ -82,3 +82,10 @@ class JobAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+@admin.register(models.JobPhotos)
+class JobPhotosAdmin(admin.ModelAdmin):
+    list_display = ['id', 'job', 'name', 'image']
+    list_per_page = 100
+    ordering = ['id', 'name']
+    search_fields = ['id', 'job', 'name']

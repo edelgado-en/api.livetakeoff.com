@@ -15,6 +15,8 @@ dj-database-url = "*"
 psycopg2-binary = "*"
 whitenoise = "*"
 pillow = "*"
+django-dotenv = "*"
+django-cloudinary-storage = "*"
 
 [dev-packages]
 
