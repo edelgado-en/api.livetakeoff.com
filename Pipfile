@@ -17,6 +17,7 @@ whitenoise = "*"
 pillow = "*"
 django-dotenv = "*"
 django-cloudinary-storage = "*"
+django-templated-mail = "*"
 
 [dev-packages]
 
