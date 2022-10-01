@@ -102,10 +102,10 @@ class FBOAdmin(admin.ModelAdmin):
 
 @admin.register(Job)
 class JobAdmin(admin.ModelAdmin):
-    list_display = ['id', 'customer', 'requestDate', 'tailNumber', 'aircraftType', 'airport', 'fbo', 'estimatedETA', 'estimatedETD', 'completeBy', 'status']
+    list_display = ['id', 'purchase_order', 'customer', 'requestDate', 'tailNumber', 'aircraftType', 'airport', 'fbo', 'estimatedETA', 'estimatedETD', 'completeBy', 'status']
     list_per_page = 100
-    ordering = ['customer', 'aircraftType', 'tailNumber', 'airport', 'fbo', 'status', 'completeBy']
-    search_fields = ['customer', 'tailNumber', ]
+    ordering = ['purchase_order', 'customer', 'aircraftType', 'tailNumber', 'airport', 'fbo', 'status', 'completeBy']
+    search_fields = ['purchase_order', 'customer', 'tailNumber', ]
 
     def has_delete_permission(self, request, obj=None):
         return False

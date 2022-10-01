@@ -18,7 +18,8 @@ class Job(models.Model):
         ('I', 'Invoiced'),
 
     ]
-    #TODO: figure out how to do the purchase order number. Do it as a separate column
+
+    purchase_order = models.CharField(max_length=255, default='')
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name='jobs')
     requestDate = models.DateTimeField(auto_now_add=True)
     tailNumber = models.CharField(max_length=50)
