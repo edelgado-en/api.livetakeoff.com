@@ -1,7 +1,34 @@
 from django.contrib import admin
-from . import models
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.models import User
 
-@admin.register(models.Service)
+from api.models import (
+    Service,
+    RetainerService,
+    ChecklistAction,
+    Customer,
+    AircraftType,
+    Airport,
+    FBO,
+    Job,
+    JobPhotos,
+    JobComments,
+    Vendor,
+    UserProfile
+)
+
+class UserProfileInline(admin.StackedInline):
+    model = UserProfile
+    can_delete = False
+
+
+class UserAdmin(BaseUserAdmin):
+    inlines = [UserProfileInline]
+
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)
+
+@admin.register(Service)
 class ServiceAdmin(admin.ModelAdmin):
     list_display = ['name', 'description', 'active']
     list_per_page = 100
@@ -12,7 +39,7 @@ class ServiceAdmin(admin.ModelAdmin):
         # Disable delete because when you want to stop using a service, just set it to inactive
         return False
 
-@admin.register(models.RetainerService)
+@admin.register(RetainerService)
 class RetainerServiceAdmin(admin.ModelAdmin):
     list_display = ['name', 'description', 'active']
     list_per_page = 100
@@ -23,7 +50,7 @@ class RetainerServiceAdmin(admin.ModelAdmin):
         # Disable delete because when you want to stop using a service, just set it to inactive
         return False
 
-@admin.register(models.ChecklistAction)
+@admin.register(ChecklistAction)
 class ChecklistActionAdmin(admin.ModelAdmin):
     list_display = ['name', 'active']
     list_per_page = 100
@@ -33,7 +60,7 @@ class ChecklistActionAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
 
-@admin.register(models.Customer)
+@admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
     list_display = ['name', 'billingAddress', 'emailAddress', 'billingInfo', 'active']
     list_per_page = 100
@@ -43,7 +70,7 @@ class CustomerAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
 
-@admin.register(models.AircraftType)
+@admin.register(AircraftType)
 class AircraftTypeAdmin(admin.ModelAdmin):
     list_display = ['name', 'active']
     list_per_page = 100
@@ -53,7 +80,7 @@ class AircraftTypeAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
 
-@admin.register(models.Airport)
+@admin.register(Airport)
 class AirportAdmin(admin.ModelAdmin):
     list_display = ['initials', 'name', 'active']
     list_per_page = 100
@@ -63,7 +90,7 @@ class AirportAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
 
-@admin.register(models.FBO)
+@admin.register(FBO)
 class FBOAdmin(admin.ModelAdmin):
     list_display = ['name', 'active']
     list_per_page = 100
@@ -73,7 +100,7 @@ class FBOAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
 
-@admin.register(models.Job)
+@admin.register(Job)
 class JobAdmin(admin.ModelAdmin):
     list_display = ['id', 'customer', 'requestDate', 'tailNumber', 'aircraftType', 'airport', 'fbo', 'estimatedETA', 'estimatedETD', 'completeBy', 'status']
     list_per_page = 100
@@ -83,7 +110,7 @@ class JobAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
 
-@admin.register(models.JobPhotos)
+@admin.register(JobPhotos)
 class JobPhotosAdmin(admin.ModelAdmin):
     list_display = ['id', 'job', 'name', 'image', 'interior']
     list_per_page = 100
@@ -95,3 +122,15 @@ class JobPhotosAdmin(admin.ModelAdmin):
 
     image_preview.short_description = 'Photo Preview'
     image_preview.allow_tags = True
+
+@admin.register(JobComments)
+class JobCommentsAdmin(admin.ModelAdmin):
+    list_display = ['id', 'comment', 'author', 'job']
+    list_per_page = 100
+    search_fields = ['comment']
+
+@admin.register(Vendor)
+class VendorAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name', 'active']
+    list_per_page = 100
+    search_fields = ['name']

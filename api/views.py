@@ -1,6 +1,6 @@
 from rest_framework import permissions
 from django.contrib.auth.models import User
-from .models import JobPhotos
+from .models.job_photo import JobPhotos
 from rest_framework.response import Response
 from rest_framework.views import APIView
 import os
@@ -20,9 +20,10 @@ class UserView(APIView):
 
 class SendEmail(APIView):
 
-    #This is working in the sandbox
     def get(self, request):
-        account_sid = os.environ.get('TWILIO_ACCOUNT_SID') 
+
+        #This is working in the sandbox
+        """ account_sid = os.environ.get('TWILIO_ACCOUNT_SID') 
         auth_token = os.environ.get('TWILIO_AUTH_TOKEN')
         client = Client(account_sid, auth_token) 
  
@@ -32,7 +33,7 @@ class SendEmail(APIView):
                               to='whatsapp:+19542133394' 
                           ) 
  
-        print(message.sid)
+        print(message.sid) """
 
         # I need to disconnect from VPN for this to work
         """ try:
