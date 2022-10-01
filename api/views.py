@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 import os
 from django.core.mail import send_mail, mail_admins, BadHeaderError
 from templated_mail.mail import BaseEmailMessage
+from twilio.rest import Client 
 
 class UserView(APIView):
 
@@ -19,9 +20,22 @@ class UserView(APIView):
 
 class SendEmail(APIView):
 
-    #This is working
+    #This is working in the sandbox
     def get(self, request):
-        try:
+        account_sid = os.environ.get('TWILIO_ACCOUNT_SID') 
+        auth_token = os.environ.get('TWILIO_AUTH_TOKEN')
+        client = Client(account_sid, auth_token) 
+ 
+        message = client.messages.create( 
+                              from_='whatsapp:+14155238886',  
+                              body='testing message',      
+                              to='whatsapp:+19542133394' 
+                          ) 
+ 
+        print(message.sid)
+
+        # I need to disconnect from VPN for this to work
+        """ try:
             message = BaseEmailMessage(
                 template_name='emails/customer.html',
                 context={'name': 'Enrique'}
@@ -30,6 +44,7 @@ class SendEmail(APIView):
             message.send(['enriquedelgado806@gmail.com'])
 
         except BadHeaderError as e:
-            print(e)
+            print(e) """
+
 
         return Response('hello from send email')

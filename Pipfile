@@ -18,6 +18,7 @@ pillow = "*"
 django-dotenv = "*"
 django-cloudinary-storage = "*"
 django-templated-mail = "*"
+twilio = "*"
 
 [dev-packages]
 
