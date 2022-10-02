@@ -23,7 +23,8 @@ from api.models import (
     CustomerDiscountAirport,
     CustomerAdditionalFee,
     CustomerAdditionalFeeAirport,
-    CustomerAdditionalFeeFBO
+    CustomerAdditionalFeeFBO,
+    CustomerRetainerService
 )
 
 class UserProfileInline(admin.StackedInline):
@@ -128,6 +129,11 @@ class CustomerAdditionalFeeFBOAdmin(admin.ModelAdmin):
 @admin.register(CustomerAdditionalFeeAirport)
 class CustomerAdditionalFeeAirportAdmin(admin.ModelAdmin):
     list_display = ['customer_additional_fee', 'airport']
+
+
+@admin.register(CustomerRetainerService)
+class CustomerRetainerServiceAdmin(admin.ModelAdmin):
+    list_display = ['customer_setting', 'retainer_service']
 
 
 @admin.register(AircraftType)

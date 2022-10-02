@@ -19,3 +19,4 @@ from .customer_discount_airport import CustomerDiscountAirport
 from .customer_additional_fee import CustomerAdditionalFee
 from .customer_additional_fee_fbo import CustomerAdditionalFeeFBO
 from .customer_additional_fee_airport import CustomerAdditionalFeeAirport
+from .customer_retainer_service import CustomerRetainerService
