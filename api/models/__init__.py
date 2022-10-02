@@ -12,3 +12,4 @@ from .vendor import Vendor
 from .user_profile import UserProfile
 from .customer_settings import CustomerSettings
 from .customer_admin import CustomerAdmin
+from .customer_project_manager import CustomerProjectManager

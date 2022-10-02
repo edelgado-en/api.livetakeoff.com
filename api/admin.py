@@ -16,7 +16,8 @@ from api.models import (
     JobPhotos,
     JobComments,
     Vendor,
-    UserProfile
+    UserProfile,
+    CustomerProjectManager
 )
 
 class UserProfileInline(admin.StackedInline):
@@ -76,6 +77,12 @@ class CustomerAdmin(admin.ModelAdmin):
 @admin.register(CustomerAssignedAdmin)
 class CustomerAssignedAdmins(admin.ModelAdmin):
     list_display = ['customer_setting', 'admin']
+    list_per_page = 100
+
+
+@admin.register(CustomerProjectManager)
+class CustomerPMAdmin(admin.ModelAdmin):
+    list_display = ['customer_setting', 'project_manager']
     list_per_page = 100
 
 
