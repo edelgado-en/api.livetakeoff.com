@@ -13,7 +13,7 @@ class CustomerDiscount(models.Model):
     type = models.CharField(max_length=1, choices=DISCOUNT_TYPE_CHOICES)
 
     def __str__(self) -> str:
-        return 'id: ' + str(self.id) + ' discount: ' + str(self.discount) + '%'
+        return 'id: ' + str(self.id) + ' type: ' + str(self.type) + ' discount: ' + str(self.discount) + '%'
 
     class Meta:
         verbose_name_plural = 'Customer Discounts'
