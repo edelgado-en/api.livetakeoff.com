@@ -10,3 +10,5 @@ from .retainer_service import RetainerService
 from .service import Service
 from .vendor import Vendor
 from .user_profile import UserProfile
+from .customer_settings import CustomerSettings
+from .customer_admin import CustomerAdmin

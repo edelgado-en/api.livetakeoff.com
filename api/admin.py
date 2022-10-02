@@ -7,6 +7,8 @@ from api.models import (
     RetainerService,
     ChecklistAction,
     Customer,
+    CustomerSettings,
+    CustomerAdmin as CustomerAssignedAdmin,
     AircraftType,
     Airport,
     FBO,
@@ -62,13 +64,29 @@ class ChecklistActionAdmin(admin.ModelAdmin):
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
-    list_display = ['name', 'billingAddress', 'emailAddress', 'billingInfo', 'active']
+    list_display = ['name', 'logo', 'billingAddress', 'emailAddress', 'billingInfo', 'active']
     list_per_page = 100
     ordering = ['name', 'emailAddress']
     search_fields = ['name', 'emailAddress']
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+@admin.register(CustomerAssignedAdmin)
+class CustomerAssignedAdmins(admin.ModelAdmin):
+    list_display = ['customer_setting', 'admin']
+    list_per_page = 100
+
+
+@admin.register(CustomerSettings)
+class CustomerSettingsAdmin(admin.ModelAdmin):
+    list_display = ['customer', 'show_spending_info', 'allow_cancel_job', 'retainer_amount', 'show_job_price', 'special_instructions']
+    list_per_page = 100
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
 
 @admin.register(AircraftType)
 class AircraftTypeAdmin(admin.ModelAdmin):
@@ -93,7 +111,7 @@ class AirportAdmin(admin.ModelAdmin):
 @admin.register(FBO)
 class FBOAdmin(admin.ModelAdmin):
     list_display = ['name', 'active']
-    list_per_page = 100
+    list_per_page = 100 
     ordering = ['name', 'active']
     search_fields = ['name', 'active']
 
