@@ -16,3 +16,6 @@ from .customer_project_manager import CustomerProjectManager
 from .customer_discount import CustomerDiscount
 from .customer_discount_service import CustomerDiscountService
 from .customer_discount_airport import CustomerDiscountAirport
+from .customer_additional_fee import CustomerAdditionalFee
+from .customer_additional_fee_fbo import CustomerAdditionalFeeFBO
+from .customer_additional_fee_airport import CustomerAdditionalFeeAirport

@@ -20,7 +20,10 @@ from api.models import (
     CustomerProjectManager,
     CustomerDiscount,
     CustomerDiscountService,
-    CustomerDiscountAirport
+    CustomerDiscountAirport,
+    CustomerAdditionalFee,
+    CustomerAdditionalFeeAirport,
+    CustomerAdditionalFeeFBO
 )
 
 class UserProfileInline(admin.StackedInline):
@@ -106,9 +109,26 @@ class CustomerDiscountAdmin(admin.ModelAdmin):
 class CustomerDiscountServiceAdmin(admin.ModelAdmin):
     list_display = ['customer_discount', 'service']
 
+
 @admin.register(CustomerDiscountAirport)
 class CustomerDiscountAirport(admin.ModelAdmin):
     list_display = ['customer_discount', 'airport']
+
+
+@admin.register(CustomerAdditionalFee)
+class CustomerAdditionalFeeAdmin(admin.ModelAdmin):
+    list_display = ['customer_setting', 'type', 'fee']
+
+
+@admin.register(CustomerAdditionalFeeFBO)
+class CustomerAdditionalFeeFBOAdmin(admin.ModelAdmin):
+    list_display = ['customer_additional_fee', 'fbo']
+
+
+@admin.register(CustomerAdditionalFeeAirport)
+class CustomerAdditionalFeeAirportAdmin(admin.ModelAdmin):
+    list_display = ['customer_additional_fee', 'airport']
+
 
 @admin.register(AircraftType)
 class AircraftTypeAdmin(admin.ModelAdmin):
