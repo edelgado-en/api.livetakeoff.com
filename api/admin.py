@@ -133,7 +133,7 @@ class CustomerAdditionalFeeAirportAdmin(admin.ModelAdmin):
 
 @admin.register(CustomerRetainerService)
 class CustomerRetainerServiceAdmin(admin.ModelAdmin):
-    list_display = ['customer_setting', 'retainer_service']
+    list_display = ['customer_setting', 'retainer_service', 'count']
 
 
 @admin.register(AircraftType)
