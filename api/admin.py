@@ -17,7 +17,9 @@ from api.models import (
     JobComments,
     Vendor,
     UserProfile,
-    CustomerProjectManager
+    CustomerProjectManager,
+    CustomerDiscount,
+    CustomerDiscountService
 )
 
 class UserProfileInline(admin.StackedInline):
@@ -93,6 +95,15 @@ class CustomerSettingsAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+@admin.register(CustomerDiscount)
+class CustomerDiscountAdmin(admin.ModelAdmin):
+    list_display = ['customer_setting', 'discount', 'type']
+
+
+@admin.register(CustomerDiscountService)
+class CustomerDiscountServiceAdmin(admin.ModelAdmin):
+    list_display = ['customer_discount', 'service']
 
 
 @admin.register(AircraftType)

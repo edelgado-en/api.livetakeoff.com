@@ -13,3 +13,5 @@ from .user_profile import UserProfile
 from .customer_settings import CustomerSettings
 from .customer_admin import CustomerAdmin
 from .customer_project_manager import CustomerProjectManager
+from .customer_discount import CustomerDiscount
+from .customer_discount_service import CustomerDiscountService
