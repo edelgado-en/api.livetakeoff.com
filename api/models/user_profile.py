@@ -8,4 +8,4 @@ class UserProfile(models.Model):
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='user_profiles', null=True, blank=True)
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='user_profiles', null=True, blank=True)
     email_notifications = models.BooleanField(default=True)
-    #Allow set themselves as busy
+    allow_set_as_busy = models.BooleanField(default=False)
