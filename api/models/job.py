@@ -19,7 +19,7 @@ class Job(models.Model):
 
     ]
 
-    purchase_order = models.CharField(max_length=255, default='')
+    purchase_order = models.CharField(max_length=255, blank=True, null=True)
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name='jobs')
     requestDate = models.DateTimeField(auto_now_add=True)
     tailNumber = models.CharField(max_length=50)
@@ -33,6 +33,13 @@ class Job(models.Model):
     services = models.ManyToManyField(Service, related_name='services', blank=True)
     retainerServices = models.ManyToManyField(RetainerService, related_name='retainerservices', blank=True)
     assignees = models.ManyToManyField('auth.User', related_name='assignees', blank=True)
+
+    # Saved in minutes. Add all the estimated times for the services in the job based on aircraft type
+    estimated_completion_time = models.PositiveIntegerField(blank=True, null=True)
+    
+    # saved in minutes. Update this value when job is completed. Add the times of all the services and retainer services
+    # This column will help us a lot when creating reports because the value will be already computed here
+    actual_completion_time = models.PositiveIntegerField(blank=True, null=True) 
 
     def __str__(self) -> str:
         return str(self.id) + ' - ' + self.tailNumber + ' - ' + self.airport.initials + ' - ' + self.aircraftType.name
