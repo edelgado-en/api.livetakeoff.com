@@ -26,7 +26,8 @@ from api.models import (
     CustomerAdditionalFeeFBO,
     CustomerRetainerService,
     PriceList,
-    PriceListEntries
+    PriceListEntries,
+    EstimatedServiceTime
 )
 
 class UserProfileInline(admin.StackedInline):
@@ -146,6 +147,13 @@ class PriceListAdmin(admin.ModelAdmin):
 class PriceListEntriesAdmin(admin.ModelAdmin):
     list_display = ['id', 'price_list', 'aircraft_type', 'service', 'price']
     search_fields = ['aircraft_type', 'service']
+
+@admin.register(EstimatedServiceTime)
+class EstimatedServiceTimeAdmin(admin.ModelAdmin):
+    list_display = ['id', 'service', 'aircraft_type', 'estimated_time']
+    search_fields = ['aircraft_type', 'service']
+    list_per_page = 100
+
 
 
 @admin.register(AircraftType)

@@ -35,11 +35,11 @@ class Job(models.Model):
     assignees = models.ManyToManyField('auth.User', related_name='assignees', blank=True)
 
     # Saved in minutes. Add all the estimated times for the services in the job based on aircraft type
-    estimated_completion_time = models.PositiveIntegerField(blank=True, null=True)
+    estimated_completion_time = models.PositiveIntegerField(blank=True, null=True, verbose_name='Estimated Completion Time (minutes)')
     
-    # saved in minutes. Update this value when job is completed. Add the times of all the services and retainer services
-    # This column will help us a lot when creating reports because the value will be already computed here
-    actual_completion_time = models.PositiveIntegerField(blank=True, null=True) 
+    # saved in minutes. Calculated when setting a job as complete with the actual time it took from WIP to completed status
+    # by reading the job status activity table
+    actual_completion_time = models.PositiveIntegerField(blank=True, null=True, verbose_name='Actual Completion Time (minutes)') 
 
     def __str__(self) -> str:
         return str(self.id) + ' - ' + self.tailNumber + ' - ' + self.airport.initials + ' - ' + self.aircraftType.name

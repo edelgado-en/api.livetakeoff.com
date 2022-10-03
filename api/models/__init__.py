@@ -22,3 +22,4 @@ from .customer_additional_fee_airport import CustomerAdditionalFeeAirport
 from .customer_retainer_service import CustomerRetainerService
 from .price_list import PriceList
 from .price_list_entries import PriceListEntries
+from .estimated_service_time import EstimatedServiceTime
