@@ -27,7 +27,8 @@ from api.models import (
     CustomerRetainerService,
     PriceList,
     PriceListEntries,
-    EstimatedServiceTime
+    EstimatedServiceTime,
+    JobStatusActivity
 )
 
 class UserProfileInline(admin.StackedInline):
@@ -143,10 +144,12 @@ class CustomerRetainerServiceAdmin(admin.ModelAdmin):
 class PriceListAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'description']
 
+
 @admin.register(PriceListEntries)
 class PriceListEntriesAdmin(admin.ModelAdmin):
     list_display = ['id', 'price_list', 'aircraft_type', 'service', 'price']
     search_fields = ['aircraft_type', 'service']
+
 
 @admin.register(EstimatedServiceTime)
 class EstimatedServiceTimeAdmin(admin.ModelAdmin):
@@ -166,6 +169,7 @@ class AircraftTypeAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
 
+
 @admin.register(Airport)
 class AirportAdmin(admin.ModelAdmin):
     list_display = ['initials', 'name', 'active']
@@ -175,6 +179,7 @@ class AirportAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
 
 @admin.register(FBO)
 class FBOAdmin(admin.ModelAdmin):
@@ -186,6 +191,7 @@ class FBOAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
 
+
 @admin.register(Job)
 class JobAdmin(admin.ModelAdmin):
     list_display = ['id', 'purchase_order', 'customer', 'requestDate', 'tailNumber', 'aircraftType', 'airport', 'fbo', 'estimatedETA', 'estimatedETD', 'completeBy', 'status', 'estimated_completion_time', 'actual_completion_time']
@@ -195,6 +201,15 @@ class JobAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+@admin.register(JobStatusActivity)
+class JobStatusActivityAdmin(admin.ModelAdmin):
+    list_display = ['id', 'timestamp', 'status', 'job', 'user']
+    list_per_page = 100
+    ordering = ['timestamp']
+    search_fields = ['status']
+
 
 @admin.register(JobPhotos)
 class JobPhotosAdmin(admin.ModelAdmin):

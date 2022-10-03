@@ -23,3 +23,4 @@ from .customer_retainer_service import CustomerRetainerService
 from .price_list import PriceList
 from .price_list_entries import PriceListEntries
 from .estimated_service_time import EstimatedServiceTime
+from .job_status_activity import JobStatusActivity

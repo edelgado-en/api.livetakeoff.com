@@ -16,7 +16,6 @@ class Job(models.Model):
         ('T', 'Cancelled'),
         ('R', 'Review'),
         ('I', 'Invoiced'),
-
     ]
 
     purchase_order = models.CharField(max_length=255, blank=True, null=True)
