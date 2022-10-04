@@ -28,7 +28,8 @@ from api.models import (
     PriceList,
     PriceListEntries,
     EstimatedServiceTime,
-    JobStatusActivity
+    JobStatusActivity,
+    JobServiceAssignment
 )
 
 class UserProfileInline(admin.StackedInline):
@@ -224,11 +225,21 @@ class JobPhotosAdmin(admin.ModelAdmin):
     image_preview.short_description = 'Photo Preview'
     image_preview.allow_tags = True
 
+
 @admin.register(JobComments)
 class JobCommentsAdmin(admin.ModelAdmin):
     list_display = ['id', 'comment', 'author', 'job']
     list_per_page = 100
     search_fields = ['comment']
+
+
+@admin.register(JobServiceAssignment)
+class JobServiceAssignmentAdmin(admin.ModelAdmin):
+    list_display = ['id', 'job', 'service', 'project_manager', 'created_at', 'updated_at']
+    list_per_page = 100
+    ordering = ['created_at', 'updated_at']
+    search_fields = ['job', 'service', 'project_manager']
+
 
 @admin.register(Vendor)
 class VendorAdmin(admin.ModelAdmin):
