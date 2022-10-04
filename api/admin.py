@@ -29,7 +29,8 @@ from api.models import (
     PriceListEntries,
     EstimatedServiceTime,
     JobStatusActivity,
-    JobServiceAssignment
+    JobServiceAssignment,
+    JobRetainerServiceAssignment
 )
 
 class UserProfileInline(admin.StackedInline):
@@ -236,6 +237,14 @@ class JobCommentsAdmin(admin.ModelAdmin):
 @admin.register(JobServiceAssignment)
 class JobServiceAssignmentAdmin(admin.ModelAdmin):
     list_display = ['id', 'job', 'service', 'project_manager', 'created_at', 'updated_at']
+    list_per_page = 100
+    ordering = ['created_at', 'updated_at']
+    search_fields = ['job', 'service', 'project_manager']
+
+
+@admin.register(JobRetainerServiceAssignment)
+class JobRetainerServiceAssignmentAdmin(admin.ModelAdmin):
+    list_display = ['id', 'job', 'retainer_service', 'project_manager', 'created_at', 'updated_at']
     list_per_page = 100
     ordering = ['created_at', 'updated_at']
     search_fields = ['job', 'service', 'project_manager']

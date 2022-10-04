@@ -25,3 +25,4 @@ from .price_list_entries import PriceListEntries
 from .estimated_service_time import EstimatedServiceTime
 from .job_status_activity import JobStatusActivity
 from .job_service_assignment import JobServiceAssignment
+from .job_retainer_service_assignment import JobRetainerServiceAssignment
