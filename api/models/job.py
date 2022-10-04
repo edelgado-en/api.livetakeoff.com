@@ -18,6 +18,7 @@ class Job(models.Model):
         ('I', 'Invoiced'),
     ]
 
+    created_at = models.DateTimeField(auto_now_add=True, blank=True)
     purchase_order = models.CharField(max_length=255, blank=True, null=True)
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name='jobs')
     requestDate = models.DateTimeField(auto_now_add=True)
