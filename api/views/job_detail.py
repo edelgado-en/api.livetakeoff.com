@@ -3,7 +3,12 @@ from django.shortcuts import get_object_or_404
 from rest_framework import (permissions, status)
 from rest_framework .response import Response
 from rest_framework.views import APIView
-from ..serializers import JobDetailSerializer
+
+from ..serializers import (
+     JobDetailSerializer,
+     JobServiceAssignmentSerializer
+     )
+
 from ..models import (
         Job,
         JobServiceAssignment,
@@ -31,8 +36,8 @@ class JobDetail(APIView):
         job.special_instructions = special_instructions
 
 
-
-
+        job_service_assignments = []
+        job_retainer_service_assignments = []
 
         # Services are shown depending on the user. If you are an account manage/admin, you can see all services
         # if you are a project manager, you can only see the services assigned to you
@@ -42,25 +47,39 @@ class JobDetail(APIView):
                 # return all services attached to this job
                 job.services.all()
                 job.retainer_services.all()
-                pass
+                
+        
         else:
             # return only the services assigned to the current user
-            service_assignments = request.user.job_service_assignments.all()
+            service_assignments = request.user.job_service_assignments.select_related('service').all()
 
             for service_assignment in service_assignments:
-                
-                checklist_actions = service_assignment.service.checklistActions.all()
-                
-                for checklist_action in checklist_actions:
-                    print(checklist_action)
+                s_assignment = {
+                    'id': service_assignment.id,
+                    'name': service_assignment.service.name,
+                    'status': service_assignment.status,
+                    'checklist_actions': service_assignment.service.checklistActions.all(),
+                }
 
+                job_service_assignments.append(s_assignment)
+                
 
-            retainer_service_assignments = request.user.job_retainer_service_assignments.all()
+            # retainer services
+            retainer_service_assignments = request.user.job_retainer_service_assignments.select_related('retainer_service').all()
 
             for retainer_service_assignment in retainer_service_assignments:
-                print(retainer_service_assignment)
+                r_assignment = {
+                    'id': retainer_service_assignment.id,
+                    'name': retainer_service_assignment.retainer_service.name,
+                    'status': retainer_service_assignment.status,
+                    'checklist_actions': retainer_service_assignment.retainer_service.checklistActions.all(),
+                }
 
-            pass
+                job_retainer_service_assignments.append(r_assignment)
+
+        
+        job.service_assignments = job_service_assignments
+        job.retainer_service_assignments = job_retainer_service_assignments
 
         serializer = JobDetailSerializer(job)
 
