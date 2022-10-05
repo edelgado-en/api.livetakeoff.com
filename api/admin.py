@@ -46,7 +46,7 @@ admin.site.register(User, UserAdmin)
 
 @admin.register(Service)
 class ServiceAdmin(admin.ModelAdmin):
-    list_display = ['name', 'description', 'active']
+    list_display = ['id', 'name', 'description', 'active']
     list_per_page = 100
     ordering = ['name', 'active']
     search_fields = ['name', 'active']
@@ -78,7 +78,7 @@ class ChecklistActionAdmin(admin.ModelAdmin):
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
-    list_display = ['name', 'logo', 'billingAddress', 'emailAddress', 'billingInfo', 'active']
+    list_display = ['id', 'name', 'logo', 'billingAddress', 'emailAddress', 'billingInfo', 'active']
     list_per_page = 100
     ordering = ['name', 'emailAddress']
     search_fields = ['name', 'emailAddress']

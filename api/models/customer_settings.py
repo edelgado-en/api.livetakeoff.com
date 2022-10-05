@@ -2,7 +2,7 @@ from django.db import models
 from .customer import Customer
 
 class CustomerSettings(models.Model):
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='customer_settings')
     show_spending_info = models.BooleanField(default=False)
     allow_cancel_job = models.BooleanField(default=False)
     #TODO: add FK to price list
