@@ -45,8 +45,9 @@ class JobDetail(APIView):
             or request.user.is_staff \
             or request.user.groups.filter(name='Account Managers').exists():
                 # return all services attached to this job
-                job.services.all()
-                job.retainer_services.all()
+                pass
+                #job.services.all()
+                #job.retainer_services.all()
                 
         
         else:
