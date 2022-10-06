@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models import JobServiceAssignment
+from ..models import (JobServiceAssignment, JobRetainerServiceAssignment)
 
 class ChecklistActionSerializer(serializers.Serializer):
     id = serializers.IntegerField()
@@ -18,4 +18,11 @@ class JobServiceAssignmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = JobServiceAssignment
+        fields = ['id', 'status']
+
+class JobRetainerServiceAssignmentSerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField()
+
+    class Meta:
+        model = JobRetainerServiceAssignment
         fields = ['id', 'status']

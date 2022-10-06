@@ -51,7 +51,7 @@ class JobDetail(APIView):
         
         else:
             # return only the services assigned to the current user
-            service_assignments = request.user.job_service_assignments.select_related('service').all()
+            service_assignments = request.user.job_service_assignments.filter(job=job).select_related('service').all()
 
             for service_assignment in service_assignments:
                 s_assignment = {
@@ -65,7 +65,7 @@ class JobDetail(APIView):
                 
 
             # retainer services
-            retainer_service_assignments = request.user.job_retainer_service_assignments.select_related('retainer_service').all()
+            retainer_service_assignments = request.user.job_retainer_service_assignments.filter(job=job).select_related('retainer_service').all()
 
             for retainer_service_assignment in retainer_service_assignments:
                 r_assignment = {
@@ -89,8 +89,6 @@ class JobDetail(APIView):
     def patch(self, request, id):
         job = get_object_or_404(Job, pk=id)
 
-        print(request.data)
-
         if not self.can_view_job(request.user, job):
             return Response({'error': 'You do not have permission to view this job'}, status=status.HTTP_403_FORBIDDEN)
 
@@ -104,6 +102,16 @@ class JobDetail(APIView):
             # Think about how annoying this will be: Leather Shampo checklist takes you 20 mins, then you have to go to the app
             # click on the job, then click on the service to as as complete. Then click on the other service to set as WIP
             # THIS IS TOO MUCH micromanaging. We want to make it as easy as possible for PMs to do their job.
+            if ('status' in request.data 
+                    and (request.data['status'] == 'W' or request.data['status'] == 'C')):
+                for service in job.job_service_assignments.all():
+                    service.status = request.data['status']
+                    service.save(update_fields=['status'])
+
+                for retainer_service in job.job_retainer_service_assignments.all():
+                    retainer_service.status = request.data['status']
+                    retainer_service.save(update_fields=['status'])
+            
 
             return Response(serializer.data)
 
@@ -118,19 +126,14 @@ class JobDetail(APIView):
            return True
 
         # You are a Project Manager
+        # Because the PM needs to be able to complete job after completing all the services
+        # we allow them if they have at least one service associated with the job
 
-        # Get job ids from pending services/retainer_services assigned to the current user
-        # If you have at least one pending service assigned to you, you can see the job
-        assignments = JobServiceAssignment.objects.filter(project_manager=user.id).all()
-
-        for assignment in assignments:
-            if assignment.status != 'C' and assignment.job.id == job.id:
-                return True
+        if job.status == 'I':
+            return False
         
-        retainer_assignment = JobRetainerServiceAssignment.objects.filter(project_manager=user.id).all()
-
-        for assignment in retainer_assignment:
-            if assignment.status != 'C' and assignment.job.id == job.id:
-                return True
+        if JobServiceAssignment.objects.filter(project_manager=user.id, job=job).exists() \
+            or JobRetainerServiceAssignment.objects.filter(project_manager=user.id, job=job).exists():
+            return True
 
         return False
