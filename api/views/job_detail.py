@@ -87,7 +87,22 @@ class JobDetail(APIView):
         return Response(serializer.data)
 
 
-    # TODO: Move this to a permissions class because you are going to call it from job comments and job photos as well
+    def patch(self, request, id):
+        job = get_object_or_404(Job, pk=id)
+
+        if not self.can_view_job(request.user, job):
+            return Response({'error': 'You do not have permission to view this job'}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = JobDetailSerializer(job, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+
+            return Response(serializer.data)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
     def can_view_job(self, user, job):
         if user.is_superuser \
           or user.is_staff \
