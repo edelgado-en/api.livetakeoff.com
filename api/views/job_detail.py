@@ -6,7 +6,6 @@ from rest_framework.views import APIView
 
 from ..serializers import (
      JobDetailSerializer,
-     JobServiceAssignmentSerializer
      )
 
 from ..models import (
@@ -90,6 +89,8 @@ class JobDetail(APIView):
     def patch(self, request, id):
         job = get_object_or_404(Job, pk=id)
 
+        print(request.data)
+
         if not self.can_view_job(request.user, job):
             return Response({'error': 'You do not have permission to view this job'}, status=status.HTTP_403_FORBIDDEN)
 
@@ -98,11 +99,18 @@ class JobDetail(APIView):
         if serializer.is_valid():
             serializer.save()
 
+            # WHEN YOU SET A JOB AS WIP, YOU ALSO HAVE TO SET THE STATUS OF ALL SERVICES ASSIGNMENTS ASSOCIATED TO THIS JOB TO WIP
+            # we don't want PMs to have to go to each service and set as WIP, then set as complete. That's too much work and tracking
+            # Think about how annoying this will be: Leather Shampo checklist takes you 20 mins, then you have to go to the app
+            # click on the job, then click on the service to as as complete. Then click on the other service to set as WIP
+            # THIS IS TOO MUCH micromanaging. We want to make it as easy as possible for PMs to do their job.
+
             return Response(serializer.data)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+    # MOVE THIS TO A SERVICE CLASS SO THAT YOU CAN USE IN OTHER VIEWS
     def can_view_job(self, user, job):
         if user.is_superuser \
           or user.is_staff \
