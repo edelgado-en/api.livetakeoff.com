@@ -15,7 +15,6 @@ class JobServiceAssignmentView(APIView):
         if not self.can_view_assignment(request.user, job_service_assignment):
             return Response({'error': 'You do not have permission to view this job'}, status=status.HTTP_403_FORBIDDEN)
 
-        print(request.data)
         serializer = JobServiceAssignmentSerializer(job_service_assignment, data=request.data, partial=True)
 
         if serializer.is_valid():
