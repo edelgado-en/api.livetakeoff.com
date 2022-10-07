@@ -45,11 +45,31 @@ class JobDetail(APIView):
         if request.user.is_superuser \
             or request.user.is_staff \
             or request.user.groups.filter(name='Account Managers').exists():
-                # return all services attached to this job
-                pass
-                #job.services.all()
-                #job.retainer_services.all()
                 
+                # return all services attached to this job
+                service_assignments = job.job_service_assignments.select_related('service').all()
+                for service_assignment in service_assignments:
+                    s_assignment = {
+                        'id': service_assignment.id,
+                        'name': service_assignment.service.name,
+                        'status': service_assignment.status,
+                        'checklist_actions': service_assignment.service.checklistActions.all(),
+                    }
+
+                    job_service_assignments.append(s_assignment)
+
+                # return all retainer services atached to this job
+                retainer_service_assignments = job.job_retainer_service_assignments.select_related('retainer_service').all()
+                for retainer_service_assignment in retainer_service_assignments:
+                    r_assignment = {
+                        'id': retainer_service_assignment.id,
+                        'name': retainer_service_assignment.retainer_service.name,
+                        'status': retainer_service_assignment.status,
+                        'checklist_actions': retainer_service_assignment.retainer_service.checklistActions.all(),
+                    }
+
+                    job_retainer_service_assignments.append(r_assignment)
+
         
         else:
             # return only the services assigned to the current user
