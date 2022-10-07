@@ -19,6 +19,8 @@ class JobDetailSerializer(serializers.ModelSerializer):
     special_instructions = serializers.CharField(required=False, allow_blank=True)
     service_assignments = GenericServiceAssignmentSerializer(many=True, read_only=True)
     retainer_service_assignments = GenericServiceAssignmentSerializer(many=True, read_only=True)
+    total_photos = serializers.IntegerField(read_only=True)
+    total_assignees = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Job
@@ -37,7 +39,9 @@ class JobDetailSerializer(serializers.ModelSerializer):
             'customer',
             'special_instructions',
             'service_assignments',
-            'retainer_service_assignments'
+            'retainer_service_assignments',
+            'total_photos',
+            'total_assignees'
         )
 
 

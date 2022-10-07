@@ -11,7 +11,8 @@ from ..serializers import (
 from ..models import (
         Job,
         JobServiceAssignment,
-        JobRetainerServiceAssignment
+        JobRetainerServiceAssignment,
+        JobPhotos
     )
 
 class JobDetail(APIView):
@@ -80,6 +81,9 @@ class JobDetail(APIView):
         
         job.service_assignments = job_service_assignments
         job.retainer_service_assignments = job_retainer_service_assignments
+
+        job.total_photos = JobPhotos.objects.filter(job=job).count()
+        job.total_assignees = job.assignees.count()
 
         serializer = JobDetailSerializer(job)
 
