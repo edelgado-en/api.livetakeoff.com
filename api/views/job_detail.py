@@ -12,7 +12,8 @@ from ..models import (
         Job,
         JobServiceAssignment,
         JobRetainerServiceAssignment,
-        JobPhotos
+        JobPhotos,
+        JobStatusActivity
     )
 
 class JobDetail(APIView):
@@ -115,6 +116,8 @@ class JobDetail(APIView):
                 for retainer_service in job.job_retainer_service_assignments.all():
                     retainer_service.status = request.data['status']
                     retainer_service.save(update_fields=['status'])
+
+                JobStatusActivity.objects.create(job=job, user=request.user, status=request.data['status'])
             
 
             return Response(serializer.data)
