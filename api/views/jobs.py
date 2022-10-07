@@ -38,8 +38,9 @@ class JobListView(ListAPIView):
             if assignment.status != 'C':
                 job_ids.add(assignment.job.id)
 
+        # the only statuses that a PM can see is Assigned and WIP
         return Job.objects \
-                  .filter(~Q(status='I')) \
+                  .filter(Q(status='S') | Q(status='W')) \
                   .filter(id__in=job_ids) \
                   .order_by('-completeBy') \
                   .all()
