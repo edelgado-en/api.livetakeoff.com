@@ -4,3 +4,5 @@ from .job_service_assignment import (
     GenericServiceAssignmentSerializer,
     JobServiceAssignmentSerializer,
     JobRetainerServiceAssignmentSerializer)
+
+from .job_photo import JobPhotoSerializer
