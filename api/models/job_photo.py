@@ -7,6 +7,7 @@ class JobPhotos(models.Model):
     name = models.CharField(max_length=255, null=True)
     image = models.ImageField(upload_to='images/', blank=True)
     interior = models.BooleanField(default=False)
+    uploaded_by = models.ForeignKey('auth.User', on_delete=models.PROTECT, related_name='job_photos', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=True)
 
     def __str__(self) -> str:
