@@ -7,6 +7,7 @@ class JobPhotos(models.Model):
     name = models.CharField(max_length=255, null=True)
     image = models.ImageField(upload_to='images/', blank=True)
     interior = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True, blank=True)
 
     def __str__(self) -> str:
         return self.name
