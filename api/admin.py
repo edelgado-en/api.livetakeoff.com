@@ -215,7 +215,7 @@ class JobStatusActivityAdmin(admin.ModelAdmin):
 
 @admin.register(JobPhotos)
 class JobPhotosAdmin(admin.ModelAdmin):
-    list_display = ['id', 'created_at', 'uploaded_by', 'job', 'name', 'image', 'interior']
+    list_display = ['id', 'created_at', 'uploaded_by', 'job', 'name', 'image', 'size', 'interior']
     list_per_page = 100
     ordering = ['id', 'name']
     search_fields = ['id', 'job', 'name']

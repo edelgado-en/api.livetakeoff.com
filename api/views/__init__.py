@@ -6,3 +6,4 @@ from .job_service_assignment import (
     )
 from .job_retainer_service_assignment import JobRetainerServiceAssignmentView
 from .job_photos import JobPhotosView
+from .job_photos_upload import JobPhotosUploadView
