@@ -32,6 +32,11 @@ class UserView(APIView):
 
         content = {
             "initials": first_name[0] + last_name[0],
+            "about": user_profile.about,
+            "username": user.username,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email,
             "isProjectManager": user.groups.filter(name='Project Managers').exists(),
             "AccountManager": user.groups.filter(name='Account Managers').exists(),
             "isAdmin": user.is_staff,
