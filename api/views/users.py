@@ -3,12 +3,20 @@ from django.contrib.auth.models import User
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from ..models import UserProfile
+
 class UserView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request):
         user = User.objects.get(id=request.user.id)
-        
+        user_profile = UserProfile.objects.get(user=user)
+
+        avatar = None
+
+        if user_profile and user_profile.avatar:
+            avatar = user_profile.avatar.url
+
         first_name = ''
         last_name = ''
 
@@ -29,6 +37,7 @@ class UserView(APIView):
             "isAdmin": user.is_staff,
             "isSuperUser": user.is_superuser,
             "fullName": first_name + ' ' + last_name,
+            "avatar": avatar
         }
 
         return Response(content)

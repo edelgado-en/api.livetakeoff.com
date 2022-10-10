@@ -53,6 +53,8 @@ class JobPhotosUploadView(APIView):
                           size=photo.size,
                           interior=interior)
             p.save()
+
+            # TODO: if you have more than 20 stop
             
             counter = counter + 1
 
