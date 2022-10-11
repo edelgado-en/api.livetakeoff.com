@@ -22,8 +22,7 @@ class JobCommentView(ListCreateAPIView):
         
         return JobComments.objects.select_related('author').filter(job=job)
 
-
-    def perform_create(self, serializer):
+    def create(self, request, *args, **kwargs):
         user = self.request.user
         job_id = self.kwargs.get(self.lookup_url_kwarg)
         job = Job.objects.get(pk=job_id)
@@ -35,4 +34,21 @@ class JobCommentView(ListCreateAPIView):
                                   author=user)
 
         job_comment.save()
+
+        serializer = JobCommentSerializer(job_comment)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    """ def perform_create(self, serializer):
+        user = self.request.user
+        job_id = self.kwargs.get(self.lookup_url_kwarg)
+        job = Job.objects.get(pk=job_id)
+
+        comment = self.request.data['comment']
+
+        job_comment = JobComments(job=job,
+                                  comment=comment,
+                                  author=user)
+
+        job_comment.save() """
 
