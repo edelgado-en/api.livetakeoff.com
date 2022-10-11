@@ -6,3 +6,5 @@ from .job_service_assignment import (
     JobRetainerServiceAssignmentSerializer)
 
 from .job_photo import JobPhotoSerializer
+from .basic_user import BasicUserSerializer
+from .job_comment import JobCommentSerializer

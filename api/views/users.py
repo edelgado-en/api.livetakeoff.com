@@ -30,6 +30,26 @@ class UserView(APIView):
         else:
             last_name = user.last_name
 
+        access_level_label = 'Not Specified'
+
+        is_project_manager = user.groups.filter(name='Project Managers').exists()
+        is_account_manager = user.groups.filter(name='Account Managers').exists()
+
+        if user.is_superuser:
+            access_level_label = 'Super User'
+
+        elif user.is_staff:
+            access_level_label = 'Admin'
+
+        elif is_account_manager:
+            access_level_label = 'Account Manager'
+
+        elif is_project_manager:
+            access_level_label = 'Project Manager'
+
+        # TODO: account for customer user later
+
+
         content = {
             "initials": first_name[0] + last_name[0],
             "about": user_profile.about,
@@ -37,11 +57,12 @@ class UserView(APIView):
             "first_name": user.first_name,
             "last_name": user.last_name,
             "email": user.email,
-            "isProjectManager": user.groups.filter(name='Project Managers').exists(),
-            "AccountManager": user.groups.filter(name='Account Managers').exists(),
+            "isProjectManager": is_project_manager,
+            "AccountManager": is_account_manager,
             "isAdmin": user.is_staff,
             "isSuperUser": user.is_superuser,
             "fullName": first_name + ' ' + last_name,
+            "access_level_label": access_level_label,
             "avatar": avatar
         }
 
