@@ -1,4 +1,4 @@
-from rest_framework import permissions
+from rest_framework import (permissions, status)
 from django.contrib.auth.models import User
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -46,3 +46,19 @@ class UserView(APIView):
         }
 
         return Response(content)
+
+    def patch(self, request):
+        user = User.objects.get(id=request.user.id)
+        user_profile = UserProfile.objects.get(user=user)
+
+        user_profile.about = request.data['about']
+        user_profile.save()
+
+        user.username = request.data['username']
+        user.first_name = request.data['first_name']
+        user.last_name = request.data['last_name']
+        user.email = request.data['email']
+
+        user.save()
+
+        return Response(status.HTTP_200_OK)
