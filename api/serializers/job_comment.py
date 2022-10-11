@@ -3,8 +3,8 @@ from ..models import JobComments
 from .basic_user import BasicUserSerializer
 
 class JobCommentSerializer(serializers.ModelSerializer):
-    user = BasicUserSerializer()
+    author = BasicUserSerializer(required=False)
 
     class Meta:
         model = JobComments
-        fields = ('id', 'comment', 'user', 'created')
+        fields = ('id', 'comment', 'author', 'created')
