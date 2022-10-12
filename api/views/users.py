@@ -58,7 +58,7 @@ class UserView(APIView):
             "last_name": user.last_name,
             "email": user.email,
             "isProjectManager": is_project_manager,
-            "AccountManager": is_account_manager,
+            "isAccountManager": is_account_manager,
             "isAdmin": user.is_staff,
             "isSuperUser": user.is_superuser,
             "fullName": first_name + ' ' + last_name,
