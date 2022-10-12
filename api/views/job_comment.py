@@ -20,7 +20,7 @@ class JobCommentView(ListCreateAPIView):
         job_id = self.kwargs.get(self.lookup_url_kwarg)
         job = Job.objects.get(pk=job_id)
         
-        return JobComments.objects.select_related('author').filter(job=job)
+        return JobComments.objects.select_related('author').filter(job=job).order_by('created')
 
     def create(self, request, *args, **kwargs):
         user = self.request.user
