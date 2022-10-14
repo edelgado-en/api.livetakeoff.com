@@ -4,13 +4,14 @@ from .retainer_service import RetainerService
 
 class JobRetainerServiceAssignment(models.Model):
     STATUS_CHOICES = [
+        ('U', 'Unassigned'),
         ('A', 'Assigned'),
         ('W', 'WIP'),
         ('C', 'Completed'),
     ]
 
     job = models.ForeignKey(Job, on_delete=models.PROTECT, related_name='job_retainer_service_assignments')
-    project_manager = models.ForeignKey('auth.User', on_delete=models.PROTECT, related_name='job_retainer_service_assignments')
+    project_manager = models.ForeignKey('auth.User', on_delete=models.PROTECT, related_name='job_retainer_service_assignments', null=True, blank=True)
     retainer_service = models.ForeignKey(RetainerService, on_delete=models.PROTECT)
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='A')
     created_at = models.DateTimeField(auto_now_add=True)

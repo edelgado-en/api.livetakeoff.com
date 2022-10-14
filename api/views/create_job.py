@@ -16,7 +16,9 @@ from ..models import (
     Customer,
     FBO,
     JobComments,
-    JobPhotos
+    JobPhotos,
+    JobServiceAssignment,
+    JobRetainerServiceAssignment
     )
 
 
@@ -114,8 +116,14 @@ class CreateJobView(APIView):
                   created_by=user)
 
         job.save()
-        job.services.add(*services)
-        job.retainerServices.add(*retainer_services)
+
+        for service in services:
+            assignment = JobServiceAssignment(job=job,service=service)
+            assignment.save()
+
+        for retainer_service in retainer_services:
+            assignment = JobRetainerServiceAssignment(job=job, retainer_service=retainer_service)
+            assignment.save()
 
 
         # TODO: Calculate estimated completion time based on the estimated times of the selected services and aircraft type
