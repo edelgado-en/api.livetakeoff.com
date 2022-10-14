@@ -11,3 +11,4 @@ from .user_avatar import UserAvatarView
 from .user_reset_password import UserResetPasswordView
 from .job_comment import JobCommentView
 from .job_stats import JobStatsView
+from .job_form_info import JobFormInfoView
