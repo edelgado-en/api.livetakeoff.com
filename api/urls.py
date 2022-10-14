@@ -9,12 +9,14 @@ from .views import (
         JobPhotosUploadView,
         UserAvatarView,
         UserResetPasswordView,
-        JobCommentView
+        JobCommentView,
+        JobStatsView
     )
 
 urlpatterns = [
     path('jobs', JobListView.as_view()),
     path('jobs/<int:id>/', JobDetail.as_view()),
+    path('jobs/stats/<int:id>/', JobStatsView.as_view()),
     path('jobs/services/<int:id>/', JobServiceAssignmentView.as_view()),
     path('jobs/retainer-services/<int:id>/', JobRetainerServiceAssignmentView.as_view()),
     path('job-photos/<int:jobid>/', JobPhotosView.as_view()),
