@@ -11,12 +11,14 @@ from .views import (
         UserResetPasswordView,
         JobCommentView,
         JobStatsView,
-        JobFormInfoView
+        JobFormInfoView,
+        CreateJobView
     )
 
 urlpatterns = [
     path('jobs', JobListView.as_view()),
     path('jobs/form-info', JobFormInfoView.as_view()),
+    path('jobs/create', CreateJobView.as_view()),
     path('jobs/<int:id>/', JobDetail.as_view()),
     path('jobs/stats/<int:id>/', JobStatsView.as_view()),
     path('jobs/services/<int:id>/', JobServiceAssignmentView.as_view()),

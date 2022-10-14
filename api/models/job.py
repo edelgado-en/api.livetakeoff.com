@@ -33,6 +33,7 @@ class Job(models.Model):
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='A')
     services = models.ManyToManyField(Service, related_name='services', blank=True)
     retainerServices = models.ManyToManyField(RetainerService, related_name='retainer_services', blank=True)
+    created_by = models.ForeignKey('auth.User', related_name='jobs', on_delete=models.CASCADE, blank=True, null=True)
     assignees = models.ManyToManyField('auth.User', related_name='assignees', blank=True)
 
     # Saved in minutes. Add all the estimated times for the services in the job based on aircraft type
