@@ -81,16 +81,17 @@ class CreateJobView(APIView):
 
         comment = data['comment']
 
-        service_ids = data['services'].split(',')
+        s = data['services']
+        r = data['retainer_services']
         services = []
-
-        if service_ids:
-            services = Service.objects.filter(id__in=service_ids)
-
-        retainer_service_ids = data['retainer_services'].split(',')
         retainer_services = []
 
-        if retainer_service_ids:
+        if s: 
+            service_ids = data['services'].split(',')
+            services = Service.objects.filter(id__in=service_ids)
+
+        if r:
+            retainer_service_ids = data['retainer_services'].split(',')
             retainer_services = RetainerService.objects.filter(id__in=retainer_service_ids)
 
         user = request.user
