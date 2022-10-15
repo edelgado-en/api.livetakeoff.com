@@ -7,7 +7,8 @@ class JobPhotoSerializer(serializers.ModelSerializer):
     interior = serializers.ReadOnlyField()
     name = serializers.ReadOnlyField()
     size = serializers.ReadOnlyField()
+    customer_uploaded = serializers.ReadOnlyField()
 
     class Meta:
         model = JobPhotos
-        fields = ['id', 'created_at', 'name', 'image', 'interior', 'size']
+        fields = ['id', 'created_at', 'name', 'image', 'interior', 'size', 'customer_uploaded']

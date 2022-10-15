@@ -141,11 +141,11 @@ class CreateJobView(APIView):
         for photo in request.data.getlist('image'):
             name = name + '_' + str(counter)
             
-            # TODO: NEED TO ADD A NEW COLUMN TO THE JOB PHOTOS TO SAY IF IT CUSTOMER UPLOAD OR NOT
             p = JobPhotos(job=job,
                           uploaded_by=request.user,
                           image=photo,
                           name=name,
+                          customer_uploaded=True,
                           size=photo.size)
             p.save()
 
