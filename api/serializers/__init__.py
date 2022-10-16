@@ -8,3 +8,4 @@ from .job_service_assignment import (
 from .job_photo import JobPhotoSerializer
 from .basic_user import BasicUserSerializer
 from .job_comment import JobCommentSerializer
+from .job_admin import JobAdminSerializer

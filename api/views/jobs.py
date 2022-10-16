@@ -1,7 +1,11 @@
 from django.db.models import Q
 from rest_framework import permissions
 from rest_framework.generics import ListAPIView
-from ..serializers.job import JobSerializer
+from ..serializers import (
+        JobSerializer,
+        JobAdminSerializer
+    )
+
 from ..pagination import CustomPageNumberPagination
 from ..models import (
         Job,
@@ -13,6 +17,17 @@ class JobListView(ListAPIView):
     serializer_class = JobSerializer
     permission_classes = (permissions.IsAuthenticated,)
     pagination_class = CustomPageNumberPagination
+
+    # TODO: you have to get a different jobserializer for Account Managers/Admin/SuperUsers
+    # in that serializer you have to also get customer and assignees
+    def get_serializer_class(self):
+        if self.request.user.is_superuser \
+          or self.request.user.is_staff \
+          or self.request.user.groups.filter(name='Account Managers').exists():
+            return JobAdminSerializer
+
+        return JobSerializer
+
 
     def get_queryset(self):
         if self.request.user.is_superuser \

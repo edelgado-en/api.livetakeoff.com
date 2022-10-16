@@ -22,7 +22,3 @@ class JobRetainerServiceAssignment(models.Model):
 
     def __str__(self):
         return str(self.job.id) + ' - ' + self.retainer_service.name
-
-    #def save(self, *args, **kwargs):
-     #   self.total = self.quantity * self.price
-      #  super().save(*args, **kwargs)

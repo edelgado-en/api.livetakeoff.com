@@ -1,0 +1,29 @@
+from rest_framework import serializers
+from .aircraft_type import AircraftTypeSerializer
+from .airport import AirportSerializer
+from .fbo import FBOSerializer
+from .customer import CustomerSerializer
+from ..models import Job
+
+class JobAdminSerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField()
+    customer = CustomerSerializer()
+    aircraftType = AircraftTypeSerializer()
+    airport = AirportSerializer()
+    fbo = FBOSerializer()
+    completeBy = serializers.DateTimeField(format="%m/%d/%Y %I:%M %p")
+
+
+    class Meta:
+        model = Job
+        fields = (
+            'id',
+            'tailNumber',
+            'status',
+            'customer',
+            'purchase_order',
+            'aircraftType',
+            'airport',
+            'fbo',
+            'completeBy'
+            )
