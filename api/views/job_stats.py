@@ -23,7 +23,11 @@ class JobStatsView(APIView):
             job_comment_check = JobCommentCheck.objects.get(job=job, user=request.user)
 
             # Only show me the comments that have been created AFTER job_comments_check.last_time_check
-            comments_count = JobComments.objects.filter(job=job, created__gt=job_comment_check.last_time_check).count()
+            comments_count = JobComments.objects.filter(
+                                                    job=job,
+                                                    created__gt=job_comment_check.last_time_check) \
+                                                .exclude(author=request.user) \
+                                                .count()
 
         except JobCommentCheck.DoesNotExist:
             # this means that the user hasn't check the comments section for this job
