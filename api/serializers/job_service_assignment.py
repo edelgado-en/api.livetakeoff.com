@@ -1,5 +1,10 @@
 from rest_framework import serializers
-from ..models import (JobServiceAssignment, JobRetainerServiceAssignment)
+from ..models import (
+    JobServiceAssignment,
+    JobRetainerServiceAssignment
+    )
+
+from .basic_user import BasicUserSerializer
 
 class ChecklistActionSerializer(serializers.Serializer):
     id = serializers.IntegerField()
@@ -15,14 +20,16 @@ class GenericServiceAssignmentSerializer(serializers.Serializer):
 
 class JobServiceAssignmentSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
+    project_manager = BasicUserSerializer()
 
     class Meta:
         model = JobServiceAssignment
-        fields = ['id', 'status']
+        fields = ['id', 'status', 'project_manager']
 
 class JobRetainerServiceAssignmentSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
+    project_manager = BasicUserSerializer()
 
     class Meta:
         model = JobRetainerServiceAssignment
-        fields = ['id', 'status']
+        fields = ['id', 'status', 'project_manager']

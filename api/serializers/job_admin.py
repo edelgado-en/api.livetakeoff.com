@@ -4,6 +4,10 @@ from .airport import AirportSerializer
 from .fbo import FBOSerializer
 from .customer import CustomerSerializer
 from ..models import Job
+from .job_service_assignment import (
+        JobServiceAssignmentSerializer,
+        JobRetainerServiceAssignmentSerializer
+    )
 
 class JobAdminSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
@@ -12,7 +16,8 @@ class JobAdminSerializer(serializers.ModelSerializer):
     airport = AirportSerializer()
     fbo = FBOSerializer()
     completeBy = serializers.DateTimeField(format="%m/%d/%Y %I:%M %p")
-
+    job_service_assignments = JobServiceAssignmentSerializer(many=True)
+    job_retainer_service_assignments = JobRetainerServiceAssignmentSerializer(many=True)
 
     class Meta:
         model = Job
@@ -25,5 +30,7 @@ class JobAdminSerializer(serializers.ModelSerializer):
             'aircraftType',
             'airport',
             'fbo',
-            'completeBy'
+            'completeBy',
+            'job_service_assignments',
+            'job_retainer_service_assignments'
             )
