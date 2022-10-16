@@ -13,7 +13,8 @@ from ..models import (
         JobServiceAssignment,
         JobRetainerServiceAssignment,
         JobPhotos,
-        JobStatusActivity
+        JobStatusActivity,
+        JobCommentCheck
     )
 
 class JobDetail(APIView):
@@ -139,6 +140,11 @@ class JobDetail(APIView):
 
                 JobStatusActivity.objects.create(job=job, user=request.user, status=request.data['status'])
             
+            if request.data['status'] == 'C':
+                job_comment_checks = JobCommentCheck.objects.filter(job=job)
+
+                if job_comment_checks:
+                    job_comment_checks.delete()
 
             return Response(serializer.data)
 
