@@ -104,7 +104,6 @@ class JobDetail(APIView):
         job.retainer_service_assignments = job_retainer_service_assignments
 
         job.total_photos = JobPhotos.objects.filter(job=job).count()
-        job.total_assignees = job.assignees.count()
 
         serializer = JobDetailSerializer(job)
 
