@@ -20,7 +20,6 @@ from ..models import (
 class JobDetail(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
-
     def get(self, request, id):
         job = get_object_or_404(Job, pk=id)
 
@@ -140,7 +139,7 @@ class JobDetail(APIView):
 
                 JobStatusActivity.objects.create(job=job, user=request.user, status=request.data['status'])
             
-            if request.data['status'] == 'C':
+            if 'status' in request.data and request.data['status'] == 'C':
                 job_comment_checks = JobCommentCheck.objects.filter(job=job)
 
                 if job_comment_checks:

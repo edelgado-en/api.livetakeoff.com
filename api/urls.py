@@ -12,7 +12,8 @@ from .views import (
         JobCommentView,
         JobStatsView,
         JobFormInfoView,
-        CreateJobView
+        CreateJobView,
+        EditJobView
     )
 
 urlpatterns = [
@@ -20,6 +21,7 @@ urlpatterns = [
     path('jobs/form-info', JobFormInfoView.as_view()),
     path('jobs/create', CreateJobView.as_view()),
     path('jobs/<int:id>/', JobDetail.as_view()),
+    path('jobs/edit/<int:id>/', EditJobView.as_view()),
     path('jobs/stats/<int:id>/', JobStatsView.as_view()),
     path('jobs/services/<int:id>/', JobServiceAssignmentView.as_view()),
     path('jobs/retainer-services/<int:id>/', JobRetainerServiceAssignmentView.as_view()),

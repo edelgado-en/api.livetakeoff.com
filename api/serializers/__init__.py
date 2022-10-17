@@ -9,3 +9,4 @@ from .job_photo import JobPhotoSerializer
 from .basic_user import BasicUserSerializer
 from .job_comment import JobCommentSerializer
 from .job_admin import JobAdminSerializer
+from .edit_job import JobEditSerializer

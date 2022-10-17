@@ -13,3 +13,4 @@ from .job_comment import JobCommentView
 from .job_stats import JobStatsView
 from .job_form_info import JobFormInfoView
 from .create_job import CreateJobView
+from .edit_job import EditJobView
