@@ -32,35 +32,14 @@ class EditJobView(APIView):
 
         if serializer.is_valid():
             serializer.save()
+            
+            response = {
+                'id': job.id,
+            }
 
-        print(serializer.validated_data['services'])
-        print(serializer.validated_data['retainerServices'])
-        services = serializer.validated_data['services']
-        retainer_services = serializer.validated_data['retainerServices']
+            return Response(response, status.HTTP_200_OK)
 
-        # TODO: you have to get the existing services to delete the ones that are not included
-
-
-        # TODO: you have to handle unassign services, you have to compare the existing services with
-        # the newly provided list of services and delete the ones not included
-
-        #for service in services:
-            #assignment = JobServiceAssignment(job=job,service=service)
-           # assignment.save()
-
-        #for retainer_service in retainer_services:
-         #   assignment = JobRetainerServiceAssignment(job=job, retainer_service=retainer_service)
-          #  assignment.save()
-
-
-        # TODO: Calculate estimated completion time based on the estimated times of the selected services and aircraft type
-
-        response = {
-            'id': job.id,
-            'tailNumber': job.tailNumber
-        }
-
-        return Response(response, status.HTTP_200_OK)
+        return Response({'error': 'Missing Required Fields'}, status.HTTP_400_BAD_REQUEST)
 
 
 
