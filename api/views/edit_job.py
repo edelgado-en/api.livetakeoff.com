@@ -35,10 +35,8 @@ class EditJobView(APIView):
 
         print(serializer.validated_data['services'])
         print(serializer.validated_data['retainerServices'])
-        #s = data['services']
-        #r = data['retainer_services']
-        services = []
-        retainer_services = []
+        services = serializer.validated_data['services']
+        retainer_services = serializer.validated_data['retainerServices']
 
         # TODO: you have to get the existing services to delete the ones that are not included
 
