@@ -12,15 +12,9 @@ class JobService(serializers.Serializer):
 
 
 class JobEditSerializer(serializers.ModelSerializer):
-    estimatedETA = serializers.DateTimeField(format="%m/%d/%Y %I:%M %p")
-    estimatedETD = serializers.DateTimeField(format="%m/%d/%Y %I:%M %p")
-    completeBy = serializers.DateTimeField(format="%m/%d/%Y %I:%M %p")
-    services = serializers.ListField(
-                    child=serializers.IntegerField(min_value=0, max_value=100), required=False
-                )
-    retainerServices = serializers.ListField(
-                        child=serializers.IntegerField(min_value=0, max_value=100), required=False
-                        )
+    estimatedETA = serializers.DateTimeField(format="%m/%d/%Y %I:%M %p", required=False, allow_null=True)
+    estimatedETD = serializers.DateTimeField(format="%m/%d/%Y %I:%M %p", required=False, allow_null=True)
+    completeBy = serializers.DateTimeField(format="%m/%d/%Y %I:%M %p", required=False, allow_null=True)
 
 
     class Meta:
@@ -34,7 +28,5 @@ class JobEditSerializer(serializers.ModelSerializer):
             'fbo',
             'estimatedETA',
             'estimatedETD',
-            'completeBy',
-            'services',
-            'retainerServices'
+            'completeBy'
             )
