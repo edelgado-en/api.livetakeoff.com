@@ -33,8 +33,8 @@ class EditJobView(APIView):
         if serializer.is_valid():
             serializer.save()
 
-
-
+        print(serializer.validated_data['services'])
+        print(serializer.validated_data['retainerServices'])
         #s = data['services']
         #r = data['retainer_services']
         services = []

@@ -31,8 +31,6 @@ class Job(models.Model):
     estimatedETD = models.DateTimeField(blank=True, null=True)
     completeBy = models.DateTimeField(blank=True, null=True)
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='A')
-    services = models.ManyToManyField(Service, related_name='services', blank=True)
-    retainerServices = models.ManyToManyField(RetainerService, related_name='retainer_services', blank=True)
     created_by = models.ForeignKey('auth.User', related_name='jobs', on_delete=models.CASCADE, blank=True, null=True)
     assignees = models.ManyToManyField('auth.User', related_name='assignees', blank=True)
 
