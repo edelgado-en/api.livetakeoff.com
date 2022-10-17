@@ -4,18 +4,10 @@ from django.shortcuts import get_object_or_404
 from rest_framework import (permissions, status)
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from api.serializers import (JobSerializer, JobEditSerializer)
+from api.serializers import (JobEditSerializer)
 
 from ..models import (
-    Job,
-    Service,
-    RetainerService,
-    AircraftType,
-    Airport,
-    Customer,
-    FBO,
-    JobServiceAssignment,
-    JobRetainerServiceAssignment
+    Job
     )
 
 

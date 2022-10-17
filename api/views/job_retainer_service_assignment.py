@@ -10,6 +10,9 @@ class JobRetainerServiceAssignmentView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def patch(self, request, id):
+        """ 
+        Completes assignment
+        """
         job_retainer_service_assignment = get_object_or_404(JobRetainerServiceAssignment, pk=id)
 
         if not self.can_view_assignment(request.user, job_retainer_service_assignment):

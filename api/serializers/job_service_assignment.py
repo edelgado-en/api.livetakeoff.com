@@ -20,16 +20,18 @@ class GenericServiceAssignmentSerializer(serializers.Serializer):
 
 class JobServiceAssignmentSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
-    project_manager = BasicUserSerializer()
+    project_manager = BasicUserSerializer(allow_null=True)
+    service_name = serializers.CharField(source='service.name')
 
     class Meta:
         model = JobServiceAssignment
-        fields = ['id', 'status', 'project_manager']
+        fields = ['id', 'status', 'project_manager', 'service_name']
 
 class JobRetainerServiceAssignmentSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
-    project_manager = BasicUserSerializer()
+    project_manager = BasicUserSerializer(allow_null=True)
+    service_name = serializers.CharField(source='retainer_service.name')
 
     class Meta:
         model = JobRetainerServiceAssignment
-        fields = ['id', 'status', 'project_manager']
+        fields = ['id', 'status', 'project_manager', 'service_name']
