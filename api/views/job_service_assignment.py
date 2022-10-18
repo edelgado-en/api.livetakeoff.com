@@ -181,6 +181,14 @@ class JobServiceAssignmentView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+    def delete(self, request, id):
+        job_service_assignment = get_object_or_404(JobServiceAssignment, pk=id)
+
+        job_service_assignment.delete()
+
+        return Response({'message': 'Delete successfully'}, status.HTTP_200_OK)
+
+
     def can_view_assignment_list(self, user):
         if user.is_superuser \
            or user.is_staff \
