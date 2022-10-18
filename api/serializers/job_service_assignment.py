@@ -15,6 +15,7 @@ class GenericServiceAssignmentSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
     status = serializers.CharField()
+    project_manager = serializers.CharField()
     checklist_actions = ChecklistActionSerializer(many=True)
 
 

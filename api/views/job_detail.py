@@ -47,11 +47,22 @@ class JobDetail(APIView):
             or request.user.groups.filter(name='Account Managers').exists():
                 
                 # return all services attached to this job
-                service_assignments = job.job_service_assignments.select_related('service').all()
+                service_assignments = job.job_service_assignments \
+                                         .select_related('service') \
+                                         .select_related('project_manager') \
+                                         .all()
+                
                 for service_assignment in service_assignments:
+                    p_manager = service_assignment.project_manager
+                    if (p_manager is None):
+                        p_manager = 'Not Assigned'
+                    else:
+                        p_manager = p_manager.username
+
                     s_assignment = {
                         'id': service_assignment.id,
                         'name': service_assignment.service.name,
+                        'project_manager': p_manager,
                         'status': service_assignment.status,
                         'checklist_actions': service_assignment.service.checklistActions.all(),
                     }
@@ -59,11 +70,22 @@ class JobDetail(APIView):
                     job_service_assignments.append(s_assignment)
 
                 # return all retainer services atached to this job
-                retainer_service_assignments = job.job_retainer_service_assignments.select_related('retainer_service').all()
+                retainer_service_assignments = job.job_retainer_service_assignments \
+                                                  .select_related('retainer_service') \
+                                                  .select_related('project_manager') \
+                                                  .all()
+                
                 for retainer_service_assignment in retainer_service_assignments:
+                    p_manager = retainer_service_assignment.project_manager
+                    if (p_manager is None):
+                        p_manager = 'Not Assigned'
+                    else:
+                        p_manager = p_manager.username
+
                     r_assignment = {
                         'id': retainer_service_assignment.id,
                         'name': retainer_service_assignment.retainer_service.name,
+                        'project_manager': p_manager,
                         'status': retainer_service_assignment.status,
                         'checklist_actions': retainer_service_assignment.retainer_service.checklistActions.all(),
                     }
