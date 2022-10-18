@@ -10,7 +10,10 @@ from ..models import (
     Job,
     JobRetainerServiceAssignment,
     JobStatusActivity,
-    EstimatedServiceTime)
+    EstimatedServiceTime,
+    Service,
+    RetainerService
+    )
 
 from ..serializers import (
                     JobServiceAssignmentSerializer,
@@ -120,6 +123,31 @@ class JobServiceAssignmentView(APIView):
         }
 
         return Response(response, status.HTTP_200_OK)
+
+
+
+
+    def post(self, request, id):
+
+        job = get_object_or_404(Job, pk=id)
+        service = get_object_or_404(Service, pk=request.data['service_id'])
+
+        project_manager = request.data['user_id']
+
+        if project_manager is not None:
+            project_manager = get_object_or_404(User, pk=request.data['user_id'])
+            status = 'A'
+        else:
+            status = 'U'
+
+        assignment = JobServiceAssignment(job=job, project_manager=project_manager, service=service, status=status)
+        assignment.save()
+
+        serializer = JobServiceAssignmentSerializer(assignment)
+
+        return Response(serializer.data)
+
+
 
 
     def put(self, request, id):
