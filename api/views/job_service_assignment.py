@@ -122,6 +122,45 @@ class JobServiceAssignmentView(APIView):
         return Response(response, status.HTTP_200_OK)
 
 
+    def put(self, request, id):
+        job = get_object_or_404(Job, pk=id)
+
+        at_least_one_service_assigned = False
+
+        # if all services are assigned and the job status is less than assigned, then set the job status to assigned
+        for service in request.data['services']:
+            
+            assignment =  JobServiceAssignment.objects.get(pk=service['assignment_id'])
+            
+            if service['user_id']:
+                user = User.objects.get(pk=service['user_id'])
+                assignment.project_manager = user
+
+                at_least_one_service_assigned = True
+
+            else :
+                assignment.project_manager = None
+
+            assignment.save()
+
+
+        # if there is at least one service assigned, then set the status to assigned
+        current_status = job.status
+
+        if at_least_one_service_assigned and (current_status == 'A' or current_status == 'U'):
+            job.status = 'S' # assigned
+            job.save()
+
+        response = {
+            'message': 'assigned succesfully'
+        }
+
+        return Response(response, status.HTTP_200_OK)
+
+
+
+
+
 
     def patch(self, request, id):
         """ 
@@ -140,6 +179,7 @@ class JobServiceAssignmentView(APIView):
             return Response(serializer.data)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
     def can_view_assignment_list(self, user):
         if user.is_superuser \
