@@ -3,9 +3,15 @@ from django.db.models import Q
 from rest_framework import (permissions, status)
 from rest_framework .response import Response
 from rest_framework.views import APIView
-
-from ..models import (JobServiceAssignment, Job, JobRetainerServiceAssignment)
 from django.contrib.auth.models import User
+
+from ..models import (
+    JobServiceAssignment,
+    Job,
+    JobRetainerServiceAssignment,
+    JobStatusActivity,
+    EstimatedServiceTime)
+
 from ..serializers import (
                     JobServiceAssignmentSerializer,
                     JobRetainerServiceAssignmentSerializer,
@@ -35,12 +41,68 @@ class JobServiceAssignmentView(APIView):
         project_managers = User.objects.filter(groups__name='Project Managers')
 
         for project_manager in project_managers:
-            # We are not doing available soon because I need to have estimated times for all services to properly test
-            assignments_in_process = project_manager.job_service_assignments.filter(Q(status='W') | Q(status='A')).count()
-            if assignments_in_process > 0:
-                project_manager.busy = True
-            else:
-                project_manager.busy = False
+            # Get the in-process assignments for this user for other jobs
+            assignments_in_process = project_manager \
+                                       .job_service_assignments \
+                                       .select_related('job') \
+                                       .select_related('service') \
+                                       .filter(Q(status='W') | Q(status='A')) \
+                                       .filter(~Q(job=job))
+
+            if assignments_in_process.count() == 0:
+                project_manager.availability = 'available'
+                continue
+
+            # if you are here, that means you are either busy or available soon
+
+            # the available soon is calculated after iterating through the assignments in process
+            # all you have to do in the loop is add up the hours of the service in process
+            # so that then you can compare
+
+            # you get all the wip services for a user with their corresponding aircraft types. You are just collecting
+            # so that you can add up the hours in total
+            # then outside the this loop, you can say this a project manager has x hours to be available 
+
+            total_estimated_work_hours = 0
+
+            for assignment_in_process in assignments_in_process:
+                job_in_process = assignment_in_process.job
+
+
+                # Get the latest assignment
+                latest_assignment_activity =  JobStatusActivity.objects \
+                                                                .filter(job=job_in_process, status='A') \
+                                                                .order_by('-timestamp') \
+                                                                .first()
+                
+                # account for no activity. Maybe someone is adding from admin view
+                if latest_assignment_activity is None:
+                    continue
+
+
+                # get estimated hours for this service/aircraftType
+                estimated_time = EstimatedServiceTime.objects.get(service=assignment_in_process.service,
+                                                                  aircraft_type=job_in_process.aircraftType)        
+
+                if estimated_time is None:
+                    continue
+
+                print(latest_assignment_activity.timestamp)
+
+            # Because you don't have estimated times, you are unavailable to calculate available soon
+            # just say it is busy
+            if total_estimated_work_hours == 0:
+                project_manager.availability = 'busy'
+
+
+            # OUTSIDE THE INNER LOOP I NEED TO KNOW: THIS PROJECT MANAGER HAS X HOURS OF WORK
+            # NOW COMPARE NOW() VS X HOURS OF WORK AND IF THE DELTA IS LESS OR EQUAL THAN 1 HOUR
+            # FLAG AS AVAILABLE SOON
+
+            
+            # TODO: YOU HAVE TO ALSO CHECK IN RETAINER SERVICES
+            # you the aircraft type of the job and the service to check the estimated time
+
 
         users = BasicUserSerializer(project_managers, many=True)
 

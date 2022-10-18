@@ -136,7 +136,6 @@ class JobDetail(APIView):
                     retainer_service.status = request.data['status']
                     retainer_service.save(update_fields=['status'])
 
-                JobStatusActivity.objects.create(job=job, user=request.user, status=request.data['status'])
             
             if 'status' in request.data and request.data['status'] == 'C':
                 job_comment_checks = JobCommentCheck.objects.filter(job=job)
@@ -144,6 +143,11 @@ class JobDetail(APIView):
                 if job_comment_checks:
                     job_comment_checks.delete()
 
+            
+            if 'status' in request.data:
+                JobStatusActivity.objects.create(job=job, user=request.user, status=request.data['status'])
+
+            
             return Response(serializer.data)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

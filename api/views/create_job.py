@@ -18,7 +18,8 @@ from ..models import (
     JobComments,
     JobPhotos,
     JobServiceAssignment,
-    JobRetainerServiceAssignment
+    JobRetainerServiceAssignment,
+    JobStatusActivity
     )
 
 
@@ -149,6 +150,8 @@ class CreateJobView(APIView):
                           size=photo.size)
             p.save()
 
+        # if user is customer, this is submitted, otherwise it is accepted
+        JobStatusActivity.objects.create(job=job, user=request.user, status='A')
 
         response = {
             'id': job.id,

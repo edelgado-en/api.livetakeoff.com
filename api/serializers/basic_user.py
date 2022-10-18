@@ -16,10 +16,10 @@ class BasicUserSerializer(serializers.ModelSerializer):
     first_name = serializers.ReadOnlyField()
     last_name = serializers.ReadOnlyField()
     profile = UserProfileSerializer()
-    busy = serializers.BooleanField(allow_null=True, default=False)
+    availability = serializers.CharField(allow_null=True)
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'first_name', 'last_name', 'profile', 'busy')
+        fields = ('id', 'username', 'first_name', 'last_name', 'profile', 'availability')
 
 

@@ -7,7 +7,8 @@ from rest_framework.response import Response
 from api.serializers import (JobEditSerializer)
 
 from ..models import (
-    Job
+    Job,
+    JobStatusActivity
     )
 
 
@@ -20,11 +21,19 @@ class EditJobView(APIView):
         if not self.can_edit_job(request.user):
             return Response({'error': 'You do not have permission to edit a job'}, status=status.HTTP_403_FORBIDDEN)
         
+        current_status = job.status
+        
         serializer = JobEditSerializer(job, data=request.data, partial=True)
 
         if serializer.is_valid():
             serializer.save()
             
+            new_status = serializer.data['status']
+
+            if current_status != new_status:
+                JobStatusActivity.objects.create(job=job, user=request.user, status=new_status)
+
+
             response = {
                 'id': job.id,
             }
