@@ -91,11 +91,19 @@ class JobServiceAssignmentView(APIView):
 
 
                 # get estimated hours for this service/aircraftType
-                estimated_time = EstimatedServiceTime.objects.get(service=assignment_in_process.service,
+                try:
+                    estimated_time = EstimatedServiceTime.objects.get(service=assignment_in_process.service,
                                                                   aircraft_type=job_in_process.aircraftType)        
 
-                if estimated_time is None:
-                    continue
+                    if estimated_time is None:
+                        continue
+
+                    # keep going
+
+                except EstimatedServiceTime.DoesNotExist:
+                    # do something here
+                    pass
+
 
                 print(latest_assignment_activity.timestamp)
 
