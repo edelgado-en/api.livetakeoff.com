@@ -36,6 +36,7 @@ class JobStatsView(APIView):
         photos_count = JobPhotos.objects.filter(job=job).count()
 
         response = {
+            'purchase_order': job.purchase_order,
             'comments_count': comments_count,
             'photos_count': photos_count
         }
