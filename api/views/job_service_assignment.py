@@ -36,11 +36,13 @@ class JobServiceAssignmentView(APIView):
 
         assignments = JobServiceAssignment \
                                 .objects.select_related('service') \
-                                .filter(job=job)
+                                .filter(job=job) \
+                                .order_by('created_at')
 
         retainer_assignments = JobRetainerServiceAssignment \
                                     .objects.select_related('retainer_service') \
-                                    .filter(job=job)
+                                    .filter(job=job) \
+                                    .order_by('created_at')
 
         # Use a different serializer because you don't need the profile part
         service_assignments = JobServiceAssignmentSerializer(assignments, many=True)
