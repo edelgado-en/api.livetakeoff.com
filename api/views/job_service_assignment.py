@@ -142,6 +142,10 @@ class JobServiceAssignmentView(APIView):
 
         project_manager = request.data['user_id']
 
+        # TODO: add validation to ensure the service to be added does not already exist for this job
+
+        # TODO: if all services are assigned, then the job status should be assigned if it less than assigned
+
         if project_manager is not None:
             project_manager = get_object_or_404(User, pk=request.data['user_id'])
             status = 'A'
