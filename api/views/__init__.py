@@ -15,3 +15,4 @@ from .job_form_info import JobFormInfoView
 from .create_job import CreateJobView
 from .edit_job import EditJobView
 from .services import ServicesView
+from .job_detail_basic import JobDetailBasicView
