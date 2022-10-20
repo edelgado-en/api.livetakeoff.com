@@ -40,5 +40,7 @@ class Job(models.Model):
     # by reading the job status activity table
     actual_completion_time = models.PositiveIntegerField(blank=True, null=True, verbose_name='Actual Completion Time (minutes)') 
 
+    price = models.DecimalField(max_digits=6, decimal_places=2, null=True)
+
     def __str__(self) -> str:
         return str(self.id) + ' - ' + self.tailNumber + ' - ' + self.airport.initials + ' - ' + self.aircraftType.name

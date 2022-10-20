@@ -101,7 +101,7 @@ class CustomerPMAdmin(admin.ModelAdmin):
 
 @admin.register(CustomerSettings)
 class CustomerSettingsAdmin(admin.ModelAdmin):
-    list_display = ['id', 'customer', 'show_spending_info', 'allow_cancel_job', 'retainer_amount', 'show_job_price', 'special_instructions']
+    list_display = ['id', 'customer', 'show_spending_info', 'allow_cancel_job', 'retainer_amount', 'show_job_price', 'special_instructions', 'price_list']
     list_per_page = 100
 
     def has_delete_permission(self, request, obj=None):
@@ -109,7 +109,7 @@ class CustomerSettingsAdmin(admin.ModelAdmin):
 
 @admin.register(CustomerDiscount)
 class CustomerDiscountAdmin(admin.ModelAdmin):
-    list_display = ['customer_setting', 'discount', 'type']
+    list_display = ['customer_setting', 'discount', 'type', 'percentage']
 
 
 @admin.register(CustomerDiscountService)
@@ -124,7 +124,7 @@ class CustomerDiscountAirport(admin.ModelAdmin):
 
 @admin.register(CustomerAdditionalFee)
 class CustomerAdditionalFeeAdmin(admin.ModelAdmin):
-    list_display = ['customer_setting', 'type', 'fee']
+    list_display = ['customer_setting', 'type', 'fee', 'percentage']
 
 
 @admin.register(CustomerAdditionalFeeFBO)
@@ -196,7 +196,7 @@ class FBOAdmin(admin.ModelAdmin):
 
 @admin.register(Job)
 class JobAdmin(admin.ModelAdmin):
-    list_display = ['id', 'created_at', 'purchase_order', 'customer', 'requestDate', 'tailNumber', 'aircraftType', 'airport', 'fbo', 'estimatedETA', 'estimatedETD', 'completeBy', 'status', 'estimated_completion_time', 'actual_completion_time']
+    list_display = ['id', 'created_at', 'purchase_order', 'customer', 'requestDate', 'tailNumber', 'aircraftType', 'airport', 'fbo', 'estimatedETA', 'estimatedETD', 'completeBy', 'status', 'estimated_completion_time', 'actual_completion_time', 'price']
     list_per_page = 100
     ordering = ['created_at', 'purchase_order', 'customer', 'aircraftType', 'tailNumber', 'airport', 'fbo', 'status', 'completeBy']
     search_fields = ['purchase_order', 'customer', 'tailNumber', ]

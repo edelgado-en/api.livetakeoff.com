@@ -9,8 +9,8 @@ class CustomerAdditionalFee(models.Model):
 
     customer_setting = models.ForeignKey(CustomerSettings, on_delete=models.CASCADE, related_name='fees')
     fee = models.DecimalField(max_digits=6, decimal_places=2)
-    # TODO: add a column that boolean is_percentage  (we have percentage or value)
     type = models.CharField(max_length=1, choices=FEE_TYPE_CHOICES)
+    percentage = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         return 'id: ' + str(self.id) + ' type: ' + str(self.type) + ' fee: $' + str(self.fee) 

@@ -10,8 +10,8 @@ class CustomerDiscount(models.Model):
 
     customer_setting = models.ForeignKey(CustomerSettings, on_delete=models.CASCADE, related_name='discounts')
     discount = models.IntegerField()
-    # TODO: add a column that boolean is_percentage  (we have percentage or value)
     type = models.CharField(max_length=1, choices=DISCOUNT_TYPE_CHOICES)
+    percentage = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         return 'id: ' + str(self.id) + ' type: ' + str(self.type) + ' discount: ' + str(self.discount) + '%'
