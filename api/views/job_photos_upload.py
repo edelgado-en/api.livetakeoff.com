@@ -1,3 +1,4 @@
+import os
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import (permissions,status)
@@ -44,7 +45,9 @@ class JobPhotosUploadView(APIView):
         name = job.tailNumber + '_' + job.airport.initials + '_' + datetime.today().strftime('%Y-%m-%d')
 
         for photo in request.data.getlist('photo'):
-            name = name + '_' + str(counter)
+            file_name, file_extension = os.path.splitext(photo.name)
+            
+            name = name + '_' + str(counter) + file_extension
             
             p = JobPhotos(job=job,
                           uploaded_by=request.user,
