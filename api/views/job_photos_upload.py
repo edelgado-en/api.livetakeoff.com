@@ -47,12 +47,13 @@ class JobPhotosUploadView(APIView):
         for photo in request.data.getlist('photo'):
             file_name, file_extension = os.path.splitext(photo.name)
             
-            name = name + '_' + str(counter) + file_extension
+            # TODO: WRONG VARIABLE NAME
+            filename = name + '_' + str(counter) + file_extension
             
             p = JobPhotos(job=job,
                           uploaded_by=request.user,
                           image=photo,
-                          name=name,
+                          name=filename,
                           size=photo.size,
                           interior=interior)
             p.save()
