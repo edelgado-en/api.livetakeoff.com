@@ -19,6 +19,8 @@ django-dotenv = "*"
 django-cloudinary-storage = "*"
 django-templated-mail = "*"
 twilio = "*"
+django-phonenumber-field = "*"
+phonenumbers = "*"
 
 [dev-packages]
 
