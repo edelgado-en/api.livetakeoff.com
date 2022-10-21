@@ -13,3 +13,6 @@ from .edit_job import JobEditSerializer
 from .service import ServiceSerializer
 from .job_detail_basic import JobDetailBasicSerializer
 from .customer import CustomerSerializer
+from .price_list import PriceListSerializer
+from .customer_settings import CustomerSettingsSerializer
+from .customer_detail import CustomerDetailSerializer

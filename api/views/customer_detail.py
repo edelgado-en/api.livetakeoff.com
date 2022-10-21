@@ -5,11 +5,12 @@ from rest_framework .response import Response
 from rest_framework.views import APIView
 
 from ..serializers import (
-     CustomerSerializer,
+     CustomerDetailSerializer,
      )
 
 from ..models import (
         Customer,
+        CustomerSettings,
         UserProfile
     )
 
@@ -18,16 +19,23 @@ class CustomerDetail(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, id):
-        customer = get_object_or_404(Customer, pk=id)
+        # customer = get_object_or_404(Customer, pk=id)
+        customer = Customer.objects.select_related('contact').get(pk=id)
         
-        if not self.can_view_customer(request.user, customer):
-            return Response({'error': 'You do not have permission to view this customer'}, status=status.HTTP_403_FORBIDDEN)
+        try:
+            settings = CustomerSettings.objects.get(customer=customer)
+            customer.settings = settings
 
+            if not self.can_view_customer(request.user, customer):
+                return Response({'error': 'You do not have permission to view this customer'}, status=status.HTTP_403_FORBIDDEN)
 
-        # TODO: you need a full serializer to get all the stuff you need
-        serializer = CustomerSerializer(customer)
-        
-        return Response(serializer.data)
+            serializer = CustomerDetailSerializer(customer)
+            
+            return Response(serializer.data)
+
+        except CustomerSettings.DoesNotExist:
+            return Response({'error': 'Customer settings not found'}, status=status.HTTP_404_NOT_FOUND)
+
 
 
     def can_view_customer(self, user, customer):
