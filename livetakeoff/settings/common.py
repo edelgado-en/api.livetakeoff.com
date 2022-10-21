@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'api',
+    'phonenumber_field',
     'debug_toolbar'
 ]
 

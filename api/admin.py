@@ -78,7 +78,7 @@ class ChecklistActionAdmin(admin.ModelAdmin):
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'logo', 'banner', 'about', 'contact',  'billingAddress', 'emailAddress', 'billingInfo', 'active']
+    list_display = ['id', 'name', 'logo', 'banner', 'about', 'contact',  'phone_number', 'billingAddress', 'emailAddress', 'billingInfo', 'active']
     list_per_page = 100
     ordering = ['name', 'emailAddress']
     search_fields = ['name', 'emailAddress']
