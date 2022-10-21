@@ -6,4 +6,4 @@ class CustomerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Customer
-        fields = ('id', 'name')
+        fields = ('id', 'name', 'emailAddress', 'logo')

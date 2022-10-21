@@ -12,3 +12,4 @@ from .job_admin import JobAdminSerializer
 from .edit_job import JobEditSerializer
 from .service import ServiceSerializer
 from .job_detail_basic import JobDetailBasicSerializer
+from .customer import CustomerSerializer

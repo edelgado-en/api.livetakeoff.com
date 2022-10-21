@@ -2,7 +2,6 @@ from rest_framework import serializers
 from .aircraft_type import AircraftTypeSerializer
 from .airport import AirportSerializer
 from .fbo import FBOSerializer
-from .customer import CustomerSerializer
 from ..models import Job
 
 class JobSerializer(serializers.ModelSerializer):

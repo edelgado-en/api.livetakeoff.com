@@ -2,7 +2,6 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import (permissions, status)
 from rest_framework .response import Response
-from rest_framework.views import APIView
 from datetime import datetime
 
 from ..serializers import (JobCommentSerializer)
@@ -51,16 +50,5 @@ class JobCommentView(ListCreateAPIView):
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    """ def perform_create(self, serializer):
-        user = self.request.user
-        job_id = self.kwargs.get(self.lookup_url_kwarg)
-        job = Job.objects.get(pk=job_id)
 
-        comment = self.request.data['comment']
-
-        job_comment = JobComments(job=job,
-                                  comment=comment,
-                                  author=user)
-
-        job_comment.save() """
 
