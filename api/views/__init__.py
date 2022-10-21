@@ -17,3 +17,4 @@ from .edit_job import EditJobView
 from .services import ServicesView
 from .job_detail_basic import JobDetailBasicView
 from .customers import CustomersView
+from .customer_detail import CustomerDetail
