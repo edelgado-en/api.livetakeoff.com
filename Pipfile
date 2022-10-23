@@ -21,6 +21,7 @@ django-templated-mail = "*"
 twilio = "*"
 django-phonenumber-field = "*"
 phonenumbers = "*"
+sendgrid = "*"
 
 [dev-packages]
 
