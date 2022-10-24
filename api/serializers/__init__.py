@@ -16,3 +16,4 @@ from .customer import CustomerSerializer
 from .price_list import PriceListSerializer
 from .customer_settings import CustomerSettingsSerializer
 from .customer_detail import CustomerDetailSerializer
+from .airport import AirportSerializer

@@ -26,12 +26,12 @@ class JobDetail(APIView):
         if not self.can_view_job(request.user, job):
             return Response({'error': 'You do not have permission to view this job'}, status=status.HTTP_403_FORBIDDEN)
 
-        customer_settings = job.customer.customer_settings.all()
+        customer_settings = job.customer.customer_settings
 
         special_instructions = ''
 
-        for customer_setting in customer_settings:
-            special_instructions = customer_setting.special_instructions
+        if customer_settings:
+            special_instructions = customer_settings.special_instructions
 
 
         job.special_instructions = special_instructions

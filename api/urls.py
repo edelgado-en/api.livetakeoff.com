@@ -19,7 +19,8 @@ from .views import (
         CustomersView,
         CustomerDetail,
         CustomerSettingsView,
-        CustomerDiscountView
+        CustomerDiscountView,
+        AirportsView
     )
 
 urlpatterns = [
@@ -37,6 +38,7 @@ urlpatterns = [
     path('job-photos/upload/<int:jobid>/', JobPhotosUploadView.as_view()),
     path('job-comments/<int:jobid>/', JobCommentView.as_view()),
     path('services', ServicesView.as_view()),
+    path('airports', AirportsView.as_view()),
     path('customers', CustomersView.as_view()),
     path('customers/<int:id>/', CustomerDetail.as_view()),
     path('customers/settings/<int:id>/', CustomerSettingsView.as_view()),
