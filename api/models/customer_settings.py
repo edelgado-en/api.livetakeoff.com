@@ -3,7 +3,7 @@ from .customer import Customer
 from .price_list import PriceList
 
 class CustomerSettings(models.Model):
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='customer_settings')
+    customer = models.OneToOneField(Customer, on_delete=models.CASCADE, related_name='customer_settings')
     show_spending_info = models.BooleanField(default=False)
     allow_cancel_job = models.BooleanField(default=False)
     retainer_amount = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True)

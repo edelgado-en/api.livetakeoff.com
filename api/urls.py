@@ -18,7 +18,8 @@ from .views import (
         JobDetailBasicView,
         CustomersView,
         CustomerDetail,
-        CustomerSettingsView
+        CustomerSettingsView,
+        CustomerDiscountView
     )
 
 urlpatterns = [
@@ -39,6 +40,7 @@ urlpatterns = [
     path('customers', CustomersView.as_view()),
     path('customers/<int:id>/', CustomerDetail.as_view()),
     path('customers/settings/<int:id>/', CustomerSettingsView.as_view()),
+    path('customers/discounts/<int:id>/', CustomerDiscountView.as_view()),
     path('users/me', UserView.as_view()),
     path('users/me/avatar', UserAvatarView.as_view()),
     path('users/me/reset-password', UserResetPasswordView.as_view())

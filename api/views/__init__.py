@@ -19,3 +19,4 @@ from .job_detail_basic import JobDetailBasicView
 from .customers import CustomersView
 from .customer_detail import CustomerDetail
 from .customer_settings import CustomerSettingsView
+from .customer_discounts import CustomerDiscountView

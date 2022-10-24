@@ -109,7 +109,7 @@ class CustomerSettingsAdmin(admin.ModelAdmin):
 
 @admin.register(CustomerDiscount)
 class CustomerDiscountAdmin(admin.ModelAdmin):
-    list_display = ['customer_setting', 'discount', 'type', 'percentage']
+    list_display = ['id', 'customer_setting', 'discount', 'type', 'percentage']
 
 
 @admin.register(CustomerDiscountService)
