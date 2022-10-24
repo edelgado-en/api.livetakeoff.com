@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from requests import delete
 from rest_framework import (permissions, status)
 from rest_framework .response import Response
 from rest_framework.views import APIView
@@ -121,6 +122,16 @@ class CustomerDiscountView(APIView):
 
         return Response({'id': customer_discount.id}, status=status.HTTP_201_CREATED)
       
+
+    def delete(self, request, id):
+        if not self.can_update_customer_discount(request.user):
+            return Response({'error': 'You do not have permission to delete customer discounts'},
+                             status=status.HTTP_403_FORBIDDEN)
+
+        customer_discount = get_object_or_404(CustomerDiscount, pk=id)
+        customer_discount.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
     # Discounts can only be changed by admins and account managers
