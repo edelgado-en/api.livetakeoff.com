@@ -11,6 +11,7 @@ class CustomerSettingsSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'allow_cancel_job',
+            'show_spending_info',
             'retainer_amount',
             'show_job_price',
             'special_instructions',

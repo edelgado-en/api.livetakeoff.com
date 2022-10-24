@@ -17,7 +17,8 @@ from .views import (
         ServicesView,
         JobDetailBasicView,
         CustomersView,
-        CustomerDetail
+        CustomerDetail,
+        CustomerSettingsView
     )
 
 urlpatterns = [
@@ -37,6 +38,7 @@ urlpatterns = [
     path('services', ServicesView.as_view()),
     path('customers', CustomersView.as_view()),
     path('customers/<int:id>/', CustomerDetail.as_view()),
+    path('customers/settings/<int:id>/', CustomerSettingsView.as_view()),
     path('users/me', UserView.as_view()),
     path('users/me/avatar', UserAvatarView.as_view()),
     path('users/me/reset-password', UserResetPasswordView.as_view())

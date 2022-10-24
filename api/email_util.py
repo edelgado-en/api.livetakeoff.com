@@ -12,6 +12,8 @@ class EmailUtil():
                         html_content=body
                     )
 
+        # This doesnt work
+        #message.template_id = 'd-bcb28d6f880444fca68dad0d1243d6b9'
 
         try:
             sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
