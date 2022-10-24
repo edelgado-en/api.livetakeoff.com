@@ -70,8 +70,6 @@ class CustomerDiscountView(APIView):
         return Response(discounts, status=status.HTTP_200_OK)
 
 
-
-
     def patch(self, request, id):
         if not self.can_update_customer_discount(request.user):
             return Response({'error': 'You do not have permission to update customer discounts'},
@@ -88,6 +86,43 @@ class CustomerDiscountView(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+
+    def post(self, request, id):
+        if not self.can_update_customer_discount(request.user):
+            return Response({'error': 'You do not have permission to create customer discounts'},
+                             status=status.HTTP_403_FORBIDDEN)
+
+        # TODO: validate discount is only numbers
+
+        customer = get_object_or_404(Customer, pk=id)
+        settings = CustomerSettings.objects.get(customer=customer)
+
+        customer_discount = CustomerDiscount(customer_setting=settings,
+                                         discount=request.data['discount'],
+                                         percentage=request.data['is_percentage'],
+                                         type=request.data['type'])
+
+        customer_discount.save()
+
+        if request.data['type'] == 'S':
+            for service in request.data['services']:
+                customer_discount_service = CustomerDiscountService(customer_discount=customer_discount,
+                                                                    service_id=service['id'])
+
+                customer_discount_service.save()
+
+
+        if request.data['type'] == 'A':
+            for airport in request.data['airports']:
+                customer_discount_airport = CustomerDiscountAirport(customer_discount=customer_discount,
+                                                                    airport_id=airport['id'])
+
+                customer_discount_airport.save()
+
+        return Response({'id': customer_discount.id}, status=status.HTTP_201_CREATED)
+      
+
+
     # Discounts can only be changed by admins and account managers
     def can_update_customer_discount(self, user):
         if user.is_superuser \
@@ -96,3 +131,5 @@ class CustomerDiscountView(APIView):
            return True
 
         return False
+
+
