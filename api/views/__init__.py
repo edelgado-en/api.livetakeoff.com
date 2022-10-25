@@ -24,3 +24,4 @@ from .airports import AirportsView
 from .customer_discount_update import CustomerDiscountUpdateView
 from .customer_fees import CustomerFeesView
 from .fbos import FBOsView
+from .customer_fee_update import CustomerFeeUpdateView

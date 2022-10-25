@@ -10,8 +10,6 @@ from api.models import (
         CustomerDiscountAirport,
     )
 
-from api.serializers import CustomerSettingsSerializer
-
 
 class CustomerDiscountUpdateView(APIView):
     permission_classes = (permissions.IsAuthenticated,)

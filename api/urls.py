@@ -24,6 +24,7 @@ from .views import (
         CustomerDiscountUpdateView,
         CustomerFeesView,
         FBOsView,
+        CustomerFeeUpdateView
     )
 
 urlpatterns = [
@@ -49,6 +50,7 @@ urlpatterns = [
     path('customers/discounts/<int:id>/', CustomerDiscountView.as_view()),
     path('customers/discounts/update/<int:id>/', CustomerDiscountUpdateView.as_view()),
     path('customers/fees/<int:id>/', CustomerFeesView.as_view()),
+    path('customers/fees/update/<int:id>/', CustomerFeeUpdateView.as_view()),
     path('users/me', UserView.as_view()),
     path('users/me/avatar', UserAvatarView.as_view()),
     path('users/me/reset-password', UserResetPasswordView.as_view())
