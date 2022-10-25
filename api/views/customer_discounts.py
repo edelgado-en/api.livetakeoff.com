@@ -71,23 +71,6 @@ class CustomerDiscountView(APIView):
         return Response(discounts, status=status.HTTP_200_OK)
 
 
-    def patch(self, request, id):
-        if not self.can_update_customer_discount(request.user):
-            return Response({'error': 'You do not have permission to update customer discounts'},
-                             status=status.HTTP_403_FORBIDDEN)
-
-        customer_discount = get_object_or_404(CustomerDiscount, pk=id)
-
-        serializer = CustomerSettingsSerializer(customer_discount, data=request.data, partial=True)
-
-        if serializer.is_valid():
-            serializer.save()
-
-            return Response(serializer.data)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-
     def post(self, request, id):
         if not self.can_update_customer_discount(request.user):
             return Response({'error': 'You do not have permission to create customer discounts'},

@@ -21,3 +21,4 @@ from .customer_detail import CustomerDetail
 from .customer_settings import CustomerSettingsView
 from .customer_discounts import CustomerDiscountView
 from .airports import AirportsView
+from .customer_discount_update import CustomerDiscountUpdateView
