@@ -5,6 +5,7 @@ class CustomerAdditionalFee(models.Model):
     FEE_TYPE_CHOICES = [
         ('F', 'By FBO'),
         ('A', 'By Airport'),
+        ('G', 'General'),
     ]
 
     customer_setting = models.ForeignKey(CustomerSettings, on_delete=models.CASCADE, related_name='fees')

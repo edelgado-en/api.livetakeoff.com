@@ -32,8 +32,9 @@ class CustomerDiscountUpdateView(APIView):
 
 
         if customer_discount.type == 'S':
-            customer_discount_services = CustomerDiscountService.objects.select_related('service').filter(customer_discount=customer_discount)
-            customer_discount.discounted_services = customer_discount_services
+            customer_discount_services = CustomerDiscountService.objects \
+                                            .select_related('service') \
+                                            .filter(customer_discount=customer_discount)
 
             for service in customer_discount_services:
                 s = {
@@ -45,8 +46,9 @@ class CustomerDiscountUpdateView(APIView):
 
 
         if customer_discount.type == 'A':
-            customer_discount_airports = CustomerDiscountAirport.objects.select_related('airport').filter(customer_discount=customer_discount)
-            customer_discount.discounted_airports = customer_discount_airports
+            customer_discount_airports = CustomerDiscountAirport.objects \
+                                            .select_related('airport') \
+                                            .filter(customer_discount=customer_discount)
 
             for airport in customer_discount_airports:
                 a = {

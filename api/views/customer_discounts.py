@@ -1,5 +1,4 @@
 from django.shortcuts import get_object_or_404
-from requests import delete
 from rest_framework import (permissions, status)
 from rest_framework .response import Response
 from rest_framework.views import APIView
@@ -11,8 +10,6 @@ from api.models import (
         CustomerDiscountAirport,
         CustomerSettings
     )
-
-from api.serializers import CustomerSettingsSerializer
 
 
 class CustomerDiscountView(APIView):
@@ -26,7 +23,6 @@ class CustomerDiscountView(APIView):
         customer_discounts = CustomerDiscount.objects.filter(customer_setting=settings)
 
         discounts = []
-
 
         for customer_discount in customer_discounts:
             discount = {
