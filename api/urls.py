@@ -24,7 +24,8 @@ from .views import (
         CustomerDiscountUpdateView,
         CustomerFeesView,
         FBOsView,
-        CustomerFeeUpdateView
+        CustomerFeeUpdateView,
+        PriceListView
     )
 
 urlpatterns = [
@@ -44,6 +45,7 @@ urlpatterns = [
     path('services', ServicesView.as_view()),
     path('airports', AirportsView.as_view()),
     path('fbos', FBOsView.as_view()),
+    path('price-list', PriceListView.as_view()),
     path('customers', CustomersView.as_view()),
     path('customers/<int:id>/', CustomerDetail.as_view()),
     path('customers/settings/<int:id>/', CustomerSettingsView.as_view()),

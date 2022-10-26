@@ -25,3 +25,4 @@ from .customer_discount_update import CustomerDiscountUpdateView
 from .customer_fees import CustomerFeesView
 from .fbos import FBOsView
 from .customer_fee_update import CustomerFeeUpdateView
+from .price_list import PriceListView
