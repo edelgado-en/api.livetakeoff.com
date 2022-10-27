@@ -23,5 +23,6 @@ class JobEditSerializer(serializers.ModelSerializer):
             'fbo',
             'estimatedETA',
             'estimatedETD',
-            'completeBy'
+            'completeBy',
+            'price'
             )
