@@ -35,7 +35,8 @@ class CreateCustomerView(APIView):
         emailAddress = data.get('emailAddress')
         logo = data.get('logo')
         banner = data.get('coverPhoto')
-        contact_id = data.get('contactId')
+        # you cannot a contact because you need to create the customer first
+        #contact_id = data.get('contactId')
         
         about = data.get('about')
         billingInfo = data.get('billingInfo')
@@ -81,8 +82,8 @@ class CreateCustomerView(APIView):
             phone_number=phone_number
         )
 
-        if contact_id:
-            customer.contact_id = contact_id
+        #if contact_id:
+        #    customer.contact_id = contact_id
 
         customer.save()
 
