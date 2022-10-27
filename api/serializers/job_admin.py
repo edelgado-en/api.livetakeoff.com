@@ -32,5 +32,6 @@ class JobAdminSerializer(serializers.ModelSerializer):
             'fbo',
             'completeBy',
             'job_service_assignments',
-            'job_retainer_service_assignments'
+            'job_retainer_service_assignments',
+            'price'
             )

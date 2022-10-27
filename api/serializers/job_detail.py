@@ -41,7 +41,8 @@ class JobDetailSerializer(serializers.ModelSerializer):
             'service_assignments',
             'retainer_service_assignments',
             'total_photos',
-            'total_assignees'
+            'total_assignees',
+            'price'
         )
 
 
