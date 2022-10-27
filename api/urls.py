@@ -26,7 +26,8 @@ from .views import (
         FBOsView,
         CustomerFeeUpdateView,
         PriceListView,
-        CustomerUsersView
+        CustomerUsersView,
+        CreateCustomerView,
     )
 
 urlpatterns = [
@@ -48,6 +49,7 @@ urlpatterns = [
     path('fbos', FBOsView.as_view()),
     path('price-list', PriceListView.as_view()),
     path('customers', CustomersView.as_view()),
+    path('customers/create', CreateCustomerView.as_view()),
     path('customers/users', CustomerUsersView.as_view()),
     path('customers/<int:id>/', CustomerDetail.as_view()),
     path('customers/settings/<int:id>/', CustomerSettingsView.as_view()),

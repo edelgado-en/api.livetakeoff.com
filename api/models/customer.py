@@ -5,7 +5,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 class Customer(models.Model):
     name = models.CharField(max_length=255, unique=True)
     billingAddress = models.TextField(blank=True, null=True)
-    emailAddress = models.EmailField(blank=True, null=True, unique=True)
+    emailAddress = models.EmailField(blank=True, null=True)
     logo = models.ImageField(upload_to='customers/', blank=True)
     banner = models.ImageField(upload_to='customers/', blank=True)
     about = models.TextField(blank=True, null=True)
