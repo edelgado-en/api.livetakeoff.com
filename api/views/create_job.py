@@ -170,15 +170,53 @@ class CreateJobView(APIView):
                         price = price - discount.discount
 
 
-        # Add fees
+        # Add fees. Fees are pply after discounts
+        additional_fees = CustomerAdditionalFee.objects \
+                                               .prefetch_related('fbos') \
+                                               .prefetch_related('airports') \
+                                               .filter(customer_setting=customer_settings)
 
+        for fee in additional_fees:
+            if fee.type == 'A':
+                # check if you have matches with the airports selected
+                upcharged_airports = fee.airports.all()
 
+                # if you have at least one match, apply the fee
+                for upcharged_airport in upcharged_airports:
+                    if upcharged_airport.airport == airport:
+                        if fee.percentage:
+                            price = price + ((price * fee.fee) / 100)
+                        else:
+                            price += fee.fee
+                        
+                        break
+            
+            elif fee.type == 'F':
+                # check if you have matches with the fbos selected
+                upcharged_fbos = fee.fbos.all()
 
+                # if you have at least one match, apply the fee
+                for upcharged_fbo in upcharged_fbos:
+                    if upcharged_fbo.fbo == fbo:
+                        if fee.percentage:
+                            price = price + ((price * fee.fee) / 100)
+                        else:
+                            price += fee.fee
+                        
+                        break
+
+            elif fee.type == 'G':
+                # just apply the fee
+                if fee.percentage:
+                    price = price + ((price * fee.fee) / 100)
+                else:
+                    price += fee.fee
 
 
         # the price should not be bellow 0
         if price < 0:
             price = 0
+
 
         job = Job(purchase_order=purchase_order,
                   customer=customer,
