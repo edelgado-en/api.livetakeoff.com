@@ -24,6 +24,10 @@ class JobAdminSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'tailNumber',
+            'requestDate',
+            'estimatedETA',
+            'estimatedETD',
+            'completeBy',
             'status',
             'customer',
             'purchase_order',
@@ -33,5 +37,6 @@ class JobAdminSerializer(serializers.ModelSerializer):
             'completeBy',
             'job_service_assignments',
             'job_retainer_service_assignments',
-            'price'
+            'price',
+            'is_auto_priced'
             )

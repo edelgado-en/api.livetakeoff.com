@@ -29,3 +29,4 @@ from .price_list import PriceListView
 from .customer_users import CustomerUsersView
 from .create_customer import CreateCustomerView
 from .retainer_services import RetainerServicesView
+from .completed_jobs import CompletedJobsListView

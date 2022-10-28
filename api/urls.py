@@ -28,13 +28,16 @@ from .views import (
         PriceListView,
         CustomerUsersView,
         CreateCustomerView,
-        RetainerServicesView
+        RetainerServicesView,
+        CompletedJobsListView
     )
 
 urlpatterns = [
     path('jobs', JobListView.as_view()),
     path('jobs/form-info', JobFormInfoView.as_view()),
     path('jobs/create', CreateJobView.as_view()),
+    path('jobs/completed', CompletedJobsListView.as_view()),
+    path('jobs/completed/<int:id>/', CompletedJobsListView.as_view()),
     path('jobs/<int:id>/', JobDetail.as_view()),
     path('jobs/basic/<int:id>/', JobDetailBasicView.as_view()),
     path('jobs/edit/<int:id>/', EditJobView.as_view()),
