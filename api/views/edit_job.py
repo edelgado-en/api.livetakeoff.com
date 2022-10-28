@@ -22,7 +22,8 @@ class EditJobView(APIView):
             return Response({'error': 'You do not have permission to edit a job'}, status=status.HTTP_403_FORBIDDEN)
         
         current_status = job.status
-        
+        current_price = job.price
+
         serializer = JobEditSerializer(job, data=request.data, partial=True)
 
         if serializer.is_valid():
@@ -33,6 +34,9 @@ class EditJobView(APIView):
             if current_status != new_status:
                 JobStatusActivity.objects.create(job=job, user=request.user, status=new_status)
 
+            if current_price != serializer.data['price']:
+                job.is_auto_priced = False
+                job.save()
 
             response = {
                 'id': job.id,
