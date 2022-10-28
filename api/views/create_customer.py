@@ -40,7 +40,7 @@ class CreateCustomerView(APIView):
         
         about = data.get('about')
         billingInfo = data.get('billingInfo')
-        phone_number = data.get('phone_number')
+        phone_number = data.get('phoneNumber')
         retainer_amount = data.get('retainerAmount')
         price_list_id = data.get('priceListId')
         special_instructions = data.get('specialInstructions')

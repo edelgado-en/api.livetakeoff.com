@@ -268,6 +268,7 @@ class CreateJobView(APIView):
 
         response = {
             'id': job.id,
+            'purchase_order': job.purchase_order
         }
 
         return Response(response, status.HTTP_201_CREATED)
