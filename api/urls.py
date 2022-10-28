@@ -28,6 +28,7 @@ from .views import (
         PriceListView,
         CustomerUsersView,
         CreateCustomerView,
+        RetainerServicesView
     )
 
 urlpatterns = [
@@ -45,6 +46,7 @@ urlpatterns = [
     path('job-photos/upload/<int:jobid>/', JobPhotosUploadView.as_view()),
     path('job-comments/<int:jobid>/', JobCommentView.as_view()),
     path('services', ServicesView.as_view()),
+    path('retainer-services', RetainerServicesView.as_view()),
     path('airports', AirportsView.as_view()),
     path('fbos', FBOsView.as_view()),
     path('price-list', PriceListView.as_view()),

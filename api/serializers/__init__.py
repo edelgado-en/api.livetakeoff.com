@@ -18,3 +18,4 @@ from .customer_settings import CustomerSettingsSerializer
 from .customer_detail import CustomerDetailSerializer
 from .airport import AirportSerializer
 from .fbo import FBOSerializer
+from .retainer_service import RetainerServiceSerializer

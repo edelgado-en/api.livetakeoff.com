@@ -27,6 +27,7 @@ class JobServiceAssignmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobServiceAssignment
         fields = ['id', 'status', 'project_manager', 'service_name']
+        
 
 class JobRetainerServiceAssignmentSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()

@@ -28,3 +28,4 @@ from .customer_fee_update import CustomerFeeUpdateView
 from .price_list import PriceListView
 from .customer_users import CustomerUsersView
 from .create_customer import CreateCustomerView
+from .retainer_services import RetainerServicesView

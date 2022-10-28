@@ -107,7 +107,6 @@ class JobServiceAssignmentView(APIView):
                     pass
 
 
-                print(latest_assignment_activity.timestamp)
 
             # Because you don't have estimated times, you are unavailable to calculate available soon
             # just say it is busy
@@ -115,11 +114,6 @@ class JobServiceAssignmentView(APIView):
                 project_manager.availability = 'busy'
 
 
-            # OUTSIDE THE INNER LOOP I NEED TO KNOW: THIS PROJECT MANAGER HAS X HOURS OF WORK
-            # NOW COMPARE NOW() VS X HOURS OF WORK AND IF THE DELTA IS LESS OR EQUAL THAN 1 HOUR
-            # FLAG AS AVAILABLE SOON
-
-            
             # TODO: YOU HAVE TO ALSO CHECK IN RETAINER SERVICES
             # you the aircraft type of the job and the service to check the estimated time
 
@@ -185,6 +179,22 @@ class JobServiceAssignmentView(APIView):
 
             assignment.save()
 
+        for retainer_service in request.data['retainer_services']:
+            
+            retainer_assignment =  JobRetainerServiceAssignment.objects.get(pk=retainer_service['assignment_id'])
+            
+            if retainer_service['user_id']:
+                user = User.objects.get(pk=retainer_service['user_id'])
+                retainer_assignment.project_manager = user
+
+                at_least_one_service_assigned = True
+
+            else :
+                retainer_assignment.project_manager = None
+
+            retainer_assignment.save()
+
+
 
         # if there is at least one service assigned, then set the status to assigned
         current_status = job.status
@@ -193,14 +203,12 @@ class JobServiceAssignmentView(APIView):
             job.status = 'S' # assigned
             job.save()
 
+
         response = {
             'message': 'assigned succesfully'
         }
 
         return Response(response, status.HTTP_200_OK)
-
-
-
 
 
 
