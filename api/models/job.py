@@ -42,5 +42,7 @@ class Job(models.Model):
 
     price = models.DecimalField(max_digits=6, decimal_places=2, null=True)
 
+    is_auto_priced = models.BooleanField(default=True)
+
     def __str__(self) -> str:
         return str(self.id) + ' - ' + self.tailNumber + ' - ' + self.airport.initials + ' - ' + self.aircraftType.name

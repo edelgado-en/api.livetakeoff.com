@@ -135,6 +135,7 @@ CLOUDINARY_STORAGE = {
     'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET')
 }
 
+# this is not used anymore. We are using Twilio SendGrid
 EMAIL_HOST = os.environ.get('MAILGUN_SMTP_SERVER')
 EMAIL_HOST_USER = os.environ.get('MAILGUN_SMTP_LOGIN')
 EMAIL_HOST_PASSWORD = os.environ.get('MAILGUN_SMTP_PASSWORD')

@@ -8,18 +8,23 @@ from datetime import (date, datetime, timedelta)
 from email.utils import parsedate_tz, mktime_tz
 
 from ..models import (
-    Job,
-    Service,
-    RetainerService,
-    AircraftType,
-    Airport,
-    Customer,
-    FBO,
-    JobComments,
-    JobPhotos,
-    JobServiceAssignment,
-    JobRetainerServiceAssignment,
-    JobStatusActivity
+        Job,
+        Service,
+        RetainerService,
+        AircraftType,
+        Airport,
+        Customer,
+        FBO,
+        JobComments,
+        JobPhotos,
+        JobServiceAssignment,
+        JobRetainerServiceAssignment,
+        JobStatusActivity,
+        CustomerSettings,
+        PriceList,
+        PriceListEntries,
+        CustomerDiscount,
+        CustomerAdditionalFee
     )
 
 
@@ -106,9 +111,79 @@ class CreateJobView(APIView):
 
         purchase_order = today_label + '-' + str(jobs_created_today + 1)
 
+        # Calculate price based on aircraft type, customer, services selected, discounts, and additional fees
+        # Move this logic to a PriceCalculator class
+        customer_settings = CustomerSettings.objects.select_related('price_list').get(customer=customer)
+
+        price_list_entries = PriceListEntries.objects.filter(price_list=customer_settings.price_list,
+                                        aircraft_type=aircraft_type,
+                                        service__in=services)
+
+        price = 0
+        for entry in price_list_entries:
+            price += entry.price
+
+
+        # Now add discounts only if the price is bigger than zero.
+        # if there are no price entries for this price list then the price could be zero. There is no need to add discounts in that case.
+        if price > 0:
+            discounts = CustomerDiscount.objects \
+                                        .prefetch_related('services') \
+                                        .prefetch_related('airports') \
+                                        .filter(customer_setting=customer_settings)
+
+            for discount in discounts:
+
+                if discount.type == 'S':
+                    # check if you have matches with the services selected
+                    discounted_services = discount.services.all()
+                    
+                    # if you have at least one match, apply the discount
+                    for discounted_service in discounted_services:
+                        if discounted_service.service in services:
+                            if discount.percentage:
+                                price = price - ((price * discount.discount) / 100)
+                            else:
+                                price -= discount.discount
+                            
+                            break
+                    
+                elif discount.type == 'A':
+                    # check if you have matches with the aircraft type selected
+                    discounted_airports = discount.airports.all()
+
+                    # if you have at least one match, apply the discount
+                    for discounted_airport in discounted_airports:
+                        if discounted_airport.airport == airport:
+                            if discount.percentage:
+                                price = price - ((price * discount.discount) / 100)
+                            else:
+                                price -= discount.discount
+                            
+                            break
+
+                elif discount.type == 'G':
+                    # just apply the discount
+                    if discount.percentage:
+                        price = price - ((price * discount.discount) / 100)
+                    else:
+                        price = price - discount.discount
+
+
+        # Add fees
+
+
+
+
+
+        # the price should not be bellow 0
+        if price < 0:
+            price = 0
+
         job = Job(purchase_order=purchase_order,
                   customer=customer,
                   tailNumber=tailNumber,
+                  price=price,
                   aircraftType=aircraft_type,
                   airport=airport,
                   fbo=fbo,
