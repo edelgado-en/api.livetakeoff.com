@@ -17,10 +17,24 @@ from ..models import (
         JobCommentCheck
     )
 
+
+from twilio.rest import Client
+import os
+
 class JobDetail(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, id):
+        """ client = Client(os.environ.get('TWILIO_ACCOUNT_SID'), os.environ.get('TWILIO_AUTH_TOKEN'))
+
+        message = client.messages.create(
+            body="ROBEEEEIIIDDDDYYY I DID IT!. THIS IS COMING FROM THE APP. I'M A ROBOT",
+            from_=os.environ.get('TWILIO_NUMBER'),
+            to='+17869756255'
+        )
+
+        print(message.body) """
+
         job = get_object_or_404(Job, pk=id)
 
         if not self.can_view_job(request.user, job):
@@ -152,11 +166,25 @@ class JobDetail(APIView):
                     and (request.data['status'] == 'W' or request.data['status'] == 'C')):
                 for service in job.job_service_assignments.all():
                     service.status = request.data['status']
-                    service.save(update_fields=['status'])
+
+                    if request.data['status'] == 'C':
+                        service.project_manager = None
+                        service.save(update_fields=['status', 'project_manager'])
+                    
+                    else:
+                        service.save(update_fields=['status'])
+
 
                 for retainer_service in job.job_retainer_service_assignments.all():
                     retainer_service.status = request.data['status']
-                    retainer_service.save(update_fields=['status'])
+
+                    if request.data['status'] == 'C':
+                        retainer_service.project_manager = None
+                        retainer_service.save(update_fields=['status', 'project_manager'])
+
+                    else:
+                        retainer_service.save(update_fields=['status'])
+
 
             
             if 'status' in request.data and request.data['status'] == 'C':

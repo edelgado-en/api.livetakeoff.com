@@ -22,6 +22,7 @@ class JobSerializer(serializers.ModelSerializer):
             'aircraftType',
             'airport',
             'fbo',
-            'completeBy'
+            'completeBy',
+            'on_site'
             )
 

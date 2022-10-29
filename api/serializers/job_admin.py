@@ -41,5 +41,6 @@ class JobAdminSerializer(serializers.ModelSerializer):
             'job_service_assignments',
             'job_retainer_service_assignments',
             'price',
-            'is_auto_priced'
+            'is_auto_priced',
+            'on_site'
             )

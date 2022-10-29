@@ -1,13 +1,17 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
+
+from api.serializers.vendor import VendorSerializer
 from ..models import UserProfile
+
 
 class UserProfileSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
+    vendor = VendorSerializer()
 
     class Meta:
         model = UserProfile
-        fields = ('id', 'avatar')
+        fields = ('id', 'avatar', 'vendor')
 
 
 class BasicUserSerializer(serializers.ModelSerializer):

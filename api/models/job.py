@@ -44,5 +44,7 @@ class Job(models.Model):
 
     is_auto_priced = models.BooleanField(default=True)
 
+    on_site = models.BooleanField(default=False)
+
     def __str__(self) -> str:
         return str(self.id) + ' - ' + self.tailNumber + ' - ' + self.airport.initials + ' - ' + self.aircraftType.name

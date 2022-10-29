@@ -45,13 +45,19 @@ class JobListView(ListAPIView):
 
         # Get job ids from pending services/retainer_services assigned to the current user
         # If you have at least one pending service assigned to you, you can see the job
-        assignments = JobServiceAssignment.objects.filter(project_manager=self.request.user.id).all()
+        assignments = JobServiceAssignment.objects \
+                                          .select_related('job') \
+                                          .filter(project_manager=self.request.user.id) \
+                                          .all()
 
         for assignment in assignments:
             if assignment.status != 'C':
                 job_ids.add(assignment.job.id)
         
-        retainer_assignment = JobRetainerServiceAssignment.objects.filter(project_manager=self.request.user.id).all()
+        retainer_assignment = JobRetainerServiceAssignment.objects \
+                                                          .select_related('job') \
+                                                          .filter(project_manager=self.request.user.id) \
+                                                          .all()
 
         for assignment in retainer_assignment:
             if assignment.status != 'C':

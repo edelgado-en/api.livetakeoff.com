@@ -43,7 +43,8 @@ class JobDetailSerializer(serializers.ModelSerializer):
             'total_photos',
             'total_assignees',
             'price',
-            'is_auto_priced'
+            'is_auto_priced',
+            'on_site'
         )
 
 
