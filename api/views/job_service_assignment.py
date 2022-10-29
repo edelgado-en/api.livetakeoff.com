@@ -21,6 +21,8 @@ from ..serializers import (
                     BasicUserSerializer
                 )
 
+from api.notification_util import NotificationUtil
+
 class JobServiceAssignmentView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
@@ -163,14 +165,22 @@ class JobServiceAssignmentView(APIView):
 
         at_least_one_service_assigned = False
 
+        unique_phone_numbers = []
+
         # if all services are assigned and the job status is less than assigned, then set the job status to assigned
         for service in request.data['services']:
             
-            assignment =  JobServiceAssignment.objects.get(pk=service['assignment_id'])
+            assignment =  JobServiceAssignment.objects \
+                                              .get(pk=service['assignment_id'])
             
             if service['user_id']:
                 user = User.objects.get(pk=service['user_id'])
                 assignment.project_manager = user
+
+                # add the phone number to the list of unique phone numbers
+                if user.profile.phone_number:
+                    if user.profile.phone_number not in unique_phone_numbers:
+                        unique_phone_numbers.append(user.profile.phone_number)
 
                 at_least_one_service_assigned = True
 
@@ -181,11 +191,17 @@ class JobServiceAssignmentView(APIView):
 
         for retainer_service in request.data['retainer_services']:
             
-            retainer_assignment =  JobRetainerServiceAssignment.objects.get(pk=retainer_service['assignment_id'])
+            retainer_assignment =  JobRetainerServiceAssignment.objects \
+                                                               .get(pk=retainer_service['assignment_id'])
             
             if retainer_service['user_id']:
                 user = User.objects.get(pk=retainer_service['user_id'])
                 retainer_assignment.project_manager = user
+
+                # add the phone number to the list of unique phone numbers
+                if user.profile.phone_number:
+                    if user.profile.phone_number not in unique_phone_numbers:
+                        unique_phone_numbers.append(user.profile.phone_number)
 
                 at_least_one_service_assigned = True
 
@@ -202,6 +218,20 @@ class JobServiceAssignmentView(APIView):
         if at_least_one_service_assigned and (current_status == 'A' or current_status == 'U'):
             job.status = 'S' # assigned
             job.save()
+
+        # get the list of unique project managers and their phone numbers and send the job information with the app link as body
+
+        notification_util = NotificationUtil()
+
+        if job.completeBy:
+            complete_by = job.completeBy.strftime("%b-%d %I:%M %p")
+        else:
+            complete_by = 'N/A'
+
+        message = f'Job {job.purchase_order} has been assigned to you for tail number {job.tailNumber} to be completed by {complete_by}. Please go to you Livetakeoff App and check it out http://livetakeoff.com'
+
+        for phone_number in unique_phone_numbers:
+            notification_util.send(message, phone_number.as_e164)
 
 
         response = {
