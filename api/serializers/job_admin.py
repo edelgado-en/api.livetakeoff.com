@@ -15,7 +15,7 @@ class JobAdminSerializer(serializers.ModelSerializer):
     aircraftType = AircraftTypeSerializer()
     airport = AirportSerializer()
     fbo = FBOSerializer()
-    completeBy = serializers.DateTimeField(format="%m/%d/%Y %I:%M %p")
+    completeBy = serializers.DateTimeField(format="%b-%d %I:%M %p")
     estimatedETA = serializers.DateTimeField(format="%m/%d/%Y %I:%M %p")
     estimatedETD = serializers.DateTimeField(format="%m/%d/%Y %I:%M %p")
     requestDate = serializers.DateTimeField(format="%m/%d/%Y %I:%M %p", read_only=True)
