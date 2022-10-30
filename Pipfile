@@ -22,6 +22,9 @@ twilio = "*"
 django-phonenumber-field = "*"
 phonenumbers = "*"
 sendgrid = "*"
+reportlab = "*"
+xhtml2pdf = "*"
+pisa = "*"
 
 [dev-packages]
 
