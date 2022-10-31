@@ -191,21 +191,33 @@ class JobDetail(APIView):
 
 
             
+            notification_util = NotificationUtil()
+            
+            #Send a notification to all admins and account managers
+            admins = User.objects.filter(Q(is_superuser=True) | Q(is_staff=True) | Q(groups__name='Account Managers'))
+            
             if 'status' in request.data and request.data['status'] == 'C':
                 job_comment_checks = JobCommentCheck.objects.filter(job=job)
 
                 if job_comment_checks:
                     job_comment_checks.delete()
 
-                notification_util = NotificationUtil()
-                #Send a notification to all admins and account managers
-                admins = User.objects.filter(Q(is_superuser=True) | Q(is_staff=True) | Q(groups__name='Account Managers'))
                 for admin in admins:
                     # get the phone number of the admin
                     phone_number = admin.profile.phone_number
                     if phone_number:
                         # send a text message
-                        message = f'Job {job.purchase_order} for tail number {job.tailNumber} has been completed. Please review the job and close it out http://livetakeoff.com/completed/review/{job.id}'
+                        message = f'Job {job.purchase_order} for tail number {job.tailNumber} has been completed. Please review the job and close it out https://livetakeoff.com/completed/review/{job.id}'
+                        notification_util.send(message, phone_number.as_e164)
+
+            
+            if 'status' in request.data and request.data['status'] == 'W':
+                for admin in admins:
+                    # get the phone number of the admin
+                    phone_number = admin.profile.phone_number
+                    if phone_number:
+                        # send a text message
+                        message = f'Job {job.purchase_order} for tail number {job.tailNumber} has been accepted by {request.user.username}. You can checkout the job at https://livetakeoff.com/jobs/{job.id}/details'
                         notification_util.send(message, phone_number.as_e164)
 
             
