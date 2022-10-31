@@ -5,6 +5,7 @@ from .fbo import FBOSerializer
 from .customer import CustomerSerializer
 from .job_service_assignment import GenericServiceAssignmentSerializer
 from ..models import Job
+from .basic_user import BasicUserSerializer
 
 class JobDetailSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
@@ -21,6 +22,7 @@ class JobDetailSerializer(serializers.ModelSerializer):
     retainer_service_assignments = GenericServiceAssignmentSerializer(many=True, read_only=True)
     total_photos = serializers.IntegerField(read_only=True)
     total_assignees = serializers.IntegerField(read_only=True)
+    created_by = BasicUserSerializer(read_only=True)
 
     class Meta:
         model = Job
@@ -44,7 +46,8 @@ class JobDetailSerializer(serializers.ModelSerializer):
             'total_assignees',
             'price',
             'is_auto_priced',
-            'on_site'
+            'on_site',
+            'created_by'
         )
 
 
