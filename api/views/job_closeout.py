@@ -43,17 +43,13 @@ class JobCloseoutView(APIView):
                             leftMargin=42, topMargin=42, bottomMargin=18)
 
         Story=[]
-        # variables
-        magName = "Pythonista"
-        issueNum = 12
-        subPrice = "99.00"
-        limitedDate = "03/05/2010"
-        freeGift = "tin foil hat"
-        formatted_time = time.ctime()
-        full_name = "Mike Driscoll"
-        address_parts = ["411 State St.", "Marshalltown, IA 50158"]
+
+        # Add a background color as a letter head
         
-        im = Image('https://res.cloudinary.com/datidxeqm/image/upload/v1667093825/media/profiles/N334JE_BCT_2022-10-28_0_suotul.png', 2*inch, 2*inch)
+       
+        
+        im = Image('https://res.cloudinary.com/datidxeqm/image/upload/v1667093825/media/profiles/N334JE_BCT_2022-10-28_0_suotul.png', 1*inch, 1*inch)
+        im.hAlign = 'RIGHT'
         #im._restrictSize(1.5 * inch, 1.5 * inch)
         Story.append(im)
         Story.append(Spacer(1, 12))
@@ -61,7 +57,6 @@ class JobCloseoutView(APIView):
         styles=getSampleStyleSheet()
         styles.add(ParagraphStyle(name='Justify', alignment=TA_JUSTIFY))
         
-        ptext = '%s' % formatted_time
         
         Story.append(Paragraph('Job Close Out', styles["Heading1"]))
 
@@ -75,10 +70,23 @@ class JobCloseoutView(APIView):
             ]
 
         t = Table(details, hAlign='LEFT')
+        t.setStyle(TableStyle(
+                        [
+                            ('LEFTPADDING', (0, 0), (-1, -1), 7),
+                            ('RIGHTPADDING', (0, 0), (-1, -1), 7),
+                            ('TOPPADDING', (0, 0), (-1, -1), 7),
+                            ('BOTTOMPADDING', (0, 0), (-1, -1), 7),
+                            ('FONTSIZE', (0, 0), (-1, -1), 11),
+                            ('FONTNAME', (0,0), (0,-1), 'Times-Bold')
+                        ]
+                    )
+                 )
 
         #t.setStyle(TableStyle([('BACKGROUND')]))
 
         Story.append(t)
+
+        Story.append(Spacer(1, 24))
 
 
         # Create return address
@@ -105,9 +113,9 @@ class JobCloseoutView(APIView):
         Story.append(Paragraph(ptext, styles["Justify"]))
         Story.append(Spacer(1, 12)) """
 
-        Story.append(Spacer(1, 24))
+        """ Story.append(Spacer(1, 24))
         Story.append(Paragraph('Thank you for you order.', styles["Justify"]))
-        Story.append(Spacer(1, 12))
+        Story.append(Spacer(1, 12)) """
 
         
         Story.append(Paragraph('Interior Photos', styles["Heading2"]))
