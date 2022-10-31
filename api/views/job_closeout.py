@@ -1,5 +1,7 @@
 import pdb
 from django.http import FileResponse, HttpResponse
+from rest_framework .response import Response
+from rest_framework import (permissions, status)
 import io
 from reportlab.pdfgen import canvas
 from reportlab.lib import utils
@@ -7,7 +9,7 @@ from reportlab.lib import colors
 from reportlab.lib.units import inch
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.utils import ImageReader
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle, Frame
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.units import mm, cm
@@ -26,14 +28,13 @@ from reportlab.lib.units import inch
 from api.models import (Job, JobPhotos)
 
 class JobCloseoutView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
 
-    def get_image(self, path, width=1*cm):
-        img = utils.ImageReader(path)
-        iw, ih = img.getSize()
-        aspect = ih / float(iw)
-        return Image(path, width=width, height=(width * aspect))
 
     def get(self, request, id):
+        if not self.can_closeout_job(request.user):
+            return Response({'error': 'You do not have permission to view close out job'}, status=status.HTTP_403_FORBIDDEN)
+
         job = Job.objects.select_related('airport').select_related('fbo').get(pk=id)
 
         response = HttpResponse(content_type='application/pdf')
@@ -46,7 +47,6 @@ class JobCloseoutView(APIView):
 
         # Add a background color as a letter head
         
-       
         
         im = Image('https://res.cloudinary.com/datidxeqm/image/upload/v1667093825/media/profiles/N334JE_BCT_2022-10-28_0_suotul.png', 1*inch, 1*inch)
         im.hAlign = 'RIGHT'
@@ -142,5 +142,11 @@ class JobCloseoutView(APIView):
         return response
 
         
-
+    def can_closeout_job(self, user):
+        if user.is_superuser \
+          or user.is_staff \
+          or user.groups.filter(name='Account Managers').exists():
+           return True
+        
+        return False
 

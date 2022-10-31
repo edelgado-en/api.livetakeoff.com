@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import (permissions, status)
 from rest_framework .response import Response
 from rest_framework.views import APIView
+from django.contrib.auth.models import User
 
 from ..serializers import (
      JobDetailSerializer,
@@ -14,12 +15,15 @@ from ..models import (
         JobRetainerServiceAssignment,
         JobPhotos,
         JobStatusActivity,
-        JobCommentCheck
+        JobCommentCheck,
+        UserProfile
     )
 
 
 from twilio.rest import Client
 import os
+
+from api.notification_util import NotificationUtil
 
 class JobDetail(APIView):
     permission_classes = (permissions.IsAuthenticated,)
@@ -192,6 +196,17 @@ class JobDetail(APIView):
 
                 if job_comment_checks:
                     job_comment_checks.delete()
+
+                notification_util = NotificationUtil()
+                #Send a notification to all admins and account managers
+                admins = User.objects.filter(Q(is_superuser=True) | Q(is_staff=True) | Q(groups__name='Account Managers'))
+                for admin in admins:
+                    # get the phone number of the admin
+                    phone_number = admin.profile.phone_number
+                    if phone_number:
+                        # send a text message
+                        message = f'Job {job.purchase_order} for tail number {job.tailNumber} has been completed. Please review the job and close it out http://livetakeoff.com/completed/review/{job.id}'
+                        notification_util.send(message, phone_number.as_e164)
 
             
             if 'status' in request.data:
