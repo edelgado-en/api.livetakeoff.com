@@ -31,7 +31,7 @@ class JobStatsView(APIView):
 
         except JobCommentCheck.DoesNotExist:
             # this means that the user hasn't check the comments section for this job
-            comments_count = JobComments.objects.filter(job=job).count()
+            comments_count = JobComments.objects.filter(job=job).exclude(author=request.user).count()
 
         photos_count = JobPhotos.objects.filter(job=job).count()
 

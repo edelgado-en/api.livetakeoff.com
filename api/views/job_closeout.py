@@ -121,7 +121,7 @@ class JobCloseoutView(APIView):
         Story.append(Paragraph('Interior Photos', styles["Heading2"]))
         Story.append(Spacer(1, 24))
 
-        interior_photos = JobPhotos.objects.filter(job_id=id, interior=True).all()
+        interior_photos = JobPhotos.objects.filter(job_id=id, interior=True, customer_uploaded=False).all()
         for photo in interior_photos:
             im = Image(photo.image.url, 4*inch, 4*inch)
             Story.append(im)
@@ -131,7 +131,7 @@ class JobCloseoutView(APIView):
         Story.append(Paragraph('Exterior Photos', styles["Heading2"]))
         Story.append(Spacer(1, 24))
 
-        exterior_photos = JobPhotos.objects.filter(job_id=id, interior=False).all()
+        exterior_photos = JobPhotos.objects.filter(job_id=id, interior=False, customer_uploaded=False).all()
         for photo in exterior_photos:
             im = Image(photo.image.url, 4*inch, 4*inch)
             Story.append(im)

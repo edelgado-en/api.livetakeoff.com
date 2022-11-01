@@ -13,6 +13,7 @@ from ..models import (
         JobRetainerServiceAssignment
     )
 
+
 class JobListView(ListAPIView):
     serializer_class = JobSerializer
     permission_classes = (permissions.IsAuthenticated,)
@@ -33,11 +34,18 @@ class JobListView(ListAPIView):
         if self.request.user.is_superuser \
           or self.request.user.is_staff \
           or self.request.user.groups.filter(name='Account Managers').exists():
-           return Job.objects.prefetch_related('job_service_assignments') \
+            qs = Job.objects.prefetch_related('job_service_assignments') \
                              .prefetch_related('job_retainer_service_assignments') \
+                             .select_related('customer') \
+                             .select_related('aircraftType')\
+                             .select_related('airport') \
+                             .select_related('fbo') \
                              .filter(Q(status='A') | Q(status='S') | Q(status='U') | Q(status='W') | Q(status='R')) \
                              .order_by('completeBy') \
                              .all()
+
+            print(qs.query)
+            return qs
 
         # You are a Project Manager
 
@@ -67,7 +75,7 @@ class JobListView(ListAPIView):
         return Job.objects \
                   .filter(Q(status='S') | Q(status='W')) \
                   .filter(id__in=job_ids) \
-                  .order_by('-completeBy') \
+                  .order_by('completeBy') \
                   .all()
 
 
