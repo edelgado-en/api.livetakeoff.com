@@ -7,7 +7,8 @@ from rest_framework.generics import ListAPIView
 from ..pagination import CustomPageNumberPagination
 from api.models import Job
 from ..serializers import (
-        JobCompletedSerializer
+        JobCompletedSerializer,
+        JobAdminSerializer
     )
 
 
@@ -17,13 +18,27 @@ class CompletedJobsListView(ListAPIView):
     pagination_class = CustomPageNumberPagination
 
     def get_queryset(self):
+        searchText = self.request.data['searchText']
+        status = self.request.data['status']
+
         qs = Job.objects.select_related('airport') \
                         .select_related('customer') \
                         .select_related('fbo') \
                         .select_related('aircraftType') \
-                        .filter(Q(status='C') | Q(status='I') | Q(status='T')) \
                         .order_by('status') \
                         .all()    
+
+        if searchText:
+                qs = qs.filter(Q(tailNumber__icontains=searchText)
+                               | Q(customer__name__icontains=searchText)
+                               | Q(purchase_order__icontains=searchText)
+                               | Q(airport__initials__icontains=searchText)
+                              )
+
+        if status == 'All':
+            qs = qs.filter(Q(status='C') | Q(status='I') | Q(status='T'))
+        else:
+            qs = qs.filter(status=status)
 
         return qs
 

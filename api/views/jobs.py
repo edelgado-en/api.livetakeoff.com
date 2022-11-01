@@ -36,7 +36,6 @@ class JobListView(ListAPIView):
           or self.request.user.groups.filter(name='Account Managers').exists():
 
             searchText = self.request.data['searchText']
-
             status = self.request.data['status']
 
             qs = Job.objects.prefetch_related('job_service_assignments') \
