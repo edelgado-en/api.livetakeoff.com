@@ -4,24 +4,26 @@ from rest_framework import (permissions, status)
 from rest_framework .response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
-
+from ..pagination import CustomPageNumberPagination
 from api.models import Job
 from ..serializers import (
-        JobAdminSerializer
+        JobCompletedSerializer
     )
 
 
 class CompletedJobsListView(ListAPIView):
-    serializer_class = JobAdminSerializer
+    serializer_class = JobCompletedSerializer
     permission_classes = (permissions.IsAuthenticated,)
+    pagination_class = CustomPageNumberPagination
 
     def get_queryset(self):
-        
-        qs = Job.objects.prefetch_related('job_service_assignments') \
-                          .prefetch_related('job_retainer_service_assignments') \
-                          .filter(Q(status='C') | Q(status='I') | Q(status='T')) \
-                          .order_by('status') \
-                          .all()
+        qs = Job.objects.select_related('airport') \
+                        .select_related('customer') \
+                        .select_related('fbo') \
+                        .select_related('aircraftType') \
+                        .filter(Q(status='C') | Q(status='I') | Q(status='T')) \
+                        .order_by('status') \
+                        .all()    
 
         return qs
 
