@@ -34,17 +34,32 @@ class JobListView(ListAPIView):
         if self.request.user.is_superuser \
           or self.request.user.is_staff \
           or self.request.user.groups.filter(name='Account Managers').exists():
+
+            searchText = self.request.data['searchText']
+
+            status = self.request.data['status']
+
             qs = Job.objects.prefetch_related('job_service_assignments') \
                              .prefetch_related('job_retainer_service_assignments') \
                              .select_related('customer') \
                              .select_related('aircraftType')\
                              .select_related('airport') \
                              .select_related('fbo') \
-                             .filter(Q(status='A') | Q(status='S') | Q(status='U') | Q(status='W') | Q(status='R')) \
                              .order_by('completeBy') \
                              .all()
 
-            print(qs.query)
+            if searchText:
+                qs = qs.filter(Q(tailNumber__icontains=searchText)
+                               | Q(customer__name__icontains=searchText)
+                               | Q(purchase_order__icontains=searchText)
+                               | Q(airport__initials__icontains=searchText)
+                              )
+
+            if status == 'All':
+                qs = qs.filter(Q(status='A') | Q(status='S') | Q(status='U') | Q(status='W') | Q(status='R'))
+            else:
+                qs = qs.filter(status=status)
+
             return qs
 
         # You are a Project Manager
@@ -79,4 +94,6 @@ class JobListView(ListAPIView):
                   .all()
 
 
+    def post(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
 
