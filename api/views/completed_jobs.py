@@ -21,6 +21,18 @@ class CompletedJobsListView(ListAPIView):
         searchText = self.request.data['searchText']
         status = self.request.data['status']
 
+        requestedDateFrom = self.request.data.get('requestedDateFrom')
+        requestedDateTo = self.request.data.get('requestedDateTo')
+
+        arrivalDateFrom = self.request.data.get('arrivalDateFrom')
+        arrivalDateTo = self.request.data.get('arrivalDateTo')
+
+        departureDateFrom = self.request.data.get('departureDateFrom')
+        departureDateTo = self.request.data.get('departureDateTo')
+
+        completeByDateFrom = self.request.data.get('completeByDateFrom')
+        completeByDateTo = self.request.data.get('completeByDateTo')
+
         qs = Job.objects.select_related('airport') \
                         .select_related('customer') \
                         .select_related('fbo') \
@@ -39,6 +51,31 @@ class CompletedJobsListView(ListAPIView):
             qs = qs.filter(Q(status='C') | Q(status='I') | Q(status='T'))
         else:
             qs = qs.filter(status=status)
+
+        # apply date range filters
+        if arrivalDateFrom:
+            qs = qs.filter(estimatedETA__gte=arrivalDateFrom)
+
+        if arrivalDateTo:
+            qs = qs.filter(estimatedETA__lte=arrivalDateTo)
+
+        if requestedDateFrom:
+            qs = qs.filter(requestDate__gte=requestedDateFrom)
+
+        if requestedDateTo:
+            qs = qs.filter(requestDate__lte=requestedDateTo)
+
+        if departureDateFrom:
+            qs = qs.filter(estimatedETD__gte=departureDateFrom)
+
+        if departureDateTo:
+            qs = qs.filter(estimatedETD__lte=departureDateTo)
+
+        if completeByDateFrom:
+            qs = qs.filter(completeBy__gte=completeByDateFrom)
+
+        if completeByDateTo:
+            qs = qs.filter(completeBy__lte=completeByDateTo)
 
         return qs
 
