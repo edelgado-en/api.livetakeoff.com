@@ -15,7 +15,7 @@ from ..models import (
         JobRetainerServiceAssignment)
 from ..serializers import JobPhotoSerializer
 
-TOTAL_PHOTOS_MAX_COUNT = 20
+TOTAL_PHOTOS_MAX_COUNT = 10
 
 class JobPhotosUploadView(APIView):
     parser_classes = (MultiPartParser, FormParser)
@@ -35,10 +35,11 @@ class JobPhotosUploadView(APIView):
         if (is_interior == 'true'):
             interior = True
 
-        total_photos = JobPhotos.objects.filter(job=jobid, interior=interior).count()
+        total_photos = JobPhotos.objects.filter(job=jobid, interior=interior, customer_uploaded=False).count()
 
-        if total_photos > TOTAL_PHOTOS_MAX_COUNT:
-            return Response({'error': 'There is aleady 20 photos associated with this job'}, status=status.HTTP_406_NOT_ACCEPTABLE)
+        # check if the total photos plus the new ones is greater than the max
+        if total_photos + len(request.data.getlist('photo')) > TOTAL_PHOTOS_MAX_COUNT:
+            return Response({'error': 'There is aleady 10 photos associated with this job'}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         counter = 0
 
@@ -57,8 +58,6 @@ class JobPhotosUploadView(APIView):
                           interior=interior)
             p.save()
 
-            # TODO: if you have more than 20 stop
-            
             counter = counter + 1
 
         return Response({'uploaded_photos': counter}, status=status.HTTP_201_CREATED)
