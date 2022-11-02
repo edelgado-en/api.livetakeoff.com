@@ -66,7 +66,7 @@ class JobCloseoutView(APIView):
                 ['Tail Number', job.tailNumber],
                 ['Airport', job.airport.name],
                 ['FBO', job.fbo.name],
-                ['Completetion Date', 'Need to get this value from the activity table: job completed'],
+                ['Completetion Date', job.completion_date.strftime("%B %d, %Y %H:%M")],
             ]
 
         t = Table(details, hAlign='LEFT')
