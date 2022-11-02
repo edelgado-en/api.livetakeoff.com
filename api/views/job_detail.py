@@ -4,6 +4,7 @@ from rest_framework import (permissions, status)
 from rest_framework .response import Response
 from rest_framework.views import APIView
 from django.contrib.auth.models import User
+from datetime import datetime
 
 from ..serializers import (
      JobDetailSerializer,
@@ -209,6 +210,10 @@ class JobDetail(APIView):
                         # send a text message
                         message = f'Job {job.purchase_order} for tail number {job.tailNumber} has been completed. Please review the job and close it out https://livetakeoff.com/completed/review/{job.id}'
                         notification_util.send(message, phone_number.as_e164)
+
+                # set the actual_completion_date to today
+                job.completion_date = datetime.now()
+                job.save()
 
             
             if 'status' in request.data and request.data['status'] == 'W':

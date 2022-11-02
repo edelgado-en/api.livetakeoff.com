@@ -32,6 +32,7 @@ class Job(models.Model):
     completeBy = models.DateTimeField(blank=True, null=True)
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='A')
     created_by = models.ForeignKey('auth.User', related_name='jobs', on_delete=models.CASCADE, blank=True, null=True)
+    completion_date = models.DateTimeField(blank=True, null=True)
 
     # Saved in minutes. Add all the estimated times for the services in the job based on aircraft type
     estimated_completion_time = models.PositiveIntegerField(blank=True, null=True, verbose_name='Estimated Completion Time (minutes)')
