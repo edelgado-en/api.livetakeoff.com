@@ -127,12 +127,12 @@ class JobExportCSVView(APIView):
             # add list of services to csv
             services = ''
             for service in job.job_service_assignments.all():
-                services += service.service.name + ', '
+                services += service.service.name + ' | '
 
             # add list of retainers to csv
             retainers = ''
             for retainer in job.job_retainer_service_assignments.all():
-                retainers += retainer.retainer_service.name + ', '
+                retainers += retainer.retainer_service.name + ' | '
 
             writer.writerow({
                 'P.O': job.purchase_order,
