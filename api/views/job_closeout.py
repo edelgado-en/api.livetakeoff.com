@@ -9,7 +9,7 @@ from reportlab.lib import colors
 from reportlab.lib.units import inch
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.utils import ImageReader
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle, Frame
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle, Frame, ListFlowable, ListItem
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.units import mm, cm
@@ -25,7 +25,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 
-from api.models import (Job, JobPhotos)
+from api.models import (Job, JobPhotos, JobServiceAssignment, JobRetainerServiceAssignment)
 
 class JobCloseoutView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
@@ -55,6 +55,7 @@ class JobCloseoutView(APIView):
         Story.append(Spacer(1, 12))
 
         styles=getSampleStyleSheet()
+        style = styles["Normal"]
         styles.add(ParagraphStyle(name='Justify', alignment=TA_JUSTIFY))
         
         
@@ -66,8 +67,11 @@ class JobCloseoutView(APIView):
                 ['Tail Number', job.tailNumber],
                 ['Airport', job.airport.name],
                 ['FBO', job.fbo.name],
-                ['Completetion Date', job.completion_date.strftime("%B %d, %Y %H:%M")],
+                ['Requested Date', job.requestDate.strftime("%B %d, %Y %H:%M")],
             ]
+
+        if job.completion_date:
+            details.append(['Completion Date', job.completion_date.strftime("%B %d, %Y %H:%M")],)
 
         t = Table(details, hAlign='LEFT')
         t.setStyle(TableStyle(
@@ -87,6 +91,40 @@ class JobCloseoutView(APIView):
         Story.append(t)
 
         Story.append(Spacer(1, 24))
+
+        # Get services associated with job
+        services = JobServiceAssignment.objects.filter(job=job).select_related('service')
+
+        # Create a list of services
+        service_list = []
+        for service in services:
+            service_list.append(Paragraph(service.service.name, style))
+            
+        # Create a list flowable
+        if service_list:
+            Story.append(Paragraph('Services Provided', styles["Heading2"]))
+            Story.append(Spacer(1, 12))
+
+            service_list_flowable = ListFlowable(service_list, bulletType='bullet')
+            Story.append(service_list_flowable)
+            Story.append(Spacer(1, 24))
+    
+
+        # Get retainer services associated with job
+        retainer_services = JobRetainerServiceAssignment.objects.filter(job=job).select_related('retainer_service')
+
+        # Create a list of retainer services
+        retainer_service_list = []
+        for retainer_service in retainer_services:
+            retainer_service_list.append(Paragraph(retainer_service.retainer_service.name, style))
+        
+        # Create a list flowable
+        if retainer_service_list:
+            Story.append(Paragraph('Retainer Services Provided', styles["Heading2"]))
+            Story.append(Spacer(1, 12))
+            retainer_service_list_flowable = ListFlowable(retainer_service_list, bulletType='bullet')
+            Story.append(retainer_service_list_flowable)
+            Story.append(Spacer(1, 24))
 
 
         # Create return address
