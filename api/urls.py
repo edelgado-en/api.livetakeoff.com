@@ -30,13 +30,15 @@ from .views import (
         CreateCustomerView,
         RetainerServicesView,
         CompletedJobsListView,
-        JobCloseoutView
+        JobCloseoutView,
+        JobExportCSVView
     )
 
 urlpatterns = [
     path('jobs', JobListView.as_view()),
     path('jobs/form-info', JobFormInfoView.as_view()),
     path('jobs/create', CreateJobView.as_view()),
+    path('jobs/export', JobExportCSVView.as_view()),
     path('jobs/completed', CompletedJobsListView.as_view()),
     path('jobs/completed/<int:id>/', CompletedJobsListView.as_view()),
     path('jobs/closeout/<int:id>/', JobCloseoutView.as_view()),

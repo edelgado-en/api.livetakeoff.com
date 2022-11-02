@@ -24,6 +24,7 @@ class JobAdminSerializer(serializers.ModelSerializer):
     job_service_assignments = JobServiceAssignmentSerializer(many=True)
     job_retainer_service_assignments = JobRetainerServiceAssignmentSerializer(many=True)
     created_by = BasicUserSerializer(read_only=True)
+    completion_date = serializers.DateTimeField(format="%m/%d/%Y %I:%M %p", read_only=True)
 
     class Meta:
         model = Job
@@ -46,5 +47,6 @@ class JobAdminSerializer(serializers.ModelSerializer):
             'price',
             'is_auto_priced',
             'on_site',
-            'created_by'
+            'created_by',
+            'completion_date'
             )
