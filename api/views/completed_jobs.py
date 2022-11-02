@@ -33,6 +33,9 @@ class CompletedJobsListView(ListAPIView):
         completeByDateFrom = self.request.data.get('completeByDateFrom')
         completeByDateTo = self.request.data.get('completeByDateTo')
 
+        completionDateFrom = self.request.data.get('completionDateFrom')
+        completionDateTo = self.request.data.get('completionDateTo')
+
         qs = Job.objects.select_related('airport') \
                         .select_related('customer') \
                         .select_related('fbo') \
@@ -77,7 +80,14 @@ class CompletedJobsListView(ListAPIView):
         if completeByDateTo:
             qs = qs.filter(completeBy__lte=completeByDateTo)
 
+        if completionDateFrom:
+            qs = qs.filter(completion_date__gte=completionDateFrom)
+        
+        if completionDateTo:
+            qs = qs.filter(completion_date__lte=completionDateTo)
+
         return qs
+
 
 
     def post(self, request, *args, **kwargs):

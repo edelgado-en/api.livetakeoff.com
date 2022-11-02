@@ -15,6 +15,7 @@ class JobCompletedSerializer(serializers.ModelSerializer):
     estimatedETA = serializers.DateTimeField(format="%m/%d/%Y %I:%M %p")
     estimatedETD = serializers.DateTimeField(format="%m/%d/%Y %I:%M %p")
     requestDate = serializers.DateTimeField(format="%m/%d/%Y %I:%M %p", read_only=True)
+    completion_date = serializers.DateTimeField(format="%m/%d/%Y %I:%M %p", read_only=True)
 
     class Meta:
         model = Job
@@ -35,4 +36,5 @@ class JobCompletedSerializer(serializers.ModelSerializer):
             'price',
             'is_auto_priced',
             'on_site',
+            'completion_date'
             )
