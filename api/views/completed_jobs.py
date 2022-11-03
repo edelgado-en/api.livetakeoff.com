@@ -5,7 +5,7 @@ from rest_framework .response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from ..pagination import CustomPageNumberPagination
-from api.models import Job
+from api.models import (Job, JobStatusActivity)
 from ..serializers import (
         JobCompletedSerializer,
         JobAdminSerializer
@@ -110,6 +110,8 @@ class CompletedJobsListView(ListAPIView):
 
         if serializer.is_valid():
             serializer.save()
+
+            JobStatusActivity.objects.create(job=job, user=request.user, status='I')
 
             return Response(serializer.data, status.HTTP_200_OK)
         

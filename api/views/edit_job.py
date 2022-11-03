@@ -38,6 +38,8 @@ class EditJobView(APIView):
                 job.is_auto_priced = False
                 job.save()
 
+                JobStatusActivity.objects.create(job=job, user=request.user, status='P', price=serializer.data['price'])
+
             response = {
                 'id': job.id,
             }
