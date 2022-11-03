@@ -7,6 +7,8 @@ from rest_framework.response import Response
 from datetime import (date, datetime, timedelta)
 from email.utils import parsedate_tz, mktime_tz
 
+from api.pricebreakdown_service import PriceBreakdownService
+
 from ..models import (
         Job,
         Service,
@@ -111,117 +113,9 @@ class CreateJobView(APIView):
 
         purchase_order = today_label + '-' + str(jobs_created_today + 1)
 
-        # Calculate price based on aircraft type, customer, services selected, discounts, and additional fees
-        # Move this logic to a PriceCalculator class
-        customer_settings = CustomerSettings.objects.select_related('price_list').get(customer=customer)
-
-        price_list_entries = PriceListEntries.objects.filter(price_list=customer_settings.price_list,
-                                        aircraft_type=aircraft_type,
-                                        service__in=services)
-
-        price = 0
-        for entry in price_list_entries:
-            price += entry.price
-
-
-        # Now add discounts only if the price is bigger than zero.
-        # if there are no price entries for this price list then the price could be zero. There is no need to add discounts in that case.
-        if price > 0:
-            discounts = CustomerDiscount.objects \
-                                        .prefetch_related('services') \
-                                        .prefetch_related('airports') \
-                                        .filter(customer_setting=customer_settings)
-
-            for discount in discounts:
-
-                if discount.type == 'S':
-                    # check if you have matches with the services selected
-                    discounted_services = discount.services.all()
-                    
-                    # if you have at least one match, apply the discount
-                    for discounted_service in discounted_services:
-                        if discounted_service.service in services:
-                            if discount.percentage:
-                                price = price - ((price * discount.discount) / 100)
-                            else:
-                                price -= discount.discount
-                            
-                            break
-                    
-                elif discount.type == 'A':
-                    # check if you have matches with the aircraft type selected
-                    discounted_airports = discount.airports.all()
-
-                    # if you have at least one match, apply the discount
-                    for discounted_airport in discounted_airports:
-                        if discounted_airport.airport == airport:
-                            if discount.percentage:
-                                price = price - ((price * discount.discount) / 100)
-                            else:
-                                price -= discount.discount
-                            
-                            break
-
-                elif discount.type == 'G':
-                    # just apply the discount
-                    if discount.percentage:
-                        price = price - ((price * discount.discount) / 100)
-                    else:
-                        price = price - discount.discount
-
-
-        # Add fees. Fees are pply after discounts
-        additional_fees = CustomerAdditionalFee.objects \
-                                               .prefetch_related('fbos') \
-                                               .prefetch_related('airports') \
-                                               .filter(customer_setting=customer_settings)
-
-        for fee in additional_fees:
-            if fee.type == 'A':
-                # check if you have matches with the airports selected
-                upcharged_airports = fee.airports.all()
-
-                # if you have at least one match, apply the fee
-                for upcharged_airport in upcharged_airports:
-                    if upcharged_airport.airport == airport:
-                        if fee.percentage:
-                            price = price + ((price * fee.fee) / 100)
-                        else:
-                            price += fee.fee
-                        
-                        break
-            
-            elif fee.type == 'F':
-                # check if you have matches with the fbos selected
-                upcharged_fbos = fee.fbos.all()
-
-                # if you have at least one match, apply the fee
-                for upcharged_fbo in upcharged_fbos:
-                    if upcharged_fbo.fbo == fbo:
-                        if fee.percentage:
-                            price = price + ((price * fee.fee) / 100)
-                        else:
-                            price += fee.fee
-                        
-                        break
-
-            elif fee.type == 'G':
-                # just apply the fee
-                if fee.percentage:
-                    price = price + ((price * fee.fee) / 100)
-                else:
-                    price += fee.fee
-
-
-        # the price should not be bellow 0
-        if price < 0:
-            price = 0
-
-
         job = Job(purchase_order=purchase_order,
                   customer=customer,
                   tailNumber=tailNumber,
-                  price=price,
                   aircraftType=aircraft_type,
                   airport=airport,
                   fbo=fbo,
@@ -233,6 +127,7 @@ class CreateJobView(APIView):
 
         job.save()
 
+
         for service in services:
             assignment = JobServiceAssignment(job=job,service=service)
             assignment.save()
@@ -240,6 +135,13 @@ class CreateJobView(APIView):
         for retainer_service in retainer_services:
             assignment = JobRetainerServiceAssignment(job=job, retainer_service=retainer_service)
             assignment.save()
+
+
+        # after creating services calculate the job price
+        # update price
+        price_breakdown = PriceBreakdownService().get_price_breakdown(job)
+        job.price = price_breakdown.get('totalPrice')
+        job.save()
 
 
         # TODO: Calculate estimated completion time based on the estimated times of the selected services and aircraft type

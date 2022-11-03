@@ -13,4 +13,4 @@ class NotificationUtil():
             to=to_number
         )
 
-        print(message.body)
+        
