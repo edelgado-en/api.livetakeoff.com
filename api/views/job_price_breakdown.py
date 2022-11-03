@@ -84,24 +84,26 @@ class JobPriceBreakdownView(APIView):
         customer_additional_fees = job.customer.customer_settings.fees.all()
         # we only include the additional fees that apply to this job based on fee type
         for customer_additional_fee in customer_additional_fees:
-            if customer_additional_fee.type == 'G':
-                additional_fees.append({'id': customer_additional_fee.id, 'name': customer_additional_fee.type,
-                                        'fee': customer_additional_fee.fee, 'isPercentage': customer_additional_fee.percentage})
-            
-            elif customer_additional_fee.type == 'F':
-                for fbo in customer_additional_fee.fbos.all():
-                    if job.fbo == fbo.fbo:
-                        additional_fees.append({'id': customer_additional_fee.id, 'name': customer_additional_fee.type,
-                                                'fee': customer_additional_fee.fee, 'isPercentage': customer_additional_fee.percentage})
-                        break
-
-            elif customer_additional_fee.type == 'A':
-                upcharged_airports = customer_additional_fee.airports.all()
-                for upcharged_airport in upcharged_airports:
-                    if job.airport == upcharged_airport.airport:
-                        additional_fees.append({'id': customer_additional_fee.id, 'name': customer_additional_fee.type,
+            # if there are no services, we only apply FIXED additional fees, not percentages
+            if len(services) > 0 or (len(services) == 0 and not customer_additional_fee.percentage):
+                if customer_additional_fee.type == 'G':
+                    additional_fees.append({'id': customer_additional_fee.id, 'name': customer_additional_fee.type,
                                             'fee': customer_additional_fee.fee, 'isPercentage': customer_additional_fee.percentage})
-                        break
+                
+                elif customer_additional_fee.type == 'F':
+                    for fbo in customer_additional_fee.fbos.all():
+                        if job.fbo == fbo.fbo:
+                            additional_fees.append({'id': customer_additional_fee.id, 'name': customer_additional_fee.type,
+                                                    'fee': customer_additional_fee.fee, 'isPercentage': customer_additional_fee.percentage})
+                            break
+
+                elif customer_additional_fee.type == 'A':
+                    upcharged_airports = customer_additional_fee.airports.all()
+                    for upcharged_airport in upcharged_airports:
+                        if job.airport == upcharged_airport.airport:
+                            additional_fees.append({'id': customer_additional_fee.id, 'name': customer_additional_fee.type,
+                                                'fee': customer_additional_fee.fee, 'isPercentage': customer_additional_fee.percentage})
+                            break
 
 
         # calculate total price discounts first, then additional fees
