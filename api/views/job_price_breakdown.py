@@ -116,12 +116,11 @@ class JobPriceBreakdownView(APIView):
 
         discounted_price = total_price
 
-        if discounted_price > 0:
-            for additional_fee in additional_fees:
-                if additional_fee['isPercentage']:
-                    total_price += total_price * additional_fee['fee'] / 100
-                else:
-                    total_price += additional_fee['fee']
+        for additional_fee in additional_fees:
+            if additional_fee['isPercentage']:
+                total_price += total_price * additional_fee['fee'] / 100
+            else:
+                total_price += additional_fee['fee']
 
         price_breakdown = {
             'aircraftType': aircraftType.name,
