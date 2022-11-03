@@ -1,4 +1,4 @@
-from django.db.models import Q
+from django.db.models import Q, F
 from rest_framework import permissions
 from rest_framework.generics import ListAPIView
 from ..serializers import (
@@ -37,10 +37,7 @@ class JobListView(ListAPIView):
 
             searchText = self.request.data['searchText']
             status = self.request.data['status']
-            sortField = self.request.data.get('sortField')
-
-            if sortField == 'requestDate':
-                sortField = '-requestDate'
+            
 
             qs = Job.objects.prefetch_related('job_service_assignments') \
                              .prefetch_related('job_retainer_service_assignments') \
@@ -48,7 +45,6 @@ class JobListView(ListAPIView):
                              .select_related('aircraftType')\
                              .select_related('airport') \
                              .select_related('fbo') \
-                             .order_by(sortField) \
                              .all()
 
             if searchText:
@@ -62,6 +58,15 @@ class JobListView(ListAPIView):
                 qs = qs.filter(Q(status='A') | Q(status='S') | Q(status='U') | Q(status='W') | Q(status='R'))
             else:
                 qs = qs.filter(status=status)
+
+
+            sortField = self.request.data.get('sortField')
+            # nulls last
+            if sortField == 'requestDate':
+                qs = qs.order_by(F('requestDate').desc(nulls_last=True))
+            elif sortField == 'completeBy':
+                qs = qs.order_by(F('completeBy').asc(nulls_last=True))
+
 
             return qs
 
