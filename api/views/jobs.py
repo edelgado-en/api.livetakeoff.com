@@ -37,6 +37,10 @@ class JobListView(ListAPIView):
 
             searchText = self.request.data['searchText']
             status = self.request.data['status']
+            sortField = self.request.data.get('sortField')
+
+            if sortField == 'requestDate':
+                sortField = '-requestDate'
 
             qs = Job.objects.prefetch_related('job_service_assignments') \
                              .prefetch_related('job_retainer_service_assignments') \
@@ -44,7 +48,7 @@ class JobListView(ListAPIView):
                              .select_related('aircraftType')\
                              .select_related('airport') \
                              .select_related('fbo') \
-                             .order_by('completeBy') \
+                             .order_by(sortField) \
                              .all()
 
             if searchText:
