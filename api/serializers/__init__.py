@@ -21,3 +21,4 @@ from .fbo import FBOSerializer
 from .retainer_service import RetainerServiceSerializer
 from .vendor import VendorSerializer
 from .job_completed import JobCompletedSerializer
+from .job_activity import JobActivitySerializer

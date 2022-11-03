@@ -32,7 +32,8 @@ from .views import (
         CompletedJobsListView,
         JobCloseoutView,
         JobExportCSVView,
-        JobPriceBreakdownView
+        JobPriceBreakdownView,
+        JobActivityView
     )
 
 urlpatterns = [
@@ -50,6 +51,7 @@ urlpatterns = [
     path('jobs/stats/<int:id>/', JobStatsView.as_view()),
     path('jobs/services/<int:id>/', JobServiceAssignmentView.as_view()),
     path('jobs/retainer-services/<int:id>/', JobRetainerServiceAssignmentView.as_view()),
+    path('jobs/activity/<int:jobid>/', JobActivityView.as_view()),
     path('job-photos/<int:jobid>/', JobPhotosView.as_view()),
     path('job-photos/delete/<int:jobid>/', JobPhotosView.as_view()),
     path('job-photos/upload/<int:jobid>/', JobPhotosUploadView.as_view()),

@@ -11,10 +11,12 @@ class JobStatusActivity(models.Model):
         ('T', 'Cancelled'),
         ('R', 'Review'),
         ('I', 'Invoiced'),
+        ('P', 'Price Changed'),
     ]
 
     job = models.ForeignKey(Job, on_delete=models.PROTECT, related_name='status_activities')
     status = models.CharField(max_length=1, choices=STATUS_CHOICES)
+    price = models.DecimalField(max_digits=6, decimal_places=2, null=True)
     user = models.ForeignKey('auth.User', on_delete=models.PROTECT, related_name='status_activities')
     timestamp = models.DateTimeField(auto_now_add=True)
 
