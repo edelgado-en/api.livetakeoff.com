@@ -114,7 +114,10 @@ class JobDetail(APIView):
         
         else:
             # return only the services assigned to the current user
-            service_assignments = request.user.job_service_assignments.filter(job=job).select_related('service').all()
+            service_assignments = request.user.job_service_assignments \
+                                              .select_related('service') \
+                                              .filter(job=job) \
+                                              .all()
 
             for service_assignment in service_assignments:
                 s_assignment = {
@@ -128,7 +131,9 @@ class JobDetail(APIView):
                 
 
             # retainer services
-            retainer_service_assignments = request.user.job_retainer_service_assignments.filter(job=job).select_related('retainer_service').all()
+            retainer_service_assignments = request.user.job_retainer_service_assignments \
+                                                       .select_related('retainer_service') \
+                                                       .filter(job=job).all()
 
             for retainer_service_assignment in retainer_service_assignments:
                 r_assignment = {
@@ -145,6 +150,9 @@ class JobDetail(APIView):
         job.retainer_service_assignments = job_retainer_service_assignments
 
         job.total_photos = JobPhotos.objects.filter(job=job).count()
+
+        # get assignees other than me for this job
+
 
         serializer = JobDetailSerializer(job)
 
@@ -214,6 +222,15 @@ class JobDetail(APIView):
                 # set the actual_completion_date to today
                 job.completion_date = datetime.now()
                 job.save()
+
+                #unassign all services and retainer services
+                for service in job.job_service_assignments.all():
+                    service.project_manager = None
+                    service.save(update_fields=['project_manager'])
+
+                for retainer_service in job.job_retainer_service_assignments.all():
+                    retainer_service.project_manager = None
+                    retainer_service.save(update_fields=['project_manager'])
 
             
             if 'status' in request.data and request.data['status'] == 'W':

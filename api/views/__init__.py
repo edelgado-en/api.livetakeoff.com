@@ -34,3 +34,4 @@ from .job_closeout import JobCloseoutView
 from .job_export import JobExportCSVView
 from .job_price_breakdown import JobPriceBreakdownView
 from .job_activity import JobActivityView
+from .job_complete_check import JobCompleteCheck

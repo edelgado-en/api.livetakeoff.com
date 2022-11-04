@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 
 from api.models import (
         JobRetainerServiceAssignment,
+        JobServiceAssignment,
         Job,
         RetainerService
     )
@@ -29,7 +30,28 @@ class JobRetainerServiceAssignmentView(APIView):
         if serializer.is_valid():
             serializer.save()
 
-            return Response(serializer.data)
+            # if all services and retainer services associated with this job are completed, then this job is a candidate to be completed
+            # return a boolean to the front end to indicate if the job can be completed
+            job = job_retainer_service_assignment.job
+            # get all services and retainer services associated with this job
+            services = JobServiceAssignment.objects.filter(job=job)
+            retainer_services = JobRetainerServiceAssignment.objects.filter(job=job)
+            
+            # check if they are all completed
+            all_completed = True
+            for service in services:
+                if service.status != 'C':
+                    all_completed = False
+                    break
+
+            if all_completed:
+                for retainer_service in retainer_services:
+                    if retainer_service.status != 'C':
+                        all_completed = False
+                        break
+
+            return Response({'can_complete_job': all_completed}, status=status.HTTP_200_OK)
+
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
