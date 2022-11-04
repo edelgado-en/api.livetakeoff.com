@@ -98,7 +98,7 @@ class JobListView(ListAPIView):
         return Job.objects \
                   .filter(Q(status='S') | Q(status='W')) \
                   .filter(id__in=job_ids) \
-                  .order_by('completeBy') \
+                  .order_by(F('completeBy').asc(nulls_last=True)) \
                   .all()
 
 

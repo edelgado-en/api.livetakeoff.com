@@ -36,14 +36,21 @@ class JobCompleteCheck(APIView):
             ~Q(status='C')
         ).count()
 
-        assigned_to_other_pms = False
-
+        other_pms_working_on_it = False
         if services_count > 0 or retainer_services_count > 0:
-            assigned_to_other_pms = True
+            other_pms_working_on_it = True
+
+
+        is_admin = False
+        if request.user.is_superuser \
+                 or request.user.is_staff \
+                 or request.user.groups.filter(name='Account Managers').exists():
+            is_admin = True
 
 
         return Response({
                          'photos_count': photos_count,
-                         'assigned_to_other_pms': assigned_to_other_pms
+                         'other_pms_working_on_it': other_pms_working_on_it,
+                         'is_admin': is_admin
                         },
                          status=status.HTTP_200_OK)
