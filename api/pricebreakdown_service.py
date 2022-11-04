@@ -62,6 +62,13 @@ class PriceBreakdownService():
                                       'discount': customer_discount.discount, 'isPercentage': customer_discount.percentage})
                         break
 
+        # do all services have a price?
+        all_services_have_price = True
+        for service in assigned_services:
+            if service['price'] == 0:
+                all_services_have_price = False
+                break
+
 
         # get additional fees for this customer
         additional_fees = []
@@ -69,7 +76,7 @@ class PriceBreakdownService():
         # we only include the additional fees that apply to this job based on fee type
         for customer_additional_fee in customer_additional_fees:
             # if there are no services, we only apply FIXED additional fees, not percentages
-            if len(services) > 0 or (len(services) == 0 and not customer_additional_fee.percentage):
+            if all_services_have_price or (not all_services_have_price and not customer_additional_fee.percentage):
                 if customer_additional_fee.type == 'G':
                     additional_fees.append({'id': customer_additional_fee.id, 'name': customer_additional_fee.type,
                                             'fee': customer_additional_fee.fee, 'isPercentage': customer_additional_fee.percentage})
