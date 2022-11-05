@@ -34,7 +34,8 @@ from .views import (
         JobExportCSVView,
         JobPriceBreakdownView,
         JobActivityView,
-        JobCompleteCheck
+        JobCompleteCheck,
+        AircraftTypesView
     )
 
 urlpatterns = [
@@ -61,6 +62,7 @@ urlpatterns = [
     path('services', ServicesView.as_view()),
     path('retainer-services', RetainerServicesView.as_view()),
     path('airports', AirportsView.as_view()),
+    path('aircraft-types', AircraftTypesView.as_view()),
     path('fbos', FBOsView.as_view()),
     path('price-list', PriceListView.as_view()),
     path('customers', CustomersView.as_view()),

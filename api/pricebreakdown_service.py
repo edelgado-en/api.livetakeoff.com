@@ -124,6 +124,7 @@ class PriceBreakdownService():
             'discountedPrice': f'{discounted_price:,.2f}',
             'additionalFees': additional_fees,
             'totalPrice': total_price,
+            'manuallySet': not job.is_auto_priced
         }
 
         return price_breakdown
