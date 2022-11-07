@@ -25,7 +25,7 @@ from .customer_discount_update import CustomerDiscountUpdateView
 from .customer_fees import CustomerFeesView
 from .fbos import FBOsView
 from .customer_fee_update import CustomerFeeUpdateView
-from .price_list import PriceListView
+from .price_plans import PricePlansView
 from .customer_users import CustomerUsersView
 from .create_customer import CreateCustomerView
 from .retainer_services import RetainerServicesView
