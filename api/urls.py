@@ -35,7 +35,8 @@ from .views import (
         JobPriceBreakdownView,
         JobActivityView,
         JobCompleteCheck,
-        AircraftTypesView
+        AircraftTypesView,
+        PriceListingView
     )
 
 urlpatterns = [
@@ -65,6 +66,7 @@ urlpatterns = [
     path('aircraft-types', AircraftTypesView.as_view()),
     path('fbos', FBOsView.as_view()),
     path('pricing-plans', PricePlansView.as_view()),
+    path('price-listing/<int:id>/', PriceListingView.as_view()),
     path('customers', CustomersView.as_view()),
     path('customers/create', CreateCustomerView.as_view()),
     path('customers/users', CustomerUsersView.as_view()),
