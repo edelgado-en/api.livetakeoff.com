@@ -66,6 +66,7 @@ urlpatterns = [
     path('aircraft-types', AircraftTypesView.as_view()),
     path('fbos', FBOsView.as_view()),
     path('pricing-plans', PricePlansView.as_view()),
+    path('pricing-plans/<int:id>/', PricePlansView.as_view()),
     path('price-listing/<int:id>/', PriceListingView.as_view()),
     path('customers', CustomersView.as_view()),
     path('customers/create', CreateCustomerView.as_view()),
