@@ -37,6 +37,21 @@ class PricePlansView(ListCreateAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+    def patch(self, request, *args, **kwargs):
+        price_list_id = self.kwargs.get('id')
+        price_list = PriceList.objects.get(pk=price_list_id)
+
+        name = self.request.data.get('name')
+        description = self.request.data.get('description')
+
+        price_list.name = name
+        price_list.description = description
+        price_list.save()
+
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 
     def create(self, request, *args, **kwargs):
         user = self.request.user
