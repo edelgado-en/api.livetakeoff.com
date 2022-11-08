@@ -54,6 +54,46 @@ class CustomerDetail(APIView):
 
 
 
+    def patch(self, request, id):
+        customer = Customer.objects.get(pk=id)
+        settings = CustomerSettings.objects.get(customer=customer)
+
+        if not self.can_view_customer(request.user, customer):
+            return Response({'error': 'You do not have permission to edit this customer'}, status=status.HTTP_403_FORBIDDEN)
+
+
+        name = request.data.get('name')
+        about = request.data.get('about')
+        phoneNumber = request.data.get('phoneNumber')
+        billingAddress = request.data.get('billingAddress')
+        emailAddress = request.data.get('emailAddress')
+        billingInfo = request.data.get('billingInfo')
+        specialInstructions = request.data.get('specialInstructions')
+        priceListId = request.data.get('priceListId')
+        retainerAmount = request.data.get('retainerAmount')
+
+        # update customer
+        customer.name = name
+        customer.billingAddress = billingAddress
+        customer.emailAddress = emailAddress
+        customer.about = about
+        customer.billingInfo = billingInfo
+        customer.phone_number = phoneNumber
+
+        customer.save()
+
+        # update customer settings
+        settings.special_instructions = specialInstructions
+        settings.price_list_id = priceListId
+        settings.retainer_amount = retainerAmount
+
+
+        settings.save()
+
+
+        return Response(status=status.HTTP_200_OK)
+
+
     def can_view_customer(self, user, customer):
         if user.is_superuser \
           or user.is_staff \
