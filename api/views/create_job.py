@@ -166,7 +166,7 @@ class CreateJobView(APIView):
         JobStatusActivity.objects.create(job=job, user=request.user, status='A')
 
         # update the tail aircraft lookup table
-        TailAircraftLookup.objects.update_or_create(tail_number=job.tailNumber, aircraft_type=job.aircraftType)
+        TailAircraftLookup.objects.update_or_create(tail_number=job.tailNumber, aircraft_type=job.aircraftType, customer=job.customer)
 
 
         response = {
