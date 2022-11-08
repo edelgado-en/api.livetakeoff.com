@@ -22,11 +22,7 @@ from ..models import (
         JobServiceAssignment,
         JobRetainerServiceAssignment,
         JobStatusActivity,
-        CustomerSettings,
-        PriceList,
-        PriceListEntries,
-        CustomerDiscount,
-        CustomerAdditionalFee
+        TailAircraftLookup,
     )
 
 
@@ -168,6 +164,10 @@ class CreateJobView(APIView):
 
         # if user is customer, this is submitted, otherwise it is accepted
         JobStatusActivity.objects.create(job=job, user=request.user, status='A')
+
+        # update the tail aircraft lookup table
+        TailAircraftLookup.objects.update_or_create(tail_number=job.tailNumber, aircraft_type=job.aircraftType)
+
 
         response = {
             'id': job.id,

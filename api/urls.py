@@ -36,7 +36,8 @@ from .views import (
         JobActivityView,
         JobCompleteCheck,
         AircraftTypesView,
-        PriceListingView
+        PriceListingView,
+        TailAircraftLookupView
     )
 
 urlpatterns = [
@@ -64,6 +65,7 @@ urlpatterns = [
     path('retainer-services', RetainerServicesView.as_view()),
     path('airports', AirportsView.as_view()),
     path('aircraft-types', AircraftTypesView.as_view()),
+    path('tail-aircraft-lookup/<str:tailnumber>/', TailAircraftLookupView.as_view()),
     path('fbos', FBOsView.as_view()),
     path('pricing-plans', PricePlansView.as_view()),
     path('pricing-plans/<int:id>/', PricePlansView.as_view()),

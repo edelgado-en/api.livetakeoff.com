@@ -27,3 +27,4 @@ from .job_status_activity import JobStatusActivity
 from .job_service_assignment import JobServiceAssignment
 from .job_retainer_service_assignment import JobRetainerServiceAssignment
 from .job_comment_check import JobCommentCheck
+from .tail_aircraft_lookup import TailAircraftLookup
