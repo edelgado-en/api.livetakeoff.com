@@ -65,7 +65,7 @@ class PricePlansView(ListCreateAPIView):
         if percentage:
             percentage = Decimal(percentage)
         else:
-            percentage = 0.0
+            percentage = Decimal(0.0)
 
 
         # create a new price list with the given name and description and set the prices for all services with the given operator and percentage
