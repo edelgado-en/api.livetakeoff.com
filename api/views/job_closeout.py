@@ -126,35 +126,6 @@ class JobCloseoutView(APIView):
             Story.append(retainer_service_list_flowable)
             Story.append(Spacer(1, 24))
 
-
-        # Create return address
-        """ ptext = '%s' % full_name
-        
-        Story.append(Paragraph(ptext, styles["Normal"]))       
-        for part in address_parts:
-            ptext = '%s' % part.strip()
-            Story.append(Paragraph(ptext, styles["Normal"]))   
-        
-        Story.append(Spacer(1, 12))
-        ptext = 'Dear %s:' % full_name.split()[0].strip()
-        
-        Story.append(Paragraph(ptext, styles["Normal"]))
-        Story.append(Spacer(1, 12))
-        
-        ptext = 'We would like to welcome you to our subscriber base for %s Magazine! \
-                You will receive %s issues at the excellent introductory price of $%s. Please respond by\
-                %s to start receiving your subscription and get the following free gift: %s.' % (magName, 
-                                                                                                        issueNum,
-                                                                                                        subPrice,
-                                                                                                        limitedDate,
-                                                                                                        freeGift)
-        Story.append(Paragraph(ptext, styles["Justify"]))
-        Story.append(Spacer(1, 12)) """
-
-        """ Story.append(Spacer(1, 24))
-        Story.append(Paragraph('Thank you for you order.', styles["Justify"]))
-        Story.append(Spacer(1, 12)) """
-
         
         Story.append(Paragraph('Interior Photos', styles["Heading2"]))
         Story.append(Spacer(1, 24))

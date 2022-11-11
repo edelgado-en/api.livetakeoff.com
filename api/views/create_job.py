@@ -43,7 +43,11 @@ class CreateJobView(APIView):
         aircraft_type = get_object_or_404(AircraftType, pk=data['aircraft_type_id'])
         airport = get_object_or_404(Airport, pk=data['airport_id'])
         fbo = get_object_or_404(FBO, pk=data['fbo_id'])
-        on_site = bool(data['on_site'])
+        on_site = False
+        
+        if data['on_site'] == 'true':
+            on_site = True
+        
 
         estimated_arrival_date = data['estimated_arrival_date']
         if estimated_arrival_date == 'null':
