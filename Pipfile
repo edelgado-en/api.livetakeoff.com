@@ -25,6 +25,7 @@ sendgrid = "*"
 reportlab = "*"
 xhtml2pdf = "*"
 pisa = "*"
+pytz = "*"
 
 [dev-packages]
 

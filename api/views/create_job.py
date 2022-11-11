@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from datetime import (date, datetime, timedelta)
+import pytz
 from email.utils import parsedate_tz, mktime_tz
 
 from api.pricebreakdown_service import PriceBreakdownService
@@ -105,8 +106,15 @@ class CreateJobView(APIView):
 
         user = request.user
 
-        today = date.today()
-        today_label = datetime.today().strftime('%Y%m%d')
+        newYorkTz = pytz.timezone("America/New_York") 
+
+        # get today in newYorkTz
+        today = datetime.now(newYorkTz).date()
+        today_label = today.strftime("%Y%m%d")
+
+        kike4341351
+        
+        
 
         # Generate purchase order: current day + number of job received that day.
         #  So if today is 2019-01-01 and we have received 3 jobs today already, the purchase order will be 20190101-4
