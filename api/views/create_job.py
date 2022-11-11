@@ -112,9 +112,6 @@ class CreateJobView(APIView):
         today = datetime.now(newYorkTz).date()
         today_label = today.strftime("%Y%m%d")
 
-        kike4341351
-        
-        
 
         # Generate purchase order: current day + number of job received that day.
         #  So if today is 2019-01-01 and we have received 3 jobs today already, the purchase order will be 20190101-4
