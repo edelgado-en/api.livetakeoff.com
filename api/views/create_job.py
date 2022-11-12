@@ -106,7 +106,7 @@ class CreateJobView(APIView):
 
         user = request.user
 
-        newYorkTz = pytz.timezone("America/New_York") 
+        newYorkTz = pytz.timezone("UTC") 
 
         # get today in newYorkTz
         today = datetime.now(newYorkTz).date()
