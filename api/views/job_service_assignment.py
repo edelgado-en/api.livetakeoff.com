@@ -12,8 +12,10 @@ from ..models import (
     JobStatusActivity,
     EstimatedServiceTime,
     Service,
-    RetainerService
+    RetainerService,
     )
+
+from ..pricebreakdown_service import PriceBreakdownService
 
 from ..serializers import (
                     JobServiceAssignmentSerializer,
@@ -153,6 +155,15 @@ class JobServiceAssignmentView(APIView):
         assignment = JobServiceAssignment(job=job, project_manager=project_manager, service=service, status=status)
         assignment.save()
 
+        # re-fetch job and update price after deleting service only if the job is auto_priced  and not invoiced
+        
+        if job.is_auto_priced and job.status != 'I':
+            updated_job = Job.objects.get(pk=job.id)
+            price_breakdown = PriceBreakdownService().get_price_breakdown(updated_job)
+            updated_job.price = price_breakdown.get('totalPrice')
+            updated_job.save()
+
+
         serializer = JobServiceAssignmentSerializer(assignment)
 
         return Response(serializer.data)
@@ -285,7 +296,18 @@ class JobServiceAssignmentView(APIView):
     def delete(self, request, id):
         job_service_assignment = get_object_or_404(JobServiceAssignment, pk=id)
 
+        # get job before deleting service
+        job_id = job_service_assignment.job.id
+
         job_service_assignment.delete()
+
+        # fetch job and update price after deleting service
+        job = Job.objects.get(pk=job_id)
+
+        price_breakdown = PriceBreakdownService().get_price_breakdown(job)
+        job.price = price_breakdown.get('totalPrice')
+        job.save()
+
 
         return Response({'message': 'Delete successfully'}, status.HTTP_200_OK)
 

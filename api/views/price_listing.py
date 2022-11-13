@@ -1,3 +1,4 @@
+from django.db.models import Q
 from decimal import Decimal
 from django.db.models import Count
 from rest_framework import (permissions, status)
@@ -6,8 +7,9 @@ from rest_framework .response import Response
 from api.serializers import PriceListSerializer
 from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView
-from api.models import (PriceList, PriceListEntries, AircraftType, Service)
+from api.models import (PriceList, PriceListEntries, AircraftType, Service, Job)
 
+from ..pricebreakdown_service import PriceBreakdownService
 
 class PriceListingView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
@@ -196,6 +198,23 @@ class PriceListingView(APIView):
                                                     price=price)
                 price_list_entry.save()
 
+
+        # update the price for all jobs with customer using a customer setting with the price list and aircraft type with is_auto_priced as true
+        # get all the jobs with customer using a customer setting with the price list and aircraft type with is_auto_priced as true
+        # not invoiced
+        jobs = Job.objects.filter(Q(customer__customer_settings__price_list=price_list) & 
+                                  Q(aircraftType_id=aircraft_type_id) &
+                                  Q(is_auto_priced=True) &
+                                  ~Q(status='I')
+                                  )
+
+        # update the price for each job using the PriceBreakdownService
+        price_service = PriceBreakdownService()
+        for job in jobs:
+            price_breakdown = price_service.get_price_breakdown(job)
+            job.price = price_breakdown.get('totalPrice')
+            job.save()
+        
 
         return Response(status=status.HTTP_200_OK)
             
