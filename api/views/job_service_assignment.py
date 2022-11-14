@@ -25,6 +25,7 @@ from ..serializers import (
 
 from api.notification_util import NotificationUtil
 
+
 class JobServiceAssignmentView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
@@ -222,12 +223,16 @@ class JobServiceAssignmentView(APIView):
             retainer_assignment.save()
 
 
-
         # if there is at least one service assigned, then set the status to assigned
         current_status = job.status
 
         if at_least_one_service_assigned and (current_status == 'A' or current_status == 'U'):
             job.status = 'S' # assigned
+            job.save()
+
+        # if none of the services are assigned and the job status is S or W, then set the job status to A
+        if not at_least_one_service_assigned and (current_status == 'S' or current_status == 'W'):
+            job.status = 'A'
             job.save()
 
         # get the list of unique project managers and their phone numbers and send the job information with the app link as body
