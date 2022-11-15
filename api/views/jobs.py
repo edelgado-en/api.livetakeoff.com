@@ -37,7 +37,8 @@ class JobListView(ListAPIView):
 
             searchText = self.request.data['searchText']
             status = self.request.data['status']
-            
+            customer = self.request.data.get('customer')
+            airport = self.request.data.get('airport')
 
             qs = Job.objects.prefetch_related('job_service_assignments') \
                              .prefetch_related('job_retainer_service_assignments') \
@@ -49,15 +50,19 @@ class JobListView(ListAPIView):
 
             if searchText:
                 qs = qs.filter(Q(tailNumber__icontains=searchText)
-                               | Q(customer__name__icontains=searchText)
                                | Q(purchase_order__icontains=searchText)
-                               | Q(airport__initials__icontains=searchText)
                               )
 
             if status == 'All':
                 qs = qs.filter(Q(status='A') | Q(status='S') | Q(status='U') | Q(status='W') | Q(status='R'))
             else:
                 qs = qs.filter(status=status)
+
+            if customer != 'All':
+                qs = qs.filter(customer_id=customer)
+
+            if airport != 'All':
+                qs = qs.filter(airport_id=airport)
 
 
             sortField = self.request.data.get('sortField')
