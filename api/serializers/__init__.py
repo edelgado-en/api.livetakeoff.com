@@ -23,3 +23,4 @@ from .vendor import VendorSerializer
 from .job_completed import JobCompletedSerializer
 from .job_activity import JobActivitySerializer
 from .aircraft_type import AircraftTypeSerializer
+from .shared_job_detail import SharedJobDetailSerializer

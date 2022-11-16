@@ -39,3 +39,4 @@ from .aircraft_types import AircraftTypesView
 from .price_listing import PriceListingView
 from .tail_aircraft_lookup import TailAircraftLookupView
 from .user_signup import UserSignupView
+from .shared_job_detail import SharedJobDetailView
