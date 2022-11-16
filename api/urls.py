@@ -37,7 +37,8 @@ from .views import (
         JobCompleteCheck,
         AircraftTypesView,
         PriceListingView,
-        TailAircraftLookupView
+        TailAircraftLookupView,
+        UserSignupView
     )
 
 urlpatterns = [
@@ -81,5 +82,6 @@ urlpatterns = [
     path('customers/fees/update/<int:id>/', CustomerFeeUpdateView.as_view()),
     path('users/me', UserView.as_view()),
     path('users/me/avatar', UserAvatarView.as_view()),
-    path('users/me/reset-password', UserResetPasswordView.as_view())
+    path('users/me/reset-password', UserResetPasswordView.as_view()),
+    path('users/signup', UserSignupView.as_view()),
 ]

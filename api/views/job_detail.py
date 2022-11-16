@@ -30,16 +30,6 @@ class JobDetail(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, id):
-        """ client = Client(os.environ.get('TWILIO_ACCOUNT_SID'), os.environ.get('TWILIO_AUTH_TOKEN'))
-
-        message = client.messages.create(
-            body="ROBEEEEIIIDDDDYYY I DID IT!. THIS IS COMING FROM THE APP. I'M A ROBOT",
-            from_=os.environ.get('TWILIO_NUMBER'),
-            to='+17869756255'
-        )
-
-        print(message.body) """
-
         job = get_object_or_404(Job, pk=id)
 
         if not self.can_view_job(request.user, job):
@@ -150,9 +140,6 @@ class JobDetail(APIView):
         job.retainer_service_assignments = job_retainer_service_assignments
 
         job.total_photos = JobPhotos.objects.filter(job=job).count()
-
-        # get assignees other than me for this job
-
 
         serializer = JobDetailSerializer(job)
 
