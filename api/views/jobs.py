@@ -69,8 +69,12 @@ class JobListView(ListAPIView):
             # nulls last
             if sortField == 'requestDate':
                 qs = qs.order_by(F('requestDate').desc(nulls_last=True))
+            
             elif sortField == 'completeBy':
                 qs = qs.order_by(F('completeBy').asc(nulls_last=True))
+
+            elif sortField == 'arrivalDate':
+                qs = qs.order_by(F('on_site').desc(), F('estimatedETA').asc(nulls_last=True))
 
 
             return qs
