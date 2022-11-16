@@ -10,7 +10,7 @@ class JobSerializer(serializers.ModelSerializer):
     airport = AirportSerializer()
     fbo = FBOSerializer()
     completeBy = serializers.DateTimeField(format="%b-%d %I:%M %p")
-
+    estimatedETA = serializers.DateTimeField(format="%b-%d %I:%M %p")
 
     class Meta:
         model = Job
@@ -23,6 +23,7 @@ class JobSerializer(serializers.ModelSerializer):
             'airport',
             'fbo',
             'completeBy',
+            'estimatedETA',
             'on_site'
             )
 

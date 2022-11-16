@@ -24,7 +24,8 @@ from ..models import (
         JobRetainerServiceAssignment,
         JobStatusActivity,
         TailAircraftLookup,
-        TailServiceLookup
+        TailServiceLookup,
+        TailRetainerServiceLookup,
     )
 
 
@@ -185,6 +186,12 @@ class CreateJobView(APIView):
 
         for service in services:
             TailServiceLookup.objects.create(tail_number=job.tailNumber, service=service, customer=job.customer)
+
+        # delete all tail retainer service lookup entries for this tail number and then add them back
+        TailRetainerServiceLookup.objects.filter(tail_number=job.tailNumber).delete()
+
+        for retainer_service in retainer_services:
+            TailRetainerServiceLookup.objects.create(tail_number=job.tailNumber, retainer_service=retainer_service, customer=job.customer)
 
 
         response = {

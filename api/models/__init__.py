@@ -29,3 +29,4 @@ from .job_retainer_service_assignment import JobRetainerServiceAssignment
 from .job_comment_check import JobCommentCheck
 from .tail_aircraft_lookup import TailAircraftLookup
 from .tail_service_lookup import TailServiceLookup
+from .tail_retainer_service_lookup import TailRetainerServiceLookup
