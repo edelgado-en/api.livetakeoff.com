@@ -1,10 +1,9 @@
 from django.db.models import Q
-from django.shortcuts import get_object_or_404
 from rest_framework import (permissions, status)
 from rest_framework .response import Response
 from rest_framework.views import APIView
 
-from api.serializers import (JobPhotoSerializer, JobDetailSerializer, SharedJobDetailSerializer)
+from api.serializers import (SharedJobDetailSerializer)
 
 from api.models import (Job)
 

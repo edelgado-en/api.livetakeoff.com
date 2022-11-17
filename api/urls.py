@@ -39,7 +39,8 @@ from .views import (
         PriceListingView,
         TailAircraftLookupView,
         UserSignupView,
-        SharedJobDetailView
+        SharedJobDetailView,
+        ContactView
     )
 
 urlpatterns = [
@@ -86,4 +87,5 @@ urlpatterns = [
     path('users/me/reset-password', UserResetPasswordView.as_view()),
     path('users/signup', UserSignupView.as_view()),
     path('shared/jobs/<int:id>/', SharedJobDetailView.as_view()),
+    path('shared/contact', ContactView.as_view()),
 ]
