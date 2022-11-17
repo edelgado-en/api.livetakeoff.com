@@ -176,8 +176,10 @@ class CreateJobView(APIView):
         # if user is customer, this is submitted, otherwise it is accepted
         JobStatusActivity.objects.create(job=job, user=request.user, status='A')
 
-        # update the tail aircraft lookup table
-        TailAircraftLookup.objects.update_or_create(tail_number=job.tailNumber, aircraft_type=job.aircraftType, customer=job.customer)
+        # delete if tailaircraft lookup already exists, and create a new entry
+        TailAircraftLookup.objects.filter(tail_number=job.tailNumber).delete()
+
+        TailAircraftLookup.objects.create(tail_number=job.tailNumber, aircraft_type=job.aircraftType, customer=job.customer)
 
 
         # update the tail service lookup table
