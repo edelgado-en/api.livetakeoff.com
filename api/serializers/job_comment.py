@@ -9,4 +9,4 @@ class JobCommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = JobComments
-        fields = ('id', 'comment', 'author', 'created')
+        fields = ('id', 'comment', 'author', 'created', 'is_public')

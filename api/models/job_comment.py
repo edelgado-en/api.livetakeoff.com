@@ -6,7 +6,7 @@ class JobComments(models.Model):
     comment = models.TextField()
     author = models.ForeignKey('auth.User', on_delete=models.PROTECT)
     created = models.DateTimeField(auto_now_add=True)
-    #visible_by_customer
+    is_public = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         return self.comment

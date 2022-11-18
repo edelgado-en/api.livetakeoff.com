@@ -35,6 +35,29 @@ class JobCommentView(ListCreateAPIView):
         return JobComments.objects.select_related('author').filter(job=job).order_by('created')
 
 
+
+    def delete(self, request, *args, **kwargs):
+        comment_id = self.kwargs.get(self.lookup_url_kwarg)
+
+        job_comment = get_object_or_404(JobComments, pk=comment_id)
+        job_comment.delete()
+
+        return Response(status=status.HTTP_200_OK)
+
+
+
+    def patch(self, request, *args, **kwargs):
+        comment_id = self.kwargs.get(self.lookup_url_kwarg)
+
+        # toggle is_public field
+        job_comment = get_object_or_404(JobComments, pk=comment_id)
+        job_comment.is_public = not job_comment.is_public
+        job_comment.save()
+
+        return Response(status=status.HTTP_200_OK)
+
+
+
     def create(self, request, *args, **kwargs):
         user = self.request.user
         job_id = self.kwargs.get(self.lookup_url_kwarg)
@@ -42,9 +65,11 @@ class JobCommentView(ListCreateAPIView):
 
         comment = self.request.data['comment']
         send_sms = self.request.data['sendSMS']
+        is_public = self.request.data['isPublic']
 
         job_comment = JobComments(job=job,
                                   comment=comment,
+                                  is_public=is_public,
                                   author=user)
 
         job_comment.save()

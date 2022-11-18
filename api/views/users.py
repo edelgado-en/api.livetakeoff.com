@@ -35,6 +35,10 @@ class UserView(APIView):
         is_project_manager = user.groups.filter(name='Project Managers').exists()
         is_account_manager = user.groups.filter(name='Account Managers').exists()
 
+        #a user is consider a customer when its profile has a reference to customer
+        is_customer = user_profile and user_profile.customer is not None
+        user.is_customer = is_customer
+
         if user.is_superuser:
             access_level_label = 'Super User'
 
@@ -47,7 +51,8 @@ class UserView(APIView):
         elif is_project_manager:
             access_level_label = 'Project Manager'
 
-        # TODO: account for customer user later
+        elif is_customer:
+            access_level_label = 'Customer'
 
 
         content = {
@@ -61,6 +66,7 @@ class UserView(APIView):
             "isAccountManager": is_account_manager,
             "isAdmin": user.is_staff,
             "isSuperUser": user.is_superuser,
+            "isCustomer": user.is_customer,
             "fullName": first_name + ' ' + last_name,
             "access_level_label": access_level_label,
             "avatar": avatar
