@@ -40,7 +40,7 @@ class CompletedJobsListView(ListAPIView):
                         .select_related('customer') \
                         .select_related('fbo') \
                         .select_related('aircraftType') \
-                        .order_by('status', '-requestDate') \
+                        .order_by('-completion_date') \
                         .all()    
 
         if searchText:
