@@ -115,8 +115,6 @@ class JobListView(ListAPIView):
             elif sortField == 'arrivalDate':
                 qs = qs.order_by(F('on_site').desc(), F('estimatedETA').asc(nulls_last=True))
 
-            # only get the first 10 jobs
-            #qs = qs[:10]
 
             return qs
 

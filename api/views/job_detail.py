@@ -17,6 +17,7 @@ from ..models import (
         JobPhotos,
         JobStatusActivity,
         JobCommentCheck,
+        CustomerSettings,
         UserProfile
     )
 
@@ -49,10 +50,12 @@ class JobDetail(APIView):
         job_service_assignments = []
         job_retainer_service_assignments = []
 
-        # Services are shown depending on the user. If you are an account manage/admin, you can see all services
+        # Services are shown depending on the user. If you are an account manager/admin OR a customer user,
+        #  you can see all services
         # if you are a project manager, you can only see the services assigned to you
         if request.user.is_superuser \
             or request.user.is_staff \
+            or (request.user.profile.customer and request.user.profile.customer == job.customer) \
             or request.user.groups.filter(name='Account Managers').exists():
                 
                 # return all services attached to this job
@@ -141,6 +144,18 @@ class JobDetail(APIView):
 
         job.total_photos = JobPhotos.objects.filter(job=job).count()
 
+        # do not include the price in the serializer if the user is a project manager or a customer user with the customer setting show_job_price set to false
+        
+        # check the customer settings if the user is a customer user to check if show_job_price is True
+        if request.user.profile.customer:
+            if not request.user.profile.customer.customer_settings.show_job_price:
+                job.price = None
+
+        # if you are a project manager, set the job price to None
+        if request.user.groups.filter(name='Project Managers').exists():
+            job.price = None
+
+        
         serializer = JobDetailSerializer(job)
 
         return Response(serializer.data)
@@ -245,6 +260,12 @@ class JobDetail(APIView):
           or user.is_staff \
           or user.groups.filter(name='Account Managers').exists():
            return True
+
+        # check if the user is a customer by checking its profile and customer field. If the job's customer matches the user's customer, then the user can view the job
+        if user.profile.customer and user.profile.customer == job.customer:
+            return True
+
+
 
         # You are a Project Manager
         # Because the PM needs to be able to complete job after completing all the services
