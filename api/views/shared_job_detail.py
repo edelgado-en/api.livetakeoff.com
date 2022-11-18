@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 
 from api.serializers import (SharedJobDetailSerializer)
 
-from api.models import (Job)
+from api.models import (Job, JobComments)
 
 
 class SharedJobDetailView(APIView):
@@ -68,9 +68,18 @@ class SharedJobDetailView(APIView):
             job_retainer_service_assignments.append(r_assignment)
 
 
+        # get public comments for this job
+        job_comments = JobComments.objects \
+                                    .select_related('author') \
+                                    .filter(job=job, is_public=True) \
+                                    .order_by('created')
+        
+
+
         job.service_assignments = job_service_assignments
         job.retainer_service_assignments = job_retainer_service_assignments
         job.job_photos = job.photos.all()
+        job.job_comments = job_comments
 
         serializer = SharedJobDetailSerializer(job)
 

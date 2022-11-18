@@ -7,6 +7,7 @@ from .job_service_assignment import GenericServiceAssignmentSerializer
 from ..models import Job
 from .basic_user import BasicUserSerializer
 from .job_photo import JobPhotoSerializer
+from .job_comment import JobCommentSerializer
 
 
 class SharedJobDetailSerializer(serializers.ModelSerializer):
@@ -23,6 +24,7 @@ class SharedJobDetailSerializer(serializers.ModelSerializer):
     service_assignments = GenericServiceAssignmentSerializer(many=True, read_only=True)
     retainer_service_assignments = GenericServiceAssignmentSerializer(many=True, read_only=True)
     job_photos = JobPhotoSerializer(many=True, read_only=True)
+    job_comments = JobCommentSerializer(many=True, read_only=True)
     created_by = BasicUserSerializer(read_only=True)
 
     class Meta:
@@ -44,6 +46,7 @@ class SharedJobDetailSerializer(serializers.ModelSerializer):
             'service_assignments',
             'retainer_service_assignments',
             'job_photos',
+            'job_comments',
             'on_site',
             'created_by'
         )
