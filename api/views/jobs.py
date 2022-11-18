@@ -79,7 +79,50 @@ class JobListView(ListAPIView):
 
             return qs
 
-        # You are a Project Manager
+
+        #########################################
+        # CUSTOMER
+
+        user_profile = self.request.user.profile
+
+        if user_profile and user_profile.customer:
+            searchText = self.request.data.get('searchText')
+            status = self.request.data.get('status')
+            airport = self.request.data.get('airport')
+
+            qs = Job.objects.filter(customer_id=user_profile.customer.id)
+
+            if searchText:
+                qs = qs.filter(Q(tailNumber__icontains=searchText)
+                               | Q(purchase_order__icontains=searchText)
+                              )
+
+            if status != 'All':
+                qs = qs.filter(status=status)
+
+
+            if airport != 'All':
+                qs = qs.filter(airport_id=airport)
+
+
+            sortField = self.request.data.get('sortField')
+            if sortField == 'requestDate':
+                qs = qs.order_by(F('requestDate').desc(nulls_last=True))
+            
+            elif sortField == 'completeBy':
+                qs = qs.order_by(F('completeBy').asc(nulls_last=True))
+
+            elif sortField == 'arrivalDate':
+                qs = qs.order_by(F('on_site').desc(), F('estimatedETA').asc(nulls_last=True))
+
+            # only get the first 10 jobs
+            #qs = qs[:10]
+
+            return qs
+
+
+        #########################################
+        # PROJECT MANAGER
 
         job_ids = set()
 

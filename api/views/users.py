@@ -17,6 +17,16 @@ class UserView(APIView):
         if user_profile and user_profile.avatar:
             avatar = user_profile.avatar.url
 
+        customerName = None
+
+        customerLogo = None
+        if user_profile and user_profile.customer and user_profile.customer.logo:
+            customerLogo = user_profile.customer.logo.url
+
+        if user_profile and user_profile.customer:
+            customerName = user_profile.customer.name
+
+
         first_name = ''
         last_name = ''
 
@@ -69,7 +79,9 @@ class UserView(APIView):
             "isCustomer": user.is_customer,
             "fullName": first_name + ' ' + last_name,
             "access_level_label": access_level_label,
-            "avatar": avatar
+            "avatar": avatar,
+            "customerLogo": customerLogo,
+            "customerName": customerName
         }
 
         return Response(content)

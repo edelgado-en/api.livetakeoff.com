@@ -41,3 +41,4 @@ from .tail_aircraft_lookup import TailAircraftLookupView
 from .user_signup import UserSignupView
 from .shared_job_detail import SharedJobDetailView
 from .contact import ContactView
+from .customer_activity import CustomerActivityView
