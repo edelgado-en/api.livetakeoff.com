@@ -11,6 +11,7 @@ class JobSerializer(serializers.ModelSerializer):
     fbo = FBOSerializer()
     completeBy = serializers.DateTimeField(format="%b-%d %I:%M %p")
     estimatedETA = serializers.DateTimeField(format="%b-%d %I:%M %p")
+    completion_date = serializers.DateTimeField(format="%b-%d %I:%M %p")
 
     class Meta:
         model = Job
@@ -24,6 +25,7 @@ class JobSerializer(serializers.ModelSerializer):
             'fbo',
             'completeBy',
             'estimatedETA',
+            'completion_date',
             'on_site'
             )
 
