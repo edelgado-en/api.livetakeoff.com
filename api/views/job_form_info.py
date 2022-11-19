@@ -8,7 +8,8 @@ from ..models import (
         Airport,
         FBO,
         Service,
-        RetainerService   
+        RetainerService,
+        UserProfile   
 )
 
 class JobFormInfoView(APIView):
@@ -116,7 +117,14 @@ class JobFormInfoView(APIView):
         """
         Check if the user has permission to create a job.
         """
-        if user.is_superuser or user.is_staff or user.groups.filter(name='Account Managers').exists():
+
+        user_profile = UserProfile.objects.get(user=user)
+        is_customer = user_profile and user_profile.customer is not None
+
+        if user.is_superuser \
+                 or user.is_staff \
+                 or is_customer \
+                 or user.groups.filter(name='Account Managers').exists():
             return True
         else:
             return False

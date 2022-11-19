@@ -26,6 +26,7 @@ from ..models import (
         TailAircraftLookup,
         TailServiceLookup,
         TailRetainerServiceLookup,
+        UserProfile
     )
 
 
@@ -41,7 +42,20 @@ class CreateJobView(APIView):
         data = request.data
 
         tailNumber = data['tail_number']
-        customer = get_object_or_404(Customer, pk=data['customer_id'])
+
+        # if user is customer, get customer from user profile
+        user_profile = UserProfile.objects.get(user=request.user)
+        is_customer = user_profile and user_profile.customer is not None
+
+        job_status = 'A'
+
+        if is_customer:
+            customer = user_profile.customer
+            job_status = 'U'
+        else:
+            customer = Customer.objects.get(id=data['customer_id'])
+
+
         aircraft_type = get_object_or_404(AircraftType, pk=data['aircraft_type_id'])
         airport = get_object_or_404(Airport, pk=data['airport_id'])
         fbo = get_object_or_404(FBO, pk=data['fbo_id'])
@@ -130,6 +144,7 @@ class CreateJobView(APIView):
                   estimatedETD=estimated_departure_date,
                   completeBy=complete_by_date,
                   created_by=user,
+                  status=job_status,
                   on_site=on_site)
 
         job.save()
@@ -209,7 +224,14 @@ class CreateJobView(APIView):
         """
         Check if the user has permission to create a job.
         """
-        if user.is_superuser or user.is_staff or user.groups.filter(name='Account Managers').exists():
+        # user customer can create a job
+        user_profile = UserProfile.objects.get(user=user)
+        is_customer = user_profile and user_profile.customer is not None
+
+        if user.is_superuser \
+                 or user.is_staff \
+                 or is_customer \
+                 or user.groups.filter(name='Account Managers').exists():
             return True
         else:
             return False

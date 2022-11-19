@@ -1,5 +1,6 @@
 from django.db.models import Q, F
-from rest_framework import permissions
+from rest_framework import (permissions,status)
+from rest_framework .response import Response
 from rest_framework.generics import ListAPIView
 from ..serializers import (
         JobSerializer,
@@ -156,4 +157,10 @@ class JobListView(ListAPIView):
 
     def post(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
+
+    
+
+
+
+
 
