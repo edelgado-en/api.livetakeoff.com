@@ -4,6 +4,8 @@ from rest_framework import (permissions, status)
 from rest_framework .response import Response
 from datetime import datetime
 
+from django.contrib.auth.models import User
+
 from ..serializers import (JobCommentSerializer)
 from rest_framework.generics import ListCreateAPIView
 from ..pagination import CustomPageNumberPagination
@@ -31,6 +33,12 @@ class JobCommentView(ListCreateAPIView):
         except JobCommentCheck.DoesNotExist:
             job_comment_check = JobCommentCheck(job=job, user=self.request.user, last_time_check=now)
             job_comment_check.save()
+
+        # if customer user and customer matches job customer then only return public comments
+        # request.user.profile.customer and request.user.profile.customer == job.customer
+        if self.request.user.profile.customer and self.request.user.profile.customer == job.customer:
+            return JobComments.objects.filter(job=job, is_public=True).order_by('created')
+
 
         return JobComments.objects.select_related('author').filter(job=job).order_by('created')
 
@@ -67,12 +75,24 @@ class JobCommentView(ListCreateAPIView):
         send_sms = self.request.data['sendSMS']
         is_public = self.request.data['isPublic']
 
+        is_customer_user = False
+
+        # when the user is customer and the customer matches the job customer then is_public is always true
+        if user.profile.customer and user.profile.customer == job.customer:
+            is_public = True
+            is_customer_user = True
+
         job_comment = JobComments(job=job,
                                   comment=comment,
                                   is_public=is_public,
                                   author=user)
 
         job_comment.save()
+
+        # if is_customer_user True always send sms
+        if is_customer_user:
+            send_sms = True    
+
 
         # if send_sms then send notification to all project managers assigned to this job
         if send_sms:
@@ -103,6 +123,17 @@ class JobCommentView(ListCreateAPIView):
                 if user and user.profile.phone_number:
                     if user.profile.phone_number not in unique_phone_numbers:
                         unique_phone_numbers.append(user.profile.phone_number)
+
+
+            # if a customer user is creating the comment then also send sms to all admins and account managers
+            if is_customer_user:
+                admins = User.objects.filter(Q(is_superuser=True) | Q(is_staff=True) | Q(groups__name='Account Managers'))
+                
+                for user in admins:
+                    if user.profile.phone_number:
+                        if user.profile.phone_number not in unique_phone_numbers:
+                            unique_phone_numbers.append(user.profile.phone_number)
+
 
 
             for phone_number in unique_phone_numbers:
