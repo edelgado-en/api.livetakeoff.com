@@ -9,9 +9,9 @@ class JobSerializer(serializers.ModelSerializer):
     aircraftType = AircraftTypeSerializer()
     airport = AirportSerializer()
     fbo = FBOSerializer()
-    completeBy = serializers.DateTimeField(format="%b-%d %I:%M %p")
-    estimatedETA = serializers.DateTimeField(format="%b-%d %I:%M %p")
-    completion_date = serializers.DateTimeField(format="%b-%d %I:%M %p")
+    completeBy = serializers.DateTimeField(format="%m/%d %H:%M")
+    estimatedETA = serializers.DateTimeField(format="%m/%d %H:%M")
+    completion_date = serializers.DateTimeField(format="%m/%d %H:%M")
 
     class Meta:
         model = Job

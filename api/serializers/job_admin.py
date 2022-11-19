@@ -17,14 +17,14 @@ class JobAdminSerializer(serializers.ModelSerializer):
     aircraftType = AircraftTypeSerializer()
     airport = AirportSerializer()
     fbo = FBOSerializer()
-    completeBy = serializers.DateTimeField(format="%b-%d %I:%M %p")
-    estimatedETA = serializers.DateTimeField(format="%m/%d/%Y %I:%M %p")
-    estimatedETD = serializers.DateTimeField(format="%m/%d/%Y %I:%M %p")
-    requestDate = serializers.DateTimeField(format="%m/%d/%Y %I:%M %p", read_only=True)
+    completeBy = serializers.DateTimeField(format="%m/%d %H:%M")
+    estimatedETA = serializers.DateTimeField(format="%m/%d %H:%M")
+    estimatedETD = serializers.DateTimeField(format="%m/%d %H:%M")
+    requestDate = serializers.DateTimeField(format="%m/%d %H:%M", read_only=True)
     job_service_assignments = JobServiceAssignmentSerializer(many=True)
     job_retainer_service_assignments = JobRetainerServiceAssignmentSerializer(many=True)
     created_by = BasicUserSerializer(read_only=True)
-    completion_date = serializers.DateTimeField(format="%m/%d/%Y %I:%M %p", read_only=True)
+    completion_date = serializers.DateTimeField(format="%m/%d %H:%M", read_only=True)
 
     class Meta:
         model = Job
