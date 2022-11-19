@@ -53,7 +53,7 @@ class UserView(APIView):
         is_premium_member = False
         if is_customer:
             customer_settings = CustomerSettings.objects.get(customer=user_profile.customer)
-            if customer_settings and customer_settings.retainer_amount > 0:
+            if customer_settings and customer_settings.retainer_amount and customer_settings.retainer_amount > 0:
                 is_premium_member = True
 
 
