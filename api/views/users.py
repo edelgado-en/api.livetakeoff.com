@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from ..models import UserProfile
+from ..models import (UserProfile, CustomerSettings)
 
 class UserView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
@@ -49,6 +49,14 @@ class UserView(APIView):
         is_customer = user_profile and user_profile.customer is not None
         user.is_customer = is_customer
 
+        # if user is customer and customer settings  has a retainer amount greater than zero, then the user is considered a Premium Member
+        is_premium_member = False
+        if is_customer:
+            customer_settings = CustomerSettings.objects.get(customer=user_profile.customer)
+            if customer_settings and customer_settings.retainer_amount > 0:
+                is_premium_member = True
+
+
         if user.is_superuser:
             access_level_label = 'Super User'
 
@@ -81,7 +89,8 @@ class UserView(APIView):
             "access_level_label": access_level_label,
             "avatar": avatar,
             "customerLogo": customerLogo,
-            "customerName": customerName
+            "customerName": customerName,
+            "isPremiumMember": is_premium_member
         }
 
         return Response(content)
