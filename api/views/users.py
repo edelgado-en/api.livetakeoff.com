@@ -19,12 +19,15 @@ class UserView(APIView):
 
         customerName = None
 
+        canSeePrice = False
+
         customerLogo = None
         if user_profile and user_profile.customer and user_profile.customer.logo:
             customerLogo = user_profile.customer.logo.url
 
         if user_profile and user_profile.customer:
             customerName = user_profile.customer.name
+            canSeePrice = user_profile.customer.customer_settings.show_job_price
 
 
         first_name = ''
@@ -59,12 +62,15 @@ class UserView(APIView):
 
         if user.is_superuser:
             access_level_label = 'Super User'
+            canSeePrice = True
 
         elif user.is_staff:
             access_level_label = 'Admin'
+            canSeePrice = True
 
         elif is_account_manager:
             access_level_label = 'Account Manager'
+            canSeePrice = True
 
         elif is_project_manager:
             access_level_label = 'Project Manager'
@@ -90,7 +96,8 @@ class UserView(APIView):
             "avatar": avatar,
             "customerLogo": customerLogo,
             "customerName": customerName,
-            "isPremiumMember": is_premium_member
+            "isPremiumMember": is_premium_member,
+            "canSeePrice": canSeePrice
         }
 
         return Response(content)
