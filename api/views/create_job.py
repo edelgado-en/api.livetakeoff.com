@@ -8,6 +8,8 @@ from datetime import (date, datetime, timedelta)
 import pytz
 from email.utils import parsedate_tz, mktime_tz
 
+from django.contrib.auth.models import User
+
 from api.pricebreakdown_service import PriceBreakdownService
 
 from ..models import (
@@ -29,6 +31,8 @@ from ..models import (
         UserProfile
     )
 
+from api.notification_util import NotificationUtil
+from api.email_util import EmailUtil
 
 class CreateJobView(APIView):
     parser_classes = (MultiPartParser, FormParser)
@@ -209,6 +213,52 @@ class CreateJobView(APIView):
 
         for retainer_service in retainer_services:
             TailRetainerServiceLookup.objects.create(tail_number=job.tailNumber, retainer_service=retainer_service, customer=job.customer)
+
+
+        # if is_customer is True, send SMS and email to all admins and account managers
+        if is_customer:
+            # send SMS to all admins and account managers
+            notification_util = NotificationUtil()
+            message = f'Customer {job.customer.name} has submitted job {job.purchase_order} for Tail number {job.tailNumber}. Check it out at  http://livetakeoff.com/jobs/{job.id}/details'
+
+            admins = User.objects.filter(Q(is_superuser=True) | Q(is_staff=True) | Q(groups__name='Account Managers'))
+
+            unique_phone_numbers = []
+
+            for user in admins:
+                if user.profile.phone_number:
+                    if user.profile.phone_number not in unique_phone_numbers:
+                        unique_phone_numbers.append(user.profile.phone_number)
+
+
+            for phone_number in unique_phone_numbers:
+                notification_util.send(message, phone_number.as_e164)
+
+            # send email to all admins and account managers
+            subject = f'Customer {job.customer.name} has submitted a job'
+
+            body = f'''
+                    <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">Customer Job Request</div>
+                    <table style="border-collapse: collapse">
+                        <tr>
+                            <td style="padding:15px">Customer</td>
+                            <td style="padding:15px">{job.customer.name}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:15px">Job PO</td>
+                            <td style="padding:15px">{job.purchase_order}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:15px">Tail</td>
+                            <td style="padding:15px">{job.tailNumber}</td>
+                        </tr>
+                    </table>
+                    <div style="margin-top:20px;padding:5px;font-weight: 700;">Check it out at</div>
+                    <div style="padding:5px">http://livetakeoff.com/jobs/{job.id}/details</div>
+                    '''
+
+            email_util = EmailUtil()
+            email_util.send_email('rob@cleantakeoff.com', subject, body)
 
 
         response = {
