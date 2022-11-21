@@ -19,6 +19,16 @@ class JobCommentView(ListCreateAPIView):
     pagination_class = CustomPageNumberPagination
     lookup_url_kwarg = "jobid"
 
+    def get(self, request, *args, **kwargs):
+        job_id = self.kwargs.get(self.lookup_url_kwarg)
+        job = Job.objects.get(pk=job_id)
+
+        if not self.can_view_comments(self.request.user, job):
+            return Response({'error': 'You do not have permission to view comments for this job'}, status=status.HTTP_403_FORBIDDEN)
+
+        return self.list(request, *args, **kwargs)
+
+
     def get_queryset(self):
         job_id = self.kwargs.get(self.lookup_url_kwarg)
         job = Job.objects.get(pk=job_id)
@@ -70,6 +80,10 @@ class JobCommentView(ListCreateAPIView):
         user = self.request.user
         job_id = self.kwargs.get(self.lookup_url_kwarg)
         job = Job.objects.get(pk=job_id)
+
+        if not self.can_view_comments(user, job):
+            return Response({'error': 'You do not have permission to create comment'}, status=status.HTTP_403_FORBIDDEN)
+
 
         comment = self.request.data['comment']
         send_sms = self.request.data['sendSMS']
@@ -145,4 +159,15 @@ class JobCommentView(ListCreateAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
+    def can_view_comments(self, user, job):
+        if user.is_superuser \
+          or user.is_staff \
+          or user.groups.filter(name='Project Managers').exists() \
+          or user.groups.filter(name='Account Managers').exists():
+           return True
+
+        if user.profile.customer and user.profile.customer == job.customer:
+            return True
+
+        return False
 
