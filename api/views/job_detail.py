@@ -155,7 +155,7 @@ class JobDetail(APIView):
         if request.user.groups.filter(name='Project Managers').exists():
             job.price = None
 
-        
+
         serializer = JobDetailSerializer(job)
 
         return Response(serializer.data)
@@ -242,6 +242,27 @@ class JobDetail(APIView):
                     if phone_number:
                         # send a text message
                         message = f'Job {job.purchase_order} for tail number {job.tailNumber} has been accepted by {request.user.username}. You can checkout the job at https://livetakeoff.com/jobs/{job.id}/details'
+                        notification_util.send(message, phone_number.as_e164)
+
+
+            # Cancel job
+            if 'status' in request.data and request.data['status'] == 'T':
+                #unassign all services and retainer services
+                for service in job.job_service_assignments.all():
+                    service.project_manager = None
+                    service.save(update_fields=['project_manager'])
+
+                for retainer_service in job.job_retainer_service_assignments.all():
+                    retainer_service.project_manager = None
+                    retainer_service.save(update_fields=['project_manager'])
+
+
+                for admin in admins:
+                    # get the phone number of the admin
+                    phone_number = admin.profile.phone_number
+                    if phone_number:
+                        # send a text message
+                        message = f'Job {job.purchase_order} for tail number {job.tailNumber} has been CANCELLED by {request.user.username}. You can checkout the job at https://livetakeoff.com/jobs/{job.id}/details'
                         notification_util.send(message, phone_number.as_e164)
 
             
