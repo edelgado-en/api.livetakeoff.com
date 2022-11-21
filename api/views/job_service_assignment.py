@@ -244,7 +244,7 @@ class JobServiceAssignmentView(APIView):
         else:
             complete_by = 'N/A'
 
-        message = f'Job {job.purchase_order} has been assigned to you for tail number {job.tailNumber} to be completed by {complete_by}. Please go to you Livetakeoff App and check it out http://livetakeoff.com/jobs/{job.id}/details'
+        message = f'Job {job.purchase_order} has been assigned to you for tail number {job.tailNumber} to be completed before {complete_by}. Please go to you Livetakeoff App and check it out http://livetakeoff.com/jobs/{job.id}/details'
 
         for phone_number in unique_phone_numbers:
             notification_util.send(message, phone_number.as_e164)
