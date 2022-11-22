@@ -18,7 +18,8 @@ from api.models import (
         PriceListEntries,
         CustomerDiscount,
         JobEstimateDiscount,
-        JobEstimateAdditionalFee
+        JobEstimateAdditionalFee,
+        Customer
     )
 
 
@@ -32,6 +33,7 @@ class CreateEstimateView(APIView):
         aircraft_type_id = request.data.get('aircraft_type_id')
         airport_id = request.data.get('airport_id')
         fbo_id = request.data.get('fbo_id')
+        customer_id = request.data.get('customer_id')
 
         s = request.data.get('services')
         services = []
@@ -39,7 +41,13 @@ class CreateEstimateView(APIView):
         if s: 
             services = Service.objects.filter(id__in=s)
 
-        customer = request.user.profile.customer
+        # if user is not a customer, get the provided customer
+        if request.user.profile.customer:
+            customer = request.user.profile.customer
+        else:
+            customer = Customer.objects.get(id=customer_id)
+        
+
         aircraft_type = AircraftType.objects.get(id=aircraft_type_id)
         airport = Airport.objects.get(id=airport_id)
         selected_fbo = FBO.objects.get(id=fbo_id)

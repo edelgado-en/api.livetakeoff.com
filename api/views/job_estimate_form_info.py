@@ -22,8 +22,9 @@ class JobEstimateFormInfoView(APIView):
         """
         Get all the data needed to create a new job estimate.
         """
-        if not self.can_create_estimate(request.user):
-            return Response({'error': 'You do not have permission to create a job estimate'}, status=status.HTTP_403_FORBIDDEN)
+        
+
+        customers = Customer.objects.all().order_by('name')
 
         aircraft_types = AircraftType.objects.filter(active=True).all().order_by('name')
         
@@ -33,6 +34,16 @@ class JobEstimateFormInfoView(APIView):
 
         # only get public services
         services = Service.objects.filter(public=True, active=True).all().order_by('name')
+
+
+        customer_dtos = []
+        for customer in customers:
+            c = {
+                'id': customer.id,
+                'name': customer.name,
+            }
+
+            customer_dtos.append(c)
 
 
         aircraft_type_dtos = []
@@ -88,6 +99,7 @@ class JobEstimateFormInfoView(APIView):
             return Response({'error': 'No services found'}, status=status.HTTP_404_NOT_FOUND)
 
         response = {
+            'customers': customer_dtos,
             'aircraft_types': aircraft_type_dtos,
             'airports': airport_dtos,
             'fbos': fbo_dtos,
@@ -95,17 +107,3 @@ class JobEstimateFormInfoView(APIView):
         }
 
         return Response(response, status.HTTP_200_OK)
-
-
-    def can_create_estimate(self, user):
-        """
-        Only customer users can create estimates.
-        """
-
-        user_profile = UserProfile.objects.get(user=user)
-        
-        if user_profile and user_profile.customer is not None:
-            return True
-
-        
-        return False
