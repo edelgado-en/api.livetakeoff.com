@@ -20,8 +20,7 @@ class JobListView(ListAPIView):
     permission_classes = (permissions.IsAuthenticated,)
     pagination_class = CustomPageNumberPagination
 
-    # TODO: you have to get a different jobserializer for Account Managers/Admin/SuperUsers
-    # in that serializer you have to also get customer and assignees
+
     def get_serializer_class(self):
         if self.request.user.is_superuser \
           or self.request.user.is_staff \

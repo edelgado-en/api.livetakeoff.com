@@ -30,3 +30,8 @@ from .job_comment_check import JobCommentCheck
 from .tail_aircraft_lookup import TailAircraftLookup
 from .tail_service_lookup import TailServiceLookup
 from .tail_retainer_service_lookup import TailRetainerServiceLookup
+from .job_estimate import JobEstimate
+from .job_service_estimate import JobServiceEstimate
+from .job_estimate_discount import JobEstimateDiscount
+from .job_estimate_additional_fee import JobEstimateAdditionalFee
+from .service_type import ServiceType

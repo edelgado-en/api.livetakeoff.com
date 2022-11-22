@@ -25,3 +25,6 @@ from .job_activity import JobActivitySerializer
 from .aircraft_type import AircraftTypeSerializer
 from .shared_job_detail import SharedJobDetailSerializer
 from .customer_activity import CustomerActivitySerializer
+from .job_estimate_detail import JobEstimateDetailSerializer
+from .job_estimate_basic import JobEstimateSerializer
+from .job_basic import JobBasicSerializer

@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 
 from api.models import (
     Service,
+    ServiceType,
     RetainerService,
     ChecklistAction,
     Customer,
@@ -46,6 +47,18 @@ admin.site.register(User, UserAdmin)
 
 @admin.register(Service)
 class ServiceAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name', 'description', 'active', 'public', 'type']
+    list_per_page = 100
+    ordering = ['name', 'active']
+    search_fields = ['name', 'active']
+
+    def has_delete_permission(self, request, obj=None):
+        # Disable delete because when you want to stop using a service, just set it to inactive
+        return False
+
+
+@admin.register(ServiceType)
+class ServicTypeeAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'description', 'active']
     list_per_page = 100
     ordering = ['name', 'active']
@@ -54,6 +67,7 @@ class ServiceAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         # Disable delete because when you want to stop using a service, just set it to inactive
         return False
+
 
 @admin.register(RetainerService)
 class RetainerServiceAdmin(admin.ModelAdmin):

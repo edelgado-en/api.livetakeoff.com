@@ -42,3 +42,7 @@ from .user_signup import UserSignupView
 from .shared_job_detail import SharedJobDetailView
 from .contact import ContactView
 from .customer_activity import CustomerActivityView
+from .job_estimate import JobEstimateView
+from .create_estimate import CreateEstimateView
+from .job_estimate_detail import JobEstimateDetailView
+from .job_estimate_form_info import JobEstimateFormInfoView
