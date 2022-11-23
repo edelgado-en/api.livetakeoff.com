@@ -29,8 +29,14 @@ class JobEstimateView(ListAPIView):
         if status != 'All':
             qs = qs.filter(status=status)
 
-        if customer != 'All':
-            qs = qs.filter(customer_id=customer)
+
+        # if the current user is a customer, only show estimates for that customer
+        if self.request.user.profile.customer:
+            qs = qs.filter(customer=self.request.user.profile.customer)
+        else:
+            if customer != 'All':
+                qs = qs.filter(customer_id=customer)
+
         
         qs = qs.order_by(F('requested_at').desc(nulls_last=True))
 

@@ -31,8 +31,6 @@ class JobEstimateDetailSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
     aircraftType = AircraftTypeSerializer()
     customer = CustomerSerializer()
-    requested_at = serializers.DateTimeField(format="%m/%d %H:%M")
-    processed_at = serializers.DateTimeField(format="%m/%d %H:%M")
     job = JobBasicSerializer(read_only=True)
     airport = AirportSerializer()
     fbo = FBOSerializer()
