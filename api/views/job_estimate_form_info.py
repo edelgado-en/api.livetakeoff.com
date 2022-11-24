@@ -28,9 +28,9 @@ class JobEstimateFormInfoView(APIView):
 
         aircraft_types = AircraftType.objects.filter(active=True).all().order_by('name')
         
-        airports = Airport.objects.filter(active=True).all().order_by('name')
+        airports = Airport.objects.filter(public=True, active=True).all().order_by('name')
         
-        fbos = FBO.objects.filter(active=True).all().order_by('name')
+        fbos = FBO.objects.filter(public=True, active=True).all().order_by('name')
 
         # only get public services
         services = Service.objects.filter(public=True, active=True).all().order_by('name')
