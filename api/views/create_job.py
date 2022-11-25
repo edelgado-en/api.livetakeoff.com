@@ -28,7 +28,8 @@ from ..models import (
         TailAircraftLookup,
         TailServiceLookup,
         TailRetainerServiceLookup,
-        UserProfile
+        UserProfile,
+        JobEstimate
     )
 
 from api.notification_util import NotificationUtil
@@ -50,6 +51,7 @@ class CreateJobView(APIView):
         # if user is customer, get customer from user profile
         user_profile = UserProfile.objects.get(user=request.user)
         is_customer = user_profile and user_profile.customer is not None
+        estimate_id = data.get('estimate_id')
 
         job_status = 'A'
 
@@ -163,13 +165,6 @@ class CreateJobView(APIView):
             assignment.save()
 
 
-        # after creating services calculate the job price
-        # update price
-        price_breakdown = PriceBreakdownService().get_price_breakdown(job)
-        job.price = price_breakdown.get('totalPrice')
-        job.save()
-
-
         # TODO: Calculate estimated completion time based on the estimated times of the selected services and aircraft type
 
         if comment:
@@ -191,6 +186,20 @@ class CreateJobView(APIView):
                           customer_uploaded=True,
                           size=photo.size)
             p.save()
+
+
+        # if the estimate is not null, then we need to update the estimate with the job id
+        if estimate_id:
+            estimate = JobEstimate.objects.get(id=estimate_id)
+            estimate.job = job
+            estimate.save()
+
+
+        # after creating services calculate the job price
+        # update price
+        price_breakdown = PriceBreakdownService().get_price_breakdown(job)
+        job.price = price_breakdown.get('totalPrice')
+        job.save()
 
         # if user is customer, this is submitted, otherwise it is accepted
         JobStatusActivity.objects.create(job=job, user=request.user, status='A')
@@ -259,6 +268,18 @@ class CreateJobView(APIView):
 
             email_util = EmailUtil()
             email_util.send_email('rob@cleantakeoff.com', subject, body)
+        
+        
+        # if there is an estimate for this job, then you need to update the estimate status to accepted if it is in pending
+        try:
+            job_estimate = JobEstimate.objects.get(job=job)
+        except:
+            job_estimate = None
+
+        if job_estimate:
+            if job_estimate.status == 'P':
+                job_estimate.status = 'A'
+                job_estimate.save()
 
 
         response = {

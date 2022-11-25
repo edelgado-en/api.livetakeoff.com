@@ -27,9 +27,18 @@ class JobFormInfoView(APIView):
 
         customers = Customer.objects.all().order_by('name')
         aircraft_types = AircraftType.objects.all().order_by('name')
-        airports = Airport.objects.all().order_by('name')
-        fbos = FBO.objects.all().order_by('name')
-        services = Service.objects.all().order_by('name')
+        
+        #if user is a customer, only show their airports, fbos, and services that are public
+        if request.user.profile.customer:
+            airports = Airport.objects.filter(public=True).order_by('name')
+            fbos = FBO.objects.filter(public=True).order_by('name')
+            services = Service.objects.filter(public=True).order_by('name')
+        else:
+            airports = Airport.objects.all().order_by('name')
+            fbos = FBO.objects.all().order_by('name')
+            services = Service.objects.all().order_by('name')
+        
+        
         retainer_services = RetainerService.objects.all().order_by('name')
 
         customer_dtos = []
