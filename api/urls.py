@@ -45,7 +45,8 @@ from .views import (
         CreateEstimateView,
         JobEstimateView,
         JobEstimateDetailView,
-        JobEstimateFormInfoView
+        JobEstimateFormInfoView,
+        SharedJobEstimateDetailView
     )
 
 urlpatterns = [
@@ -91,8 +92,11 @@ urlpatterns = [
     path('users/me/avatar', UserAvatarView.as_view()),
     path('users/me/reset-password', UserResetPasswordView.as_view()),
     path('users/signup', UserSignupView.as_view()),
+    
     path('shared/jobs/<int:id>/', SharedJobDetailView.as_view()),
     path('shared/contact', ContactView.as_view()),
+    path('shared/estimates/<str:encoded_id>/', SharedJobEstimateDetailView.as_view()),
+
     path('customers/activities', CustomerActivityView.as_view()),
     path('estimates/create', CreateEstimateView.as_view()),
     path('estimates', JobEstimateView.as_view()),

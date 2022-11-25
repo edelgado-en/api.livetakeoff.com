@@ -38,6 +38,7 @@ class JobEstimateDetailSerializer(serializers.ModelSerializer):
     services = EstimateServiceSerializer(many=True, read_only=True)
     job_estimate_discounts = JobEstimateDiscountSerializer(many=True, read_only=True)
     job_estimate_additional_fees = JobEstimateAdditionalFeeSerializer(many=True, read_only=True)
+    encoded_id = serializers.CharField(max_length=100, read_only=True, required=False)
 
     class Meta:
         model = JobEstimate
@@ -59,5 +60,6 @@ class JobEstimateDetailSerializer(serializers.ModelSerializer):
             'fbo',
             'services',
             'job_estimate_discounts',
-            'job_estimate_additional_fees'     
+            'job_estimate_additional_fees',
+            'encoded_id'     
         )
