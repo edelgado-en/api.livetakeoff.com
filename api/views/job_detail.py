@@ -6,6 +6,8 @@ from rest_framework.views import APIView
 from django.contrib.auth.models import User
 from datetime import datetime
 
+import base64
+
 from ..serializers import (
      JobDetailSerializer,
      )
@@ -157,6 +159,13 @@ class JobDetail(APIView):
         if request.user.groups.filter(name='Project Managers').exists():
             job.price = None
 
+
+        message = str(job.id) + '-' + job.tailNumber
+        message_bytes = message.encode('ascii')
+        base64_bytes = base64.b64encode(message_bytes)
+        base64_message = base64_bytes.decode('ascii')
+
+        job.encoded_id = base64_message
 
         serializer = JobDetailSerializer(job)
 

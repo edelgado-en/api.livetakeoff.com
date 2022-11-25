@@ -3,6 +3,8 @@ from rest_framework import (permissions, status)
 from rest_framework .response import Response
 from rest_framework.views import APIView
 
+import base64
+
 from api.serializers import (SharedJobDetailSerializer)
 
 from api.models import (Job, JobComments)
@@ -11,12 +13,20 @@ from api.models import (Job, JobComments)
 class SharedJobDetailView(APIView):
     permission_classes = (permissions.AllowAny,)
 
-    def get(self, request, id):
+    def get(self, request, encoded_id):
+        # Base64 DECODE
+        base64_bytes = encoded_id.encode('ascii')
+        message_bytes = base64.b64decode(base64_bytes)
+        message = message_bytes.decode('ascii')
+
+        # split message with delimiter - and get the first part
+        job_id = int(message.split('-')[0])
+
         job = Job.objects \
                  .prefetch_related('photos') \
                  .prefetch_related('job_service_assignments') \
                  .prefetch_related('job_retainer_service_assignments') \
-                 .get(pk=id)
+                 .get(pk=job_id)
         
         job_service_assignments = []
         job_retainer_service_assignments = []

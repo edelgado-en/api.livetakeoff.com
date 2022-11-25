@@ -23,6 +23,7 @@ class JobDetailSerializer(serializers.ModelSerializer):
     total_photos = serializers.IntegerField(read_only=True)
     total_assignees = serializers.IntegerField(read_only=True)
     created_by = BasicUserSerializer(read_only=True)
+    encoded_id = serializers.CharField(max_length=100, read_only=True, required=False)
 
     class Meta:
         model = Job
@@ -47,7 +48,8 @@ class JobDetailSerializer(serializers.ModelSerializer):
             'price',
             'is_auto_priced',
             'on_site',
-            'created_by'
+            'created_by',
+            'encoded_id'
         )
 
 

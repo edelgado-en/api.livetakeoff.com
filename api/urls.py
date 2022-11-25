@@ -93,7 +93,7 @@ urlpatterns = [
     path('users/me/reset-password', UserResetPasswordView.as_view()),
     path('users/signup', UserSignupView.as_view()),
     
-    path('shared/jobs/<int:id>/', SharedJobDetailView.as_view()),
+    path('shared/jobs/<str:encoded_id>/', SharedJobDetailView.as_view()),
     path('shared/contact', ContactView.as_view()),
     path('shared/estimates/<str:encoded_id>/', SharedJobEstimateDetailView.as_view()),
 
