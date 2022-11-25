@@ -13,7 +13,7 @@ from ..pagination import CustomPageNumberPagination
 
 
 class JobEstimateView(ListAPIView):
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.AllowAny,)
     serializer_class = JobEstimateDetailSerializer
     pagination_class = CustomPageNumberPagination
 

@@ -16,7 +16,7 @@ class JobEstimateFormInfoView(APIView):
     """
     View to gather all the data needed to create a new job estimate.
     """
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.AllowAny,)
 
     def get(self, request):
         """

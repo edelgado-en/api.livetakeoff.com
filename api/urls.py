@@ -96,6 +96,6 @@ urlpatterns = [
     path('customers/activities', CustomerActivityView.as_view()),
     path('estimates/create', CreateEstimateView.as_view()),
     path('estimates', JobEstimateView.as_view()),
-    path('estimates/<int:id>/', JobEstimateDetailView.as_view()),
+    path('estimates/details/<int:id>/', JobEstimateDetailView.as_view()),
     path('estimates/form-info', JobEstimateFormInfoView.as_view()),
 ]
