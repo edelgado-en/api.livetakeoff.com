@@ -279,8 +279,30 @@ class JobDetail(APIView):
             
             if 'status' in request.data:
                 JobStatusActivity.objects.create(job=job, user=request.user, status=request.data['status'])
+                
+                job_status = request.data["status"]
 
-            
+                #we only notify customer for status A, W, C
+                if job_status == 'A' or job_status == 'W' or job_status == 'C':
+                    
+                    # Get Status name
+                    status_name = 'COMPLETED'
+                    if job_status == 'A':
+                        status_name = 'ACCEPTED'
+                    elif job_status == 'W':
+                        status_name = 'STARTED'
+                    
+                    
+                    # if the job.requested_by is a customer user (check if userProfile has a customer specified), send an SMS notification to the customer if he/she has the sms_notification enabled in its UserProfile
+                    if job.created_by.profile.customer and job.created_by.profile.sms_notifications:
+                        # check if user has a phone number
+                        phone_number = job.created_by.profile.phone_number
+
+                        # check if the request_by is different than the user who is updating the job. Only send notification if the user is different
+                        if phone_number and job.created_by != request.user:
+                            notification_util.send(f'Job {job.purchase_order} for tail number {job.tailNumber} has been {status_name}. You can checkout the job at https://livetakeoff.com/jobs/{job.id}/details', phone_number.as_e164)
+
+
             return Response(serializer.data)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

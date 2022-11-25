@@ -97,7 +97,9 @@ class UserView(APIView):
             "customerLogo": customerLogo,
             "customerName": customerName,
             "isPremiumMember": is_premium_member,
-            "canSeePrice": canSeePrice
+            "canSeePrice": canSeePrice,
+            "receive_sms_notifications": user_profile.sms_notifications,
+            "receive_email_notifications": user_profile.email_notifications
         }
 
         return Response(content)
@@ -107,6 +109,9 @@ class UserView(APIView):
         user_profile = UserProfile.objects.get(user=user)
 
         user_profile.about = request.data['about']
+        user_profile.email_notifications = request.data['email_notifications']
+        user_profile.sms_notifications = request.data['sms_notifications']
+        
         user_profile.save()
 
         user.username = request.data['username']
