@@ -13,7 +13,9 @@ from api.notification_util import NotificationUtil
 from ..models import (
     Job,
     JobStatusActivity,
-    JobCommentCheck
+    JobCommentCheck,
+    JobServiceAssignment,
+    JobRetainerServiceAssignment
     )
 
 
@@ -23,7 +25,7 @@ class EditJobView(APIView):
     def patch(self, request, id):
         job = get_object_or_404(Job, pk=id)
 
-        if not self.can_edit_job(request.user):
+        if not self.can_edit_job(request.user, job):
             return Response({'error': 'You do not have permission to edit a job'}, status=status.HTTP_403_FORBIDDEN)
         
         current_status = job.status
@@ -33,51 +35,57 @@ class EditJobView(APIView):
 
         if serializer.is_valid():
             serializer.save()
-            
-            new_status = serializer.data['status']
 
-            if current_status != new_status:
+            # only non-customer users can edit this part
+            if not request.user.profile.customer:
+                new_status = serializer.data['status']
 
-                if new_status == 'C':
-                    job_comment_checks = JobCommentCheck.objects.filter(job=job)
+                if current_status != new_status:
 
-                    if job_comment_checks:
-                        job_comment_checks.delete()
+                    if new_status == 'C':
+                        job_comment_checks = JobCommentCheck.objects.filter(job=job)
 
-                    #Send a notification to all admins and account managers
-                    notification_util = NotificationUtil()
-                    admins = User.objects.filter(Q(is_superuser=True) | Q(is_staff=True) | Q(groups__name='Account Managers'))
+                        if job_comment_checks:
+                            job_comment_checks.delete()
 
-                    for admin in admins:
-                        # get the phone number of the admin
-                        phone_number = admin.profile.phone_number
-                        if phone_number:
-                            # send a text message
-                            message = f'Job {job.purchase_order} for tail number {job.tailNumber} has been COMPLETED. Please review the job and close it out https://livetakeoff.com/completed/review/{job.id}'
-                            notification_util.send(message, phone_number.as_e164)
+                        #Send a notification to all admins and account managers
+                        notification_util = NotificationUtil()
+                        admins = User.objects.filter(Q(is_superuser=True) | Q(is_staff=True) | Q(groups__name='Account Managers'))
 
-
-                    #unassign all services and retainer services
-                    for service in job.job_service_assignments.all():
-                        service.project_manager = None
-                        service.save(update_fields=['project_manager'])
-
-                    for retainer_service in job.job_retainer_service_assignments.all():
-                        retainer_service.project_manager = None
-                        retainer_service.save(update_fields=['project_manager'])
+                        for admin in admins:
+                            # get the phone number of the admin
+                            phone_number = admin.profile.phone_number
+                            if phone_number:
+                                # send a text message
+                                message = f'Job {job.purchase_order} for tail number {job.tailNumber} has been COMPLETED. Please review the job and close it out https://livetakeoff.com/completed/review/{job.id}'
+                                notification_util.send(message, phone_number.as_e164)
 
 
-                    job.completion_date = datetime.now()
+                        #unassign all services and retainer services
+                        for service in job.job_service_assignments.all():
+                            service.project_manager = None
+                            service.save(update_fields=['project_manager'])
+
+                        for retainer_service in job.job_retainer_service_assignments.all():
+                            retainer_service.project_manager = None
+                            retainer_service.save(update_fields=['project_manager'])
+
+
+                        job.completion_date = datetime.now()
+                        job.save()
+
+
+                    JobStatusActivity.objects.create(job=job, user=request.user, status=new_status)
+
+                if current_price != serializer.data['price']:
+                    job.is_auto_priced = False
                     job.save()
 
+                    JobStatusActivity.objects.create(job=job, user=request.user, status='P', price=serializer.data['price'])
 
-                JobStatusActivity.objects.create(job=job, user=request.user, status=new_status)
+            # TODO: handle ability to add/remove JobServiceAssignments and/or JobRetainerServiceAssignments if the user is a customer
 
-            if current_price != serializer.data['price']:
-                job.is_auto_priced = False
-                job.save()
 
-                JobStatusActivity.objects.create(job=job, user=request.user, status='P', price=serializer.data['price'])
 
             response = {
                 'id': job.id,
@@ -89,11 +97,15 @@ class EditJobView(APIView):
 
 
 
-    def can_edit_job(self, user):
+    def can_edit_job(self, user, job):
         """
         Check if the user has permission to edit a job.
         """
+        # if the user is a customer, he/she can edit the job is the job.customer matches its customer
+        if user.profile.customer and user.profile.customer == job.customer:
+            return True
+
         if user.is_superuser or user.is_staff or user.groups.filter(name='Account Managers').exists():
             return True
-        else:
-            return False
+        
+        return False
