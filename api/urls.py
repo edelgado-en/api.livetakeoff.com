@@ -46,7 +46,9 @@ from .views import (
         JobEstimateView,
         JobEstimateDetailView,
         JobEstimateFormInfoView,
-        SharedJobEstimateDetailView
+        SharedJobEstimateDetailView,
+        TailStatsView,
+        TailStatsDetailView
     )
 
 urlpatterns = [
@@ -102,4 +104,7 @@ urlpatterns = [
     path('estimates', JobEstimateView.as_view()),
     path('estimates/details/<int:id>/', JobEstimateDetailView.as_view()),
     path('estimates/form-info', JobEstimateFormInfoView.as_view()),
+
+    path('tail-stats', TailStatsView.as_view()),
+    path('tail-stats/<str:tail_number>/', TailStatsDetailView.as_view()),
 ]

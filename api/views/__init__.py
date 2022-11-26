@@ -47,3 +47,5 @@ from .create_estimate import CreateEstimateView
 from .job_estimate_detail import JobEstimateDetailView
 from .job_estimate_form_info import JobEstimateFormInfoView
 from .shared_job_estimate_detail import SharedJobEstimateDetailView
+from .tail_stats import TailStatsView
+from .tail_stats_detail import TailStatsDetailView

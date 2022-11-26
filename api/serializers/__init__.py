@@ -28,3 +28,4 @@ from .customer_activity import CustomerActivitySerializer
 from .job_estimate_detail import JobEstimateDetailSerializer
 from .job_estimate_basic import JobEstimateSerializer
 from .job_basic import JobBasicSerializer
+from .tail_stats import TailStatsSerializer
