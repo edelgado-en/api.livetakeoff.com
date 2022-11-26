@@ -27,8 +27,7 @@ class TailStatsView(ListAPIView):
         # and sort by highest number of jobs first
         qs = Job.objects.values('tailNumber', 'aircraftType__name') \
                         .annotate(job_count=Count('tailNumber')) \
-                        .order_by('-job_count') \
-                        .distinct('tailNumber') # distinct only works in Postgres
+                        .order_by('-job_count')
 
 
         if searchText:
