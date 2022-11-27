@@ -21,7 +21,7 @@ class TailStatsView(ListAPIView):
     def get_queryset(self):
         # search by tailNumber
         searchText = self.request.data.get('searchText')
-        sortDirection = self.request.data.get('sortDirection')
+        sortSelected = self.request.data.get('sortSelected')
 
         # Get the list of tail numbers with aircraftType names the count of total jobs and the total price of those jobs but only for jobs with status C or I
         # and sort by highest number of jobs first
@@ -32,12 +32,18 @@ class TailStatsView(ListAPIView):
         if searchText:
             qs = qs.filter(tailNumber__icontains=searchText)
 
-        # sort by job count
-        if sortDirection == 'asc':
-            qs = qs.order_by('total_price')
-        else:
-            qs = qs.order_by('-total_price')
         
+        if sortSelected == 'total_price_desc':
+            qs = qs.order_by('-total_price')
+
+        elif sortSelected == 'total_price_asc':
+            qs = qs.order_by('total_price')
+
+        elif sortSelected == 'job_count_desc':
+            qs = qs.order_by('-job_count')
+        
+        elif sortSelected == 'job_count_asc':
+            qs = qs.order_by('job_count')
 
         return qs
     
