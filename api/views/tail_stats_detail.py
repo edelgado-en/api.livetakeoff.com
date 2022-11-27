@@ -38,7 +38,7 @@ class TailStatsDetailView(APIView):
 
         # get the list of the last 10 services for the given tail number with their corresponding dates
         # and sort by most recent date first
-        job_service_assignments = JobServiceAssignment.objects.filter(job__tailNumber=tail_number) \
+        job_service_assignments = JobServiceAssignment.objects.filter(job__tailNumber=tail_number, status__in=['C', 'W']) \
             .order_by('-job__requestDate')[:10]
         
         # get the service name and the updated_at date
@@ -46,7 +46,7 @@ class TailStatsDetailView(APIView):
         
         # get the list of the last 10 retainer services for the given tail number with their corresponding dates
         # and sort by most recent date first
-        job_retainer_service_assignments = JobRetainerServiceAssignment.objects.filter(job__tailNumber=tail_number) \
+        job_retainer_service_assignments = JobRetainerServiceAssignment.objects.filter(job__tailNumber=tail_number, status__in=['C', 'W']) \
             .order_by('-job__requestDate')[:10]
         
         # get the retainer service name and the updated_at date
@@ -54,16 +54,16 @@ class TailStatsDetailView(APIView):
 
 
         # get the list of service names with how many times they have been completed for the given tail_number
-        # and sort by highest number of jobs first
+        # and sort by highest number of jobs first. This should only include status completed (C) or W
         service_stats = JobServiceAssignment.objects.values('service__name') \
-                                            .filter(job__tailNumber=tail_number) \
+                                            .filter(job__tailNumber=tail_number, status__in=['C', 'W']) \
                                             .annotate(services_count=Count('service__name')) \
                                             .order_by('-services_count') \
         
         # get the list of retainer service names with how many times they have been completed for the given tail_number
         # and sort by highest number of jobs first
         retainer_service_stats = JobRetainerServiceAssignment.objects.values('retainer_service__name') \
-                                            .filter(job__tailNumber=tail_number) \
+                                            .filter(job__tailNumber=tail_number, status__in=['C', 'W']) \
                                             .annotate(services_count=Count('retainer_service__name')) \
                                             .order_by('-services_count') \
 
@@ -87,12 +87,15 @@ class TailStatsDetailView(APIView):
         recent_activity = JobStatusActivity.objects.filter(job__tailNumber=tail_number).order_by('-timestamp')[:10]
 
 
-        # Get the total price for all jobs for this tail number
-        total_price = Job.objects.filter(tailNumber=tail_number) \
+        # Get the total price for all jobs for this tail number only including status completed and invoiced
+        total_price = Job.objects.filter(tailNumber=tail_number, status__in=['C', 'I']) \
                                  .aggregate(total_price=Sum('price'))
 
         # Get the total number of jobs for this tail number
         total_jobs = Job.objects.filter(tailNumber=tail_number).count()
+
+        # get the total number of canceled jobs for this tail number
+        total_canceled_jobs = Job.objects.filter(tailNumber=tail_number, status='T').count()
 
         # Get a breakdown by month of how many jobs have been completed for this tail number
         # and sort by month chronological order
@@ -142,6 +145,10 @@ class TailStatsDetailView(APIView):
         #Get the requestDate column value of the first job for this tail number
         first_job_date = Job.objects.filter(tailNumber=tail_number).order_by('requestDate')[:1].values('requestDate')
 
+        if not total_price['total_price']:
+            total_price = 0
+        else:
+            total_price = total_price['total_price']
 
         # Create a json object with all thease values and return it in the response
         return Response({
@@ -154,9 +161,10 @@ class TailStatsDetailView(APIView):
             'recent_activity': activity_serializer.data,
             'customer': customer_serializer.data,
             'aircraft_type': aircraft_serializer.data,
-            'total_price': total_price['total_price'],
+            'total_price': total_price,
             'recent_services': recent_services,
             'recent_retainer_services': recent_retainer_services,
             'total_jobs': total_jobs,
+            'total_canceled_jobs': total_canceled_jobs
             #'jobs_by_month': jobs_by_month
         }, status=status.HTTP_200_OK)
