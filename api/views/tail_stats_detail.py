@@ -100,6 +100,20 @@ class TailStatsDetailView(APIView):
         # Get a breakdown by month of how many jobs have been completed for this tail number
         # and sort by month chronological order
         # MONTH from api_job.requestDate is failing in Postgres Heroku
+
+        # Get a breakdown of how many jobs have been completed or invoiced for this tail number group by month
+        # and sort by month chronological order
+        # MONTH from api_job.requestDate is failing in Postgres Heroku
+
+        
+        
+
+
+
+
+
+
+
         """ jobs_by_month = Job.objects.filter(tailNumber=tail_number) \
                                       .extra(select={'requestDate': 'EXTRACT(MONTH FROM api_job.requestDate)'}) \
                                         .values('requestDate') \

@@ -23,11 +23,11 @@ class TailStatsView(ListAPIView):
         searchText = self.request.data.get('searchText')
         sortDirection = self.request.data.get('sortDirection')
 
-        # Get a list of tail numbers with its corresponding aircraft types with how many jobs have been associated with them and the total price of those jobs
+        # Get the list of tail numbers with aircraftType names the count of total jobs and the total price of those jobs but only for jobs with status C or I
         # and sort by highest number of jobs first
-        qs = Job.objects.values('tailNumber', 'aircraftType__name') \
-                        .annotate(job_count=Count('tailNumber'), total_price=Sum('price'))
 
+        qs = Job.objects.values('tailNumber', 'aircraftType__name') \
+                        .annotate(job_count=Count('tailNumber'), total_price=Sum('price', filter=Q(status__in=['C', 'I'])))
 
         if searchText:
             qs = qs.filter(tailNumber__icontains=searchText)
