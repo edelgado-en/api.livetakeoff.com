@@ -1,5 +1,5 @@
 from django.db.models import Q, F
-from django.db.models import Count
+from django.db.models import Count, Sum
 from rest_framework import (permissions,status)
 from rest_framework .response import Response
 from rest_framework.generics import ListAPIView
@@ -23,11 +23,10 @@ class TailStatsView(ListAPIView):
         searchText = self.request.data.get('searchText')
         sortDirection = self.request.data.get('sortDirection')
 
-        # Get a list of tail numbers with its corresponding aircraft types with how many jobs have been associated with them
+        # Get a list of tail numbers with its corresponding aircraft types with how many jobs have been associated with them and the total price of those jobs
         # and sort by highest number of jobs first
         qs = Job.objects.values('tailNumber', 'aircraftType__name') \
-                        .annotate(job_count=Count('tailNumber')) \
-                        .order_by('-job_count')
+                        .annotate(job_count=Count('tailNumber'), total_price=Sum('price'))
 
 
         if searchText:
