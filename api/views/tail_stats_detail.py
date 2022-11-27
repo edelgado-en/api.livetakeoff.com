@@ -97,7 +97,7 @@ class TailStatsDetailView(APIView):
         # Get a breakdown by month of how many jobs have been completed for this tail number
         # and sort by month chronological order
         jobs_by_month = Job.objects.filter(tailNumber=tail_number) \
-                                      .extra(select={'requestDate': 'EXTRACT(MONTH FROM requestDate)'}) \
+                                      .extra(select={'requestDate': 'EXTRACT(MONTH FROM api_job.requestDate)'}) \
                                         .values('requestDate') \
                                         .annotate(job_count=Count('requestDate')) \
                                         .order_by('requestDate')
