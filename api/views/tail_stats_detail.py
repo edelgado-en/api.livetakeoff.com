@@ -43,6 +43,14 @@ class TailStatsDetailView(APIView):
         
         # get the service name and the updated_at date
         recent_services = job_service_assignments.values('service__name', 'updated_at')
+        
+        # get the list of the last 10 retainer services for the given tail number with their corresponding dates
+        # and sort by most recent date first
+        job_retainer_service_assignments = JobRetainerServiceAssignment.objects.filter(job__tailNumber=tail_number) \
+            .order_by('-job__requestDate')[:10]
+        
+        # get the retainer service name and the updated_at date
+        recent_retainer_services = job_retainer_service_assignments.values('retainer_service__name', 'updated_at')
 
 
         # get the list of service names with how many times they have been completed for the given tail_number
@@ -56,8 +64,8 @@ class TailStatsDetailView(APIView):
         # and sort by highest number of jobs first
         retainer_service_stats = JobRetainerServiceAssignment.objects.values('retainer_service__name') \
                                             .filter(job__tailNumber=tail_number) \
-                                            .annotate(job_count=Count('retainer_service__name')) \
-                                            .order_by('-job_count') \
+                                            .annotate(services_count=Count('retainer_service__name')) \
+                                            .order_by('-services_count') \
 
         # get the list of airports with how many times they have been used for the given tail_number
         # and sort by highest number of jobs first
@@ -66,13 +74,13 @@ class TailStatsDetailView(APIView):
                                    .annotate(job_count=Count('airport__name')) \
                                    .order_by('-job_count') \
 
-        # query the JobStatusActivity table to get the list of users who have worked on the given tail_number
+        # query the JobStatusActivity table to get the list of project managers with how many times a job has been set to status Complete (C)
         # and sort by highest number of jobs first
-        # The jobs_count IS NOT ACCURATE
-        user_stats = JobStatusActivity.objects.values('user__username') \
-                                                .filter(job__tailNumber=tail_number) \
-                                                .annotate(job_count=Count('user__username')) \
-                                                .order_by('-job_count') \
+        # need to include the user's avatar from the UserProfile table
+        project_manager_stats = JobStatusActivity.objects.values('user__username', 'user__first_name', 'user__last_name', 'user__profile__avatar') \
+                                                            .filter(job__tailNumber=tail_number, status='C') \
+                                                            .annotate(job_count=Count('user__username')) \
+                                                            .order_by('-job_count') \
 
 
         # get recent JobStatusActivity for this tail number
@@ -98,9 +106,9 @@ class TailStatsDetailView(APIView):
         for job in jobs_by_month:
             requestDate = job['requestDate']
             if requestDate == 1:
-                job['requestDate'] = 'January'
+                job['requestDate'] = 'Jan'
             elif requestDate == 2:
-                job['requestDate'] = 'February'
+                job['requestDate'] = 'Feb'
             elif requestDate == 3:
                 job['requestDate'] = 'March'
             elif requestDate == 4:
@@ -112,15 +120,15 @@ class TailStatsDetailView(APIView):
             elif requestDate == 7:
                 job['requestDate'] = 'July'
             elif requestDate == 8:
-                job['requestDate'] = 'August'
+                job['requestDate'] = 'Aug'
             elif requestDate == 9:
-                job['requestDate'] = 'September'
+                job['requestDate'] = 'Sept'
             elif requestDate == 10:
-                job['requestDate'] = 'October'
+                job['requestDate'] = 'Oct'
             elif requestDate == 11:
-                job['requestDate'] = 'November'
+                job['requestDate'] = 'Nov'
             elif requestDate == 12:
-                job['requestDate'] = 'December'
+                job['requestDate'] = 'Dec'
 
         
         # pass recent_activity to JobActivitySerializer
@@ -130,18 +138,24 @@ class TailStatsDetailView(APIView):
 
         aircraft_serializer = AircraftTypeSerializer(aircraft_type)
 
+        #Get the requestDate column value of the first job for this tail number
+        first_job_date = Job.objects.filter(tailNumber=tail_number).order_by('requestDate')[:1].values('requestDate')
+
 
         # Create a json object with all thease values and return it in the response
         return Response({
+            'tailNumber': tail_number,
+            'first_job_date': first_job_date,
             'service_stats': service_stats,
             'retainer_service_stats': retainer_service_stats,
             'airport_stats': airport_stats,
-            'user_stats': user_stats,
+            'project_manager_stats': project_manager_stats,
             'recent_activity': activity_serializer.data,
             'customer': customer_serializer.data,
             'aircraft_type': aircraft_serializer.data,
             'total_price': total_price['total_price'],
             'recent_services': recent_services,
+            'recent_retainer_services': recent_retainer_services,
             'total_jobs': total_jobs,
             'jobs_by_month': jobs_by_month
         }, status=status.HTTP_200_OK)

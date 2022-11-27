@@ -34,9 +34,9 @@ class TailStatsView(ListAPIView):
 
         # sort by job count
         if sortDirection == 'asc':
-            qs = qs.order_by('job_count')
+            qs = qs.order_by('total_price')
         else:
-            qs = qs.order_by('-job_count')
+            qs = qs.order_by('-total_price')
         
 
         return qs
