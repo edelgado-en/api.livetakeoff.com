@@ -91,7 +91,7 @@ class SharedJobEstimateDetailView(APIView):
 
         if phone_number:
             # send a text message
-            message = f'Your estimate for aircraft {estimate.aircraftType.name} at airport {estimate.airport.initials} has been {status_name}. You can checkout it out at https://livetakeoff.com/estimates/{estimate.id}'
+            message = f'Your estimate for tail {estimate.tailNumber} at airport {estimate.airport.initials} has been {status_name}. You can checkout it out at https://livetakeoff.com/estimates/{estimate.id}'
             notification_util.send(message, phone_number.as_e164)
 
         

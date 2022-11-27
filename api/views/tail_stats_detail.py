@@ -96,14 +96,15 @@ class TailStatsDetailView(APIView):
 
         # Get a breakdown by month of how many jobs have been completed for this tail number
         # and sort by month chronological order
-        jobs_by_month = Job.objects.filter(tailNumber=tail_number) \
+        # MONTH from api_job.requestDate is failing in Postgres Heroku
+        """ jobs_by_month = Job.objects.filter(tailNumber=tail_number) \
                                       .extra(select={'requestDate': 'EXTRACT(MONTH FROM api_job.requestDate)'}) \
                                         .values('requestDate') \
                                         .annotate(job_count=Count('requestDate')) \
-                                        .order_by('requestDate')
+                                        .order_by('requestDate') """
 
         # jobs_by_month returns requestDate as a number. Convert to its corresponding month name. For example: 1 = January, 2 = February, etc
-        for job in jobs_by_month:
+        """ for job in jobs_by_month:
             requestDate = job['requestDate']
             if requestDate == 1:
                 job['requestDate'] = 'Jan'
@@ -128,7 +129,7 @@ class TailStatsDetailView(APIView):
             elif requestDate == 11:
                 job['requestDate'] = 'Nov'
             elif requestDate == 12:
-                job['requestDate'] = 'Dec'
+                job['requestDate'] = 'Dec' """
 
         
         # pass recent_activity to JobActivitySerializer
@@ -157,5 +158,5 @@ class TailStatsDetailView(APIView):
             'recent_services': recent_services,
             'recent_retainer_services': recent_retainer_services,
             'total_jobs': total_jobs,
-            'jobs_by_month': jobs_by_month
+            #'jobs_by_month': jobs_by_month
         }, status=status.HTTP_200_OK)
