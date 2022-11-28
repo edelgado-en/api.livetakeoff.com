@@ -15,4 +15,5 @@ class JobActivitySerializer(serializers.ModelSerializer):
             'price',
             'user',
             'timestamp',
+            'activity_type'
             )

@@ -14,6 +14,20 @@ class JobStatusActivity(models.Model):
         ('P', 'Price Changed'),
     ]
 
+    ACTIVITY_TYPE_CHOICES = [
+        ('E', 'Departure Changed'),
+        ('A', 'Arrival Changed'), 
+        ('B', 'Complete Before Changed'),
+        ('P', 'Price Changed'),
+        ('O', 'Airport Changed'),
+        ('F', 'FBO Changed'),
+        ('S', 'Status Changed'),
+        ('T', 'Tail Number Changed'),
+        ('U', 'Photos Uploaded'),
+    ]
+
+    activity_type = models.CharField(max_length=1, choices=ACTIVITY_TYPE_CHOICES, default='S')
+
     job = models.ForeignKey(Job, on_delete=models.PROTECT, related_name='status_activities')
     status = models.CharField(max_length=1, choices=STATUS_CHOICES)
     price = models.DecimalField(max_digits=6, decimal_places=2, null=True)

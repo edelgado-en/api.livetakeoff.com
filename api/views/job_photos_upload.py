@@ -12,6 +12,7 @@ from ..models import (
         JobPhotos,
         Job,
         JobServiceAssignment,
+        JobStatusActivity,
         JobRetainerServiceAssignment)
 from ..serializers import JobPhotoSerializer
 
@@ -59,6 +60,11 @@ class JobPhotosUploadView(APIView):
             p.save()
 
             counter = counter + 1
+
+
+        JobStatusActivity.objects.create(job=job, user=request.user,
+                                    status=job.status, activity_type='U')
+
 
         return Response({'uploaded_photos': counter}, status=status.HTTP_201_CREATED)
 

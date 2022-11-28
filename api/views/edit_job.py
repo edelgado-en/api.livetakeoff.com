@@ -30,11 +30,49 @@ class EditJobView(APIView):
         
         current_status = job.status
         current_price = job.price
+        current_airport = job.airport.id
+        current_fbo = job.fbo.id
+        current_tailNumber = job.tailNumber
+        current_estimatedETD = job.estimatedETD
+        current_estimatedETA = job.estimatedETA
+        current_completeBy = job.completeBy
 
         serializer = JobEditSerializer(job, data=request.data, partial=True)
 
         if serializer.is_valid():
             serializer.save()
+
+            saved_job = Job.objects.get(pk=id)
+
+            if current_estimatedETD != saved_job.estimatedETD:
+                JobStatusActivity.objects.create(job=job, user=request.user,
+                                                 status=serializer.data['status'], activity_type='E')
+
+
+            if current_estimatedETA != saved_job.estimatedETA:
+                JobStatusActivity.objects.create(job=job, user=request.user,
+                                    status=serializer.data['status'], activity_type='A')
+
+
+            if current_completeBy != saved_job.completeBy:
+                JobStatusActivity.objects.create(job=job, user=request.user,
+                                    status=serializer.data['status'], activity_type='B')
+
+
+            if current_airport != serializer.data['airport']:
+                JobStatusActivity.objects.create(job=job, user=request.user,
+                                    status=serializer.data['status'], activity_type='O')
+
+
+            if current_fbo != serializer.data['fbo']:
+                JobStatusActivity.objects.create(job=job, user=request.user,
+                                    status=serializer.data['status'], activity_type='F')
+
+
+            if current_tailNumber != serializer.data['tailNumber']:
+                JobStatusActivity.objects.create(job=job, user=request.user,
+                                    status=serializer.data['status'], activity_type='T')
+
 
             # only non-customer users can edit this part
             if not request.user.profile.customer:
@@ -81,10 +119,7 @@ class EditJobView(APIView):
                     job.is_auto_priced = False
                     job.save()
 
-                    JobStatusActivity.objects.create(job=job, user=request.user, status='P', price=serializer.data['price'])
-
-            # TODO: handle ability to add/remove JobServiceAssignments and/or JobRetainerServiceAssignments if the user is a customer
-
+                    JobStatusActivity.objects.create(job=job, user=request.user, status='P', activity_type='P', price=serializer.data['price'])
 
 
             response = {
