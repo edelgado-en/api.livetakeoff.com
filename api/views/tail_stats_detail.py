@@ -70,7 +70,7 @@ class TailStatsDetailView(APIView):
         # get the list of airports with how many times they have been used for the given tail_number
         # and sort by highest number of jobs first
         airport_stats = Job.objects.values('airport__name') \
-                                   .filter(tailNumber=tail_number) \
+                                   .filter(tailNumber=tail_number, status__in=['C', 'W', 'I']) \
                                    .annotate(job_count=Count('airport__name')) \
                                    .order_by('-job_count') \
 
