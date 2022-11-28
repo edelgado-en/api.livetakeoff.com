@@ -84,7 +84,7 @@ class TailStatsDetailView(APIView):
 
 
         # get recent JobStatusActivity for this tail number
-        recent_activity = JobStatusActivity.objects.filter(job__tailNumber=tail_number).order_by('-timestamp')[:10]
+        recent_activity = JobStatusActivity.objects.filter(job__tailNumber=tail_number).order_by('-timestamp')[:20]
 
 
         # Get the total price for all jobs for this tail number only including status completed and invoiced
@@ -106,7 +106,7 @@ class TailStatsDetailView(APIView):
         # MONTH from api_job.requestDate is failing in Postgres Heroku
 
         
-        
+
 
 
 
