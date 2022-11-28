@@ -18,7 +18,16 @@ class JobActivityView(ListAPIView):
 
     def get_queryset(self):
         jobid = self.kwargs.get(self.lookup_url_kwarg)
-        return JobStatusActivity.objects.filter(job=jobid).order_by('timestamp')
+        job = Job.objects.get(pk=jobid)
+
+        # if the current user is a customer, exclude job status activities related to price changed
+        if self.request.user.profile.customer and self.request.user.profile.customer == job.customer:
+            return JobStatusActivity.objects.filter(job=job).exclude(Q(status='P')).order_by('timestamp')
+
+        if  not self.request.user.profile.customer:
+            return JobStatusActivity.objects.filter(job=jobid).order_by('timestamp')
+
+        return Response({'error': 'You do not have permission to view job activity for this job'}, status=status.HTTP_403_FORBIDDEN)
 
 
 
