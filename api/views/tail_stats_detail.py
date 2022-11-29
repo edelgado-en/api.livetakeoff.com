@@ -39,15 +39,15 @@ class TailStatsDetailView(APIView):
         try:
             # if the current user is a customer, then only show the stats for that customer
             if request.user.profile.customer:
-                job = Job.objects.filter(tailNumber=tail_number, customer=customer).order_by('-requestDate')[:1]
+                job = Job.objects.filter(tailNumber=tail_number, customer=request.user.profile.customer).order_by('-requestDate')[:1]
 
             else:
                 job = Job.objects.filter(tailNumber=tail_number).order_by('-requestDate')[:1]
 
+
             for j in job:
                 customer = j.customer
                 aircraft_type = j.aircraftType
-                break
 
         except Job.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
