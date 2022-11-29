@@ -1,5 +1,6 @@
 from django.db.models import Q, F
-from django.db.models import Count, Sum
+from django.db import models
+from django.db.models import Count, Sum, Func
 from django.shortcuts import get_object_or_404
 from rest_framework import (permissions, status)
 from rest_framework .response import Response
@@ -15,6 +16,16 @@ from api.models import (
 )
 
 from api.serializers import (JobActivitySerializer, CustomerSerializer, AircraftTypeSerializer)
+
+class Month(Func):
+    function = 'EXTRACT'
+    template = '%(function)s(MONTH FROM %(expressions)s)'
+    output_field = models.IntegerField()
+
+class Year(Func):
+    function = 'EXTRACT'
+    template = '%(function)s(YEAR FROM %(expressions)s)'
+    output_field = models.IntegerField()
 
 
 class TailStatsDetailView(APIView):
@@ -97,56 +108,52 @@ class TailStatsDetailView(APIView):
         # get the total number of canceled jobs for this tail number
         total_canceled_jobs = Job.objects.filter(tailNumber=tail_number, status='T').count()
 
-        # Get a breakdown by month of how many jobs have been completed for this tail number
-        # and sort by month chronological order
-        # MONTH from api_job.requestDate is failing in Postgres Heroku
 
-        # Get a breakdown of how many jobs have been completed or invoiced for this tail number group by month
-        # and sort by month chronological order
-        # MONTH from api_job.requestDate is failing in Postgres Heroku
+        jobs_by_month = Job.objects.filter(status__in=['C', 'I'], tailNumber=tail_number) \
+                                   .annotate(month=Month('requestDate')) \
+                                   .annotate(year=Year('requestDate')) \
+                                   .values('month', 'year') \
+                                   .annotate(job_count=Count('month')) \
+                                   .order_by('month')
+
+        # create a dictionary where they key is the year and the value is a list of jobs by month with its corresponding year
+        jobs_by_month_dict = {}
+        for job in jobs_by_month:
+            if job['year'] not in jobs_by_month_dict:
+                jobs_by_month_dict[job['year']] = []
+
+            jobs_by_month_dict[job['year']].append(job)
 
         
 
 
-
-
-
-
-
-
-        """ jobs_by_month = Job.objects.filter(tailNumber=tail_number) \
-                                      .extra(select={'requestDate': 'EXTRACT(MONTH FROM api_job.requestDate)'}) \
-                                        .values('requestDate') \
-                                        .annotate(job_count=Count('requestDate')) \
-                                        .order_by('requestDate') """
-
         # jobs_by_month returns requestDate as a number. Convert to its corresponding month name. For example: 1 = January, 2 = February, etc
-        """ for job in jobs_by_month:
-            requestDate = job['requestDate']
+        for job in jobs_by_month:
+            requestDate = job['month']
             if requestDate == 1:
-                job['requestDate'] = 'Jan'
+                job['month'] = 'Jan'
             elif requestDate == 2:
-                job['requestDate'] = 'Feb'
+                job['month'] = 'Feb'
             elif requestDate == 3:
-                job['requestDate'] = 'March'
+                job['month'] = 'March'
             elif requestDate == 4:
-                job['requestDate'] = 'April'
+                job['month'] = 'April'
             elif requestDate == 5:
-                job['requestDate'] = 'May'
+                job['month'] = 'May'
             elif requestDate == 6:
-                job['requestDate'] = 'June'
+                job['month'] = 'June'
             elif requestDate == 7:
-                job['requestDate'] = 'July'
+                job['month'] = 'July'
             elif requestDate == 8:
-                job['requestDate'] = 'Aug'
+                job['month'] = 'Aug'
             elif requestDate == 9:
-                job['requestDate'] = 'Sept'
+                job['month'] = 'Sept'
             elif requestDate == 10:
-                job['requestDate'] = 'Oct'
+                job['month'] = 'Oct'
             elif requestDate == 11:
-                job['requestDate'] = 'Nov'
+                job['month'] = 'Nov'
             elif requestDate == 12:
-                job['requestDate'] = 'Dec' """
+                job['month'] = 'Dec'
 
         
         # pass recent_activity to JobActivitySerializer
@@ -179,6 +186,7 @@ class TailStatsDetailView(APIView):
             'recent_services': recent_services,
             'recent_retainer_services': recent_retainer_services,
             'total_jobs': total_jobs,
-            'total_canceled_jobs': total_canceled_jobs
-            #'jobs_by_month': jobs_by_month
+            'total_canceled_jobs': total_canceled_jobs,
+            'jobs_by_month': jobs_by_month,
+            'jobs_by_year': jobs_by_month_dict
         }, status=status.HTTP_200_OK)
