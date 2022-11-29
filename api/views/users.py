@@ -54,23 +54,31 @@ class UserView(APIView):
 
         # if user is customer and customer settings  has a retainer amount greater than zero, then the user is considered a Premium Member
         is_premium_member = False
+        showSpendingInfo = False
+        
         if is_customer:
             customer_settings = CustomerSettings.objects.get(customer=user_profile.customer)
             if customer_settings and customer_settings.retainer_amount and customer_settings.retainer_amount > 0:
                 is_premium_member = True
 
+            if customer_settings and customer_settings.show_spending_info:
+                showSpendingInfo = True
+
 
         if user.is_superuser:
             access_level_label = 'Super User'
             canSeePrice = True
+            showSpendingInfo = True
 
         elif user.is_staff:
             access_level_label = 'Admin'
             canSeePrice = True
+            showSpendingInfo = True
 
         elif is_account_manager:
             access_level_label = 'Account Manager'
             canSeePrice = True
+            showSpendingInfo = True
 
         elif is_project_manager:
             access_level_label = 'Project Manager'
@@ -99,7 +107,8 @@ class UserView(APIView):
             "isPremiumMember": is_premium_member,
             "canSeePrice": canSeePrice,
             "receive_sms_notifications": user_profile.sms_notifications,
-            "receive_email_notifications": user_profile.email_notifications
+            "receive_email_notifications": user_profile.email_notifications,
+            'showSpendingInfo': showSpendingInfo
         }
 
         return Response(content)

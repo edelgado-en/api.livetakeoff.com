@@ -10,6 +10,7 @@ from ..serializers import TailStatsSerializer
 
 from api.models import (
         Job,
+        CustomerSettings
     )
 
 
@@ -23,11 +24,23 @@ class TailStatsView(ListAPIView):
         searchText = self.request.data.get('searchText')
         sortSelected = self.request.data.get('sortSelected')
 
-        # Get the list of tail numbers with aircraftType names the count of total jobs and the total price of those jobs but only for jobs with status C or I
-        # and sort by highest number of jobs first
 
         qs = Job.objects.values('tailNumber', 'aircraftType__name') \
-                        .annotate(job_count=Count('tailNumber'), total_price=Sum('price', filter=Q(status__in=['C', 'I'])))
+                        .annotate(job_count=Count('tailNumber'))
+
+        # if the current user is a customer and customerSettings.show_spending_info is true OR current user is admin or account manager, then include total_price
+        # otherwise, don't include total_price
+        if self.request.user.is_superuser \
+                 or self.request.user.is_staff \
+                 or self.request.user.groups.filter(name='Account Managers').exists() \
+                 or (self.request.user.profile.customer and self.request.user.profile.customer.customer_settings.show_spending_info):
+            qs = qs.annotate(total_price=Sum('price', filter=Q(status__in=['C', 'I'])))
+
+
+        # if the current user is a customer, only get the jobs for that customer
+        if self.request.user.profile.customer:
+            qs = qs.filter(customer=self.request.user.profile.customer)
+
 
         if searchText:
             qs = qs.filter(tailNumber__icontains=searchText)

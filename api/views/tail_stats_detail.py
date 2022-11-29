@@ -35,8 +35,14 @@ class TailStatsDetailView(APIView):
         # if the tail does not exists, then throw an error
         customer = None
         aircraft_type = None
+
         try:
-            job = Job.objects.filter(tailNumber=tail_number).order_by('-requestDate')[:1]
+            # if the current user is a customer, then only show the stats for that customer
+            if request.user.profile.customer:
+                job = Job.objects.filter(tailNumber=tail_number, customer=customer).order_by('-requestDate')[:1]
+
+            else:
+                job = Job.objects.filter(tailNumber=tail_number).order_by('-requestDate')[:1]
 
             for j in job:
                 customer = j.customer
@@ -49,16 +55,18 @@ class TailStatsDetailView(APIView):
 
         # get the list of the last 10 services for the given tail number with their corresponding dates
         # and sort by most recent date first
-        job_service_assignments = JobServiceAssignment.objects.filter(job__tailNumber=tail_number, status__in=['C', 'W']) \
-            .order_by('-job__requestDate')[:10]
+        job_service_assignments = JobServiceAssignment.objects \
+                                                      .filter(job__tailNumber=tail_number, status__in=['C', 'W']) \
+                                                      .order_by('-job__requestDate')[:10]
         
         # get the service name and the updated_at date
         recent_services = job_service_assignments.values('service__name', 'updated_at')
         
         # get the list of the last 10 retainer services for the given tail number with their corresponding dates
         # and sort by most recent date first
-        job_retainer_service_assignments = JobRetainerServiceAssignment.objects.filter(job__tailNumber=tail_number, status__in=['C', 'W']) \
-            .order_by('-job__requestDate')[:10]
+        job_retainer_service_assignments = JobRetainerServiceAssignment.objects \
+                                                       .filter(job__tailNumber=tail_number, status__in=['C', 'W']) \
+                                                       .order_by('-job__requestDate')[:10]
         
         # get the retainer service name and the updated_at date
         recent_retainer_services = job_retainer_service_assignments.values('retainer_service__name', 'updated_at')
@@ -95,12 +103,30 @@ class TailStatsDetailView(APIView):
 
 
         # get recent JobStatusActivity for this tail number
-        recent_activity = JobStatusActivity.objects.filter(job__tailNumber=tail_number).order_by('-timestamp')[:20]
+        recent_activity = JobStatusActivity.objects.filter(job__tailNumber=tail_number)
 
+        if request.user.profile.customer:
+            recent_activity = recent_activity.exclude(Q(status='P') | Q(activity_type='P'))
+
+        recent_activity = recent_activity.order_by('-timestamp')[:20]
 
         # Get the total price for all jobs for this tail number only including status completed and invoiced
-        total_price = Job.objects.filter(tailNumber=tail_number, status__in=['C', 'I']) \
+        if request.user.is_superuser \
+                 or request.user.is_staff \
+                 or request.user.groups.filter(name='Account Managers').exists() \
+                 or (request.user.profile.customer and self.request.user.profile.customer.customer_settings.show_spending_info):
+            
+            total_price = Job.objects.filter(tailNumber=tail_number, status__in=['C', 'I']) \
                                  .aggregate(total_price=Sum('price'))
+
+            if not total_price['total_price']:
+                total_price = 0
+            else:
+                total_price = total_price['total_price']
+        
+        else:
+            total_price = 0
+
 
         # Get the total number of jobs for this tail number
         total_jobs = Job.objects.filter(tailNumber=tail_number).count()
@@ -173,10 +199,6 @@ class TailStatsDetailView(APIView):
         #Get the requestDate column value of the first job for this tail number
         first_job_date = Job.objects.filter(tailNumber=tail_number).order_by('requestDate')[:1].values('requestDate')
 
-        if not total_price['total_price']:
-            total_price = 0
-        else:
-            total_price = total_price['total_price']
 
         # Create a json object with all thease values and return it in the response
         return Response({

@@ -22,7 +22,7 @@ class JobActivityView(ListAPIView):
         
 
         if self.request.user.profile.customer and self.request.user.profile.customer == job.customer:
-            return JobStatusActivity.objects.filter(job=job).exclude(Q(status='P') & Q(activity_type='P')).order_by('timestamp')
+            return JobStatusActivity.objects.filter(job=job).exclude(Q(status='P') | Q(activity_type='P')).order_by('timestamp')
 
 
         if  not self.request.user.profile.customer:
