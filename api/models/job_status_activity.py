@@ -12,6 +12,7 @@ class JobStatusActivity(models.Model):
         ('R', 'Review'),
         ('I', 'Invoiced'),
         ('P', 'Price Changed'),
+        ('X', 'Project Manager Unassigned')
     ]
 
     ACTIVITY_TYPE_CHOICES = [

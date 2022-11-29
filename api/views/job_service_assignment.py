@@ -230,10 +230,15 @@ class JobServiceAssignmentView(APIView):
             job.status = 'S' # assigned
             job.save()
 
+            JobStatusActivity.objects.create(job=job, status='S', user=request.user)
+
         # if none of the services are assigned and the job status is S or W, then set the job status to A
         if not at_least_one_service_assigned and (current_status == 'S' or current_status == 'W'):
             job.status = 'A'
             job.save()
+
+            #record JobStatusActivity X PM Unassigned
+            JobStatusActivity.objects.create(job=job, status='X', user=request.user)
 
         # get the list of unique project managers and their phone numbers and send the job information with the app link as body
 
