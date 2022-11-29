@@ -105,8 +105,17 @@ class TailStatsDetailView(APIView):
         # Get the total number of jobs for this tail number
         total_jobs = Job.objects.filter(tailNumber=tail_number).count()
 
+        # get the total number of invoiced jobs for this tail number
+        total_invoiced_jobs = Job.objects.filter(tailNumber=tail_number, status='I').count()
+
+        # get the total number of completed jobs for this tail number
+        total_completed_jobs = Job.objects.filter(tailNumber=tail_number, status='C').count()
+
         # get the total number of canceled jobs for this tail number
         total_canceled_jobs = Job.objects.filter(tailNumber=tail_number, status='T').count()
+
+        # get the total number of open jobs for this tail number. An open job is a job with status U or A or S or W
+        total_open_jobs = Job.objects.filter(tailNumber=tail_number, status__in=['U', 'A', 'S', 'W']).count()
 
 
         jobs_by_month = Job.objects.filter(status__in=['C', 'I'], tailNumber=tail_number) \
@@ -125,8 +134,6 @@ class TailStatsDetailView(APIView):
             jobs_by_month_dict[job['year']].append(job)
 
         
-
-
         # jobs_by_month returns requestDate as a number. Convert to its corresponding month name. For example: 1 = January, 2 = February, etc
         for job in jobs_by_month:
             requestDate = job['month']
@@ -186,7 +193,10 @@ class TailStatsDetailView(APIView):
             'recent_services': recent_services,
             'recent_retainer_services': recent_retainer_services,
             'total_jobs': total_jobs,
+            'total_invoiced_jobs': total_invoiced_jobs,
+            'total_completed_jobs': total_completed_jobs,
             'total_canceled_jobs': total_canceled_jobs,
+            'total_open_jobs': total_open_jobs,
             'jobs_by_month': jobs_by_month,
             'jobs_by_year': jobs_by_month_dict
         }, status=status.HTTP_200_OK)
