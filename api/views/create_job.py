@@ -202,7 +202,7 @@ class CreateJobView(APIView):
         job.save()
 
         # if user is customer, this is submitted, otherwise it is accepted
-        JobStatusActivity.objects.create(job=job, user=request.user, status='A')
+        JobStatusActivity.objects.create(job=job, user=request.user, status=job_status)
 
         # delete if tailaircraft lookup already exists, and create a new entry
         TailAircraftLookup.objects.filter(tail_number=job.tailNumber).delete()
