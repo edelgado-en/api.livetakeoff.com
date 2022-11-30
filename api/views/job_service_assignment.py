@@ -188,6 +188,7 @@ class JobServiceAssignmentView(APIView):
             if service['user_id']:
                 user = User.objects.get(pk=service['user_id'])
                 assignment.project_manager = user
+                assignment.status = 'A'
 
                 # add the phone number to the list of unique phone numbers
                 if user.profile.phone_number:
@@ -197,6 +198,7 @@ class JobServiceAssignmentView(APIView):
                 at_least_one_service_assigned = True
 
             else :
+                assignment.status = 'U'
                 assignment.project_manager = None
 
             assignment.save()
@@ -209,6 +211,7 @@ class JobServiceAssignmentView(APIView):
             if retainer_service['user_id']:
                 user = User.objects.get(pk=retainer_service['user_id'])
                 retainer_assignment.project_manager = user
+                retainer_assignment.status = 'A'
 
                 # add the phone number to the list of unique phone numbers
                 if user.profile.phone_number:
@@ -218,6 +221,7 @@ class JobServiceAssignmentView(APIView):
                 at_least_one_service_assigned = True
 
             else :
+                retainer_assignment.status = 'U'
                 retainer_assignment.project_manager = None
 
             retainer_assignment.save()
