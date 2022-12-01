@@ -194,6 +194,7 @@ class JobDetail(APIView):
                     service.status = request.data['status']
 
                     if request.data['status'] == 'C':
+                        service.status = 'U'
                         service.project_manager = None
                         service.save(update_fields=['status', 'project_manager'])
                     
@@ -205,6 +206,7 @@ class JobDetail(APIView):
                     retainer_service.status = request.data['status']
 
                     if request.data['status'] == 'C':
+                        retainer_service.status = 'U'
                         retainer_service.project_manager = None
                         retainer_service.save(update_fields=['status', 'project_manager'])
 
@@ -238,12 +240,14 @@ class JobDetail(APIView):
 
                 #unassign all services and retainer services
                 for service in job.job_service_assignments.all():
+                    service.status = 'U'
                     service.project_manager = None
-                    service.save(update_fields=['project_manager'])
+                    service.save(update_fields=['project_manager', 'status'])
 
                 for retainer_service in job.job_retainer_service_assignments.all():
+                    retainer_service.status = 'U'
                     retainer_service.project_manager = None
-                    retainer_service.save(update_fields=['project_manager'])
+                    retainer_service.save(update_fields=['project_manager', 'status'])
 
             
             if 'status' in request.data and request.data['status'] == 'W':
@@ -260,12 +264,14 @@ class JobDetail(APIView):
             if 'status' in request.data and request.data['status'] == 'T':
                 #unassign all services and retainer services
                 for service in job.job_service_assignments.all():
+                    service.status = 'U'
                     service.project_manager = None
-                    service.save(update_fields=['project_manager'])
+                    service.save(update_fields=['project_manager', 'status'])
 
                 for retainer_service in job.job_retainer_service_assignments.all():
+                    retainer_service.status = 'U'
                     retainer_service.project_manager = None
-                    retainer_service.save(update_fields=['project_manager'])
+                    retainer_service.save(update_fields=['project_manager', 'status'])
 
 
                 for admin in admins:
