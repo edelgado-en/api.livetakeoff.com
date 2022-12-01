@@ -25,10 +25,26 @@ class ServiceByAirportView(APIView):
         assigned_data = self.getAirportDataByStatus('A')
         wip_data = self.getAirportDataByStatus('W')
 
+        accepted = {
+            'airport_data': accepted_data,
+            'total_services': sum([airport['count'] for airport in accepted_data])
+        }
+
+        assigned = {
+            'airport_data': assigned_data,
+            'total_services': sum([airport['count'] for airport in assigned_data])
+        }
+
+        wip = {
+            'airport_data': wip_data,
+            'total_services': sum([airport['count'] for airport in wip_data])
+        }
+
+
         data = {
-            'accepted': accepted_data,
-            'assigned': assigned_data,
-            'wip': wip_data
+            'accepted': accepted,
+            'assigned': assigned,
+            'wip': wip
         }
 
 
@@ -67,7 +83,8 @@ class ServiceByAirportView(APIView):
         for airport in airports:
             airport_data = {
                 'name': airport.name,
-                'services': []
+                'services': [],
+                'count': 0
             }
 
             for service in services:
@@ -79,6 +96,9 @@ class ServiceByAirportView(APIView):
                             'name': service['service__name'],
                             'count': service['count']
                         }
+
+                        # increase airport count by the number of services in service_data
+                        airport_data['count'] += service['count']
 
                         airport_data['services'].append(service_data)
             
@@ -120,7 +140,14 @@ class ServiceByAirportView(APIView):
             '-count'
         )
 
-        # merge services and retainer_services into one list
+        print(retainer_services)
+
+        # you need to sum the count of services with the count in retainer services
+        # because the retainer services are not in the services list
+        
+
+        # I have to merge manually to make sure the count is correct
+        # I can't use the union because it will not sum the count
         services = list(services) + list(retainer_services)
 
         # get a list of all the users that are currently assigned to a service
@@ -155,7 +182,8 @@ class ServiceByAirportView(APIView):
             '-count'
         )
 
-        # combine the two lists of users
+        # I have to merge manually to make sure the count is correct
+        # I can't use the union because it will not sum the count
         users = list(users) + list(retainer_users)
 
         # create a list of dictionaries
@@ -167,7 +195,8 @@ class ServiceByAirportView(APIView):
         for airport in airports:
             airport_data = {
                 'name': airport.name,
-                'services': []
+                'services': [],
+                'count': 0
             }
 
             for service in services:
@@ -181,6 +210,9 @@ class ServiceByAirportView(APIView):
                             'users': []
                         }
 
+                        # increase airport count by the number of services in service_data
+                        airport_data['count'] += service['count']
+
                         for user in users:
                             if user['job__airport__name'] == airport.name and user['service__name'] == service['service__name']:
                                 # if user_data already exists in service_data['users'] then add the count to the existing user_data
@@ -190,14 +222,17 @@ class ServiceByAirportView(APIView):
                                         if user_data['username'] == user['project_manager__username']:
                                             user_data['count'] += user['count']
                                 else:
-                                    user_data = {
-                                        'avatar': user['project_manager__profile__avatar'],
-                                        'username': user['project_manager__username'],
-                                        'first_name': user['project_manager__first_name'],
-                                        'last_name': user['project_manager__last_name'],
-                                        'count': user['count']
-                                    }
-                                    service_data['users'].append(user_data)
+                                    # if user['count'] is zero, don't add the user_data
+                                    if user['count'] > 0:
+                                        user_data = {
+                                            'avatar': user['project_manager__profile__avatar'],
+                                            'username': user['project_manager__username'],
+                                            'first_name': user['project_manager__first_name'],
+                                            'last_name': user['project_manager__last_name'],
+                                            'count': user['count']
+                                        }
+
+                                        service_data['users'].append(user_data)
                                 
 
                         airport_data['services'].append(service_data)

@@ -45,11 +45,12 @@ class JobPhotosView(ListAPIView):
 
         for photo_id in request.data['photos']:
             # This is not deleting from cloudinary. It is only deleting from the database
-            #job_photo = JobPhotos.objects.get(pk=photo_id)
+            job_photo = JobPhotos.objects.get(pk=photo_id)
             
-            # This is not working
-            #cloudinary.uploader.destroy('Screenshot_from_2022-09-04_11-47-11_zcocvu.png', invalidate=True)
-
+            # this deletes from cloudinary!
+            job_photo.image.delete()
+            
+            # now delete the instance from the database
             JobPhotos.objects.filter(pk=photo_id).delete()
 
         return Response(status.HTTP_200_OK)
