@@ -77,7 +77,29 @@ class ServiceByAirportView(APIView):
             '-count'
         )
 
-        services = list(services) + list(retainer_services)
+        #services = list(services) + list(retainer_services)
+
+        all_services = []
+
+        # iterate through services and retainer_services and add them to all_services. The count of each service will be added together. Do not repeat the service names
+        for service in services:
+            if not any(d['service__name'] == service['service__name'] and d['job__airport__name'] == service['job__airport__name'] for d in all_services):
+                all_services.append(service)
+            else:
+                for d in all_services:
+                    if d['service__name'] == service['service__name'] and d['job__airport__name'] == service['job__airport__name']:
+                        d['count'] += service['count']
+                        break  
+
+        for service in retainer_services:
+            if not any(d['service__name'] == service['service__name'] and d['job__airport__name'] == service['job__airport__name'] for d in all_services):
+                all_services.append(service)
+            else:
+                for d in all_services:
+                    if d['service__name'] == service['service__name'] and d['job__airport__name'] == service['job__airport__name']:
+                        d['count'] += service['count']
+                        break
+
 
         data = []
         for airport in airports:
@@ -87,7 +109,7 @@ class ServiceByAirportView(APIView):
                 'count': 0
             }
 
-            for service in services:
+            for service in all_services:
                 if service['job__airport__name'] == airport.name:
                     # only add service_data to airport_data if it doesn't already exist 
                     # this is to prevent duplicate services
@@ -101,8 +123,10 @@ class ServiceByAirportView(APIView):
                         airport_data['count'] += service['count']
 
                         airport_data['services'].append(service_data)
-            
-            data.append(airport_data)
+
+            # if airport_data['services'] is empty, don't add it to data
+            if airport_data['services']:
+                data.append(airport_data)
 
 
         return data
@@ -140,15 +164,29 @@ class ServiceByAirportView(APIView):
             '-count'
         )
 
-        print(retainer_services)
 
-        # you need to sum the count of services with the count in retainer services
-        # because the retainer services are not in the services list
+        all_services = []
+
+        # iterate through services and retainer_services and add them to all_services. The count of each service will be added together. Do not repeat the service names
+        for service in services:
+            if not any(d['service__name'] == service['service__name'] and d['job__airport__name'] == service['job__airport__name'] for d in all_services):
+                all_services.append(service)
+            else:
+                for d in all_services:
+                    if d['service__name'] == service['service__name'] and d['job__airport__name'] == service['job__airport__name']:
+                        d['count'] += service['count']
+                        break  
+
+        for service in retainer_services:
+            if not any(d['service__name'] == service['service__name'] and d['job__airport__name'] == service['job__airport__name'] for d in all_services):
+                all_services.append(service)
+            else:
+                for d in all_services:
+                    if d['service__name'] == service['service__name'] and d['job__airport__name'] == service['job__airport__name']:
+                        d['count'] += service['count']
+                        break
         
 
-        # I have to merge manually to make sure the count is correct
-        # I can't use the union because it will not sum the count
-        services = list(services) + list(retainer_services)
 
         # get a list of all the users that are currently assigned to a service
         users = JobServiceAssignment.objects.filter(
@@ -199,7 +237,7 @@ class ServiceByAirportView(APIView):
                 'count': 0
             }
 
-            for service in services:
+            for service in all_services:
                 if service['job__airport__name'] == airport.name:
                     # only add service_data to airport_data if it doesn't already exist 
                     # this is to prevent duplicate services
