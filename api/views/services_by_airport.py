@@ -150,7 +150,11 @@ class ServiceByAirportView(APIView):
     def getAirportDataByStatus(self, status):
         # get a list of airports that have job service assignments with status assigned (S). A job service assignment has a job, and a job has an airport
         # this is the list of airports that have jobs with services assigned to them
-        airports = Airport.objects.filter(job__job_service_assignments__status=status).distinct()
+
+        # this airports also need to look for jobs with retainer services assigned to them
+
+        airports = Airport.objects.filter(job__job_service_assignments__status=status,
+                                          job__job_retainer_service_assignments__status=status).distinct()
 
 
         # get a list of all the services that are currently assigned to an airport
