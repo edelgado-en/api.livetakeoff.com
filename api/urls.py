@@ -49,7 +49,8 @@ from .views import (
         SharedJobEstimateDetailView,
         TailStatsView,
         TailStatsDetailView,
-        ServiceByAirportView
+        ServiceByAirportView,
+        CustomerRetainersView
     )
 
 urlpatterns = [
@@ -83,6 +84,7 @@ urlpatterns = [
     path('pricing-plans/<int:id>/', PricePlansView.as_view()),
     path('price-listing/<int:id>/', PriceListingView.as_view()),
     path('customers', CustomersView.as_view()),
+    path('customers/retainers', CustomerRetainersView.as_view()),
     path('customers/create', CreateCustomerView.as_view()),
     path('customers/users', CustomerUsersView.as_view()),
     path('customers/<int:id>/', CustomerDetail.as_view()),
