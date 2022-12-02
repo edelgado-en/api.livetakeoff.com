@@ -85,8 +85,12 @@ class CustomerDetail(APIView):
         # update customer settings
         settings.special_instructions = specialInstructions
         settings.price_list_id = priceListId
-        settings.retainer_amount = retainerAmount
 
+        # if retainerAmount is empty string, don't set it
+        if retainerAmount == '':
+            settings.retainer_amount = None
+        else:
+            settings.retainer_amount = retainerAmount
 
         settings.save()
 
