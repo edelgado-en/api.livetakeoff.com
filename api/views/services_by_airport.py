@@ -153,8 +153,7 @@ class ServiceByAirportView(APIView):
 
         # this airports also need to look for jobs with retainer services assigned to them
 
-        airports = Airport.objects.filter(job__job_service_assignments__status=status,
-                                          job__job_retainer_service_assignments__status=status).distinct()
+        airports = Airport.objects.filter(job__job_service_assignments__status=status).distinct()
 
 
         # get a list of all the services that are currently assigned to an airport
