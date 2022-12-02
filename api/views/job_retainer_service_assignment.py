@@ -8,7 +8,8 @@ from api.models import (
         JobRetainerServiceAssignment,
         JobServiceAssignment,
         Job,
-        RetainerService
+        RetainerService,
+        RetainerServiceActivity
     )
 
 from api.serializers import JobRetainerServiceAssignmentSerializer
@@ -29,6 +30,13 @@ class JobRetainerServiceAssignmentView(APIView):
 
         if serializer.is_valid():
             serializer.save()
+
+            #save retainer service activity
+            RetainerServiceActivity.objects.create(job=job_retainer_service_assignment.job,
+                                                   retainer_service=job_retainer_service_assignment.retainer_service,
+                                                   project_manager=request.user,
+                                                   status='C')
+
 
             # if all services and retainer services associated with this job are completed, then this job is a candidate to be completed
             # return a boolean to the front end to indicate if the job can be completed

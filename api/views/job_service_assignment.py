@@ -13,6 +13,7 @@ from ..models import (
     EstimatedServiceTime,
     Service,
     RetainerService,
+    ServiceActivity
     )
 
 from ..pricebreakdown_service import PriceBreakdownService
@@ -280,6 +281,11 @@ class JobServiceAssignmentView(APIView):
 
         if serializer.is_valid():
             serializer.save()
+
+            #save service activity
+            ServiceActivity.objects.create(job=job_service_assignment.job,
+                                           service=job_service_assignment.service,
+                                           project_manager=request.user, status='C')
 
             # if all services and retainer services associated with this job are completed, then this job is a candidate to be completed
             # return a boolean to the front end to indicate if the job can be completed

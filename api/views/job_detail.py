@@ -20,7 +20,9 @@ from ..models import (
         JobStatusActivity,
         JobCommentCheck,
         CustomerSettings,
-        UserProfile
+        UserProfile,
+        ServiceActivity,
+        RetainerServiceActivity
     )
 
 
@@ -183,11 +185,6 @@ class JobDetail(APIView):
         if serializer.is_valid():
             serializer.save()
 
-            # WHEN YOU SET A JOB AS WIP, YOU ALSO HAVE TO SET THE STATUS OF ALL SERVICES ASSIGNMENTS ASSOCIATED TO THIS JOB TO WIP
-            # we don't want PMs to have to go to each service and set as WIP, then set as complete. That's too much work and tracking
-            # Think about how annoying this will be: Leather Shampo checklist takes you 20 mins, then you have to go to the app
-            # click on the job, then click on the service to as as complete. Then click on the other service to set as WIP
-            # THIS IS TOO MUCH micromanaging. We want to make it as easy as possible for PMs to do their job.
             if ('status' in request.data 
                     and (request.data['status'] == 'W' or request.data['status'] == 'C')):
                 for service in job.job_service_assignments.all():
@@ -201,6 +198,11 @@ class JobDetail(APIView):
                     else:
                         service.save(update_fields=['status'])
 
+                        ServiceActivity.objects.create(job=job,
+                                                       service=service.service,
+                                                       status='W',
+                                                       project_manager=request.user)
+
 
                 for retainer_service in job.job_retainer_service_assignments.all():
                     retainer_service.status = request.data['status']
@@ -212,6 +214,11 @@ class JobDetail(APIView):
 
                     else:
                         retainer_service.save(update_fields=['status'])
+
+                        RetainerServiceActivity.objects.create(job=job,
+                                                               retainer_service=retainer_service.retainer_service,
+                                                               status='W',
+                                                               project_manager=request.user)
 
 
             
@@ -244,10 +251,25 @@ class JobDetail(APIView):
                     service.project_manager = None
                     service.save(update_fields=['project_manager', 'status'])
 
+                    # save service activity only if it does not exists already for this job and service
+                    if not ServiceActivity.objects.filter(job=job, service=service.service, status='C').exists():
+                        ServiceActivity.objects.create(job=job,
+                                                       service=service.service,
+                                                       status='C',
+                                                       project_manager=request.user)
+
+
                 for retainer_service in job.job_retainer_service_assignments.all():
                     retainer_service.status = 'U'
                     retainer_service.project_manager = None
                     retainer_service.save(update_fields=['project_manager', 'status'])
+
+                    #save retainer service activity only if it does not exists already for this job and service
+                    if not RetainerServiceActivity.objects.filter(job=job, retainer_service=retainer_service.retainer_service, status='C').exists():
+                        RetainerServiceActivity.objects.create(job=job,
+                                                               retainer_service=retainer_service.retainer_service,
+                                                               status='C',
+                                                               project_manager=request.user)
 
             
             if 'status' in request.data and request.data['status'] == 'W':

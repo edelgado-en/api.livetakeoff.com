@@ -15,7 +15,9 @@ from ..models import (
     JobStatusActivity,
     JobCommentCheck,
     JobServiceAssignment,
-    JobRetainerServiceAssignment
+    JobRetainerServiceAssignment,
+    ServiceActivity,
+    RetainerServiceActivity
     )
 
 
@@ -105,10 +107,23 @@ class EditJobView(APIView):
                             service.project_manager = None
                             service.save(update_fields=['project_manager', 'status'])
 
+                            if not ServiceActivity.objects.filter(job=job, service=service.service, status='C').exists():
+                                ServiceActivity.objects.create(job=job,
+                                                                service=service.service,
+                                                                status='C',
+                                                                project_manager=request.user)
+
+
                         for retainer_service in job.job_retainer_service_assignments.all():
                             retainer_service.status = 'U'
                             retainer_service.project_manager = None
                             retainer_service.save(update_fields=['project_manager', 'status'])
+
+                            if not RetainerServiceActivity.objects.filter(job=job, retainer_service=retainer_service.retainer_service, status='C').exists():
+                                RetainerServiceActivity.objects.create(job=job,
+                                                                        retainer_service=retainer_service.retainer_service,
+                                                                        status='C',
+                                                                        project_manager=request.user)
 
 
                         job.completion_date = datetime.now()
