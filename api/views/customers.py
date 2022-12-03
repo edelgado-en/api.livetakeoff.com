@@ -16,10 +16,16 @@ class CustomersView(ListAPIView):
     def get_queryset(self):
         name = self.request.data['name']
 
+        open_jobs = self.request.data.get('open_jobs', False)
+
         qs = Customer.objects \
                        .filter(name__icontains=name) \
                        .order_by('name')
 
+        # if open_jobs include only customers with open jobs. An open job is a job with status 'A' or 'U', or 'S' or 'W'
+        if open_jobs:
+            qs = qs.filter(jobs__status__in=['A', 'U', 'S', 'W']).distinct()
+    
         return qs
 
     def post(self, request, *args, **kwargs):

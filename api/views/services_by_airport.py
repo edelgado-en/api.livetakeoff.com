@@ -19,20 +19,11 @@ from api.serializers import (
 )
 
 
-
 class ServiceByAirportView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
 
     def get(self, request):
-
-        # get customers that have jobs with services or retainer services in status U or A or W
-        customers = Customer.objects.filter(
-            Q(jobs__job_service_assignments__status__in=['U', 'A', 'W']) |
-            Q(jobs__job_retainer_service_assignments__status__in=['U', 'A', 'W'])
-        ).distinct()
-
-        customers = CustomerSerializer(customers, many=True).data
 
         accepted_data = self.getAirportDataByAcceptedJobs()
         assigned_data = self.getAirportDataByStatus('A')
@@ -55,7 +46,6 @@ class ServiceByAirportView(APIView):
 
 
         data = {
-            'customers': customers,
             'accepted': accepted,
             'assigned': assigned,
             'wip': wip
