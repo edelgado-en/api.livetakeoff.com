@@ -19,7 +19,7 @@ class CustomersView(ListAPIView):
         open_jobs = self.request.data.get('open_jobs', False)
 
         qs = Customer.objects \
-                       .filter(name__icontains=name) \
+                       .filter(name__icontains=name, active=True) \
                        .order_by('name')
 
         # if open_jobs include only customers with open jobs. An open job is a job with status 'A' or 'U', or 'S' or 'W'

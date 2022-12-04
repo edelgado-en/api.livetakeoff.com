@@ -25,7 +25,7 @@ class Job(models.Model):
     requestDate = models.DateTimeField(auto_now_add=True)
     tailNumber = models.CharField(max_length=50)
     aircraftType = models.ForeignKey(AircraftType, on_delete=models.PROTECT)
-    airport = models.ForeignKey(Airport, on_delete=models.PROTECT)
+    airport = models.ForeignKey(Airport, on_delete=models.PROTECT, related_name='jobs')
     fbo = models.ForeignKey(FBO, on_delete=models.PROTECT)
     estimatedETA = models.DateTimeField(blank=True, null=True)
     estimatedETD = models.DateTimeField(blank=True, null=True)
