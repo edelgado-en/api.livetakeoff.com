@@ -56,7 +56,7 @@ class JobServiceAssignmentView(APIView):
 
 
         # get project managers and their availability
-        project_managers = User.objects.filter(groups__name='Project Managers')
+        project_managers = User.objects.filter(groups__name='Project Managers', is_active=True)
 
         for project_manager in project_managers:
             # Get the in-process assignments for this user for other jobs
