@@ -17,6 +17,7 @@ class JobDetailSerializer(serializers.ModelSerializer):
     estimatedETA = serializers.DateTimeField(format="%m/%d/%y %H:%M")
     estimatedETD = serializers.DateTimeField(format="%m/%d/%y %H:%M")
     requestDate = serializers.DateTimeField(format="%m/%d/%y %H:%M", read_only=True)
+    completion_date = serializers.DateTimeField(format="%m/%d/%y %H:%M", read_only=True)
     special_instructions = serializers.CharField(required=False, allow_blank=True)
     service_assignments = GenericServiceAssignmentSerializer(many=True, read_only=True)
     retainer_service_assignments = GenericServiceAssignmentSerializer(many=True, read_only=True)
@@ -49,6 +50,7 @@ class JobDetailSerializer(serializers.ModelSerializer):
             'is_auto_priced',
             'on_site',
             'created_by',
+            'completion_date',
             'encoded_id'
         )
 
