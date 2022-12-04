@@ -57,7 +57,7 @@ class ServiceByAirportView(APIView):
 
     def getAirportDataByAcceptedJobs(self):
         # only get airports where the job is accepted
-        airports = Airport.objects.filter(job__status='A').distinct()
+        airports = Airport.objects.filter(jobs__status='A').distinct()
         
         services = JobServiceAssignment.objects.filter(
             job__airport__in=airports, status='U', job__status='A'
@@ -143,10 +143,10 @@ class ServiceByAirportView(APIView):
 
         # this airports also need to look for jobs with retainer services assigned to them
 
-        airports = Airport.objects.filter(job__job_service_assignments__status=status).distinct()
+        airports = Airport.objects.filter(jobs__job_service_assignments__status=status).distinct()
 
         # need to include airports where the job has retainer services assigned to it
-        airports = airports | Airport.objects.filter(job__job_retainer_service_assignments__status=status).distinct()
+        airports = airports | Airport.objects.filter(jobs__job_retainer_service_assignments__status=status).distinct()
 
 
 
