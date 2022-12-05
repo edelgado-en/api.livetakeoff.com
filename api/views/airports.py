@@ -15,6 +15,8 @@ class AirportsView(ListAPIView):
     def get_queryset(self):
         name = self.request.data.get('name', '')
         open_jobs = self.request.data.get('open_jobs', False)
+        closed_jobs = self.request.data.get('closed_jobs', False)
+
         onlyIncludeCustomerJobs = self.request.data.get('onlyIncludeCustomerJobs', False)
 
         qs = Airport.objects \
@@ -24,6 +26,11 @@ class AirportsView(ListAPIView):
         # if open_jobs include only airports with open jobs. An open job is a job with status 'A' or 'U', or 'S' or 'W'
         if open_jobs:
             qs = qs.filter(jobs__status__in=['A', 'U', 'S', 'W']).distinct()
+
+
+        if closed_jobs:
+            qs = qs.filter(jobs__status__in=['C', 'I', 'T']).distinct()
+
 
         if onlyIncludeCustomerJobs:
             qs = qs.filter(Q(jobs__customer=self.request.user.profile.customer)).distinct()

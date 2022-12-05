@@ -20,6 +20,8 @@ class CompletedJobsListView(ListAPIView):
     def get_queryset(self):
         searchText = self.request.data['searchText']
         status = self.request.data['status']
+        airport = self.request.data.get('airport')
+        customer = self.request.data.get('customer')
 
         requestedDateFrom = self.request.data.get('requestedDateFrom')
         requestedDateTo = self.request.data.get('requestedDateTo')
@@ -45,15 +47,22 @@ class CompletedJobsListView(ListAPIView):
 
         if searchText:
                 qs = qs.filter(Q(tailNumber__icontains=searchText)
-                               | Q(customer__name__icontains=searchText)
                                | Q(purchase_order__icontains=searchText)
-                               | Q(airport__initials__icontains=searchText)
                               )
 
         if status == 'All':
             qs = qs.filter(Q(status='C') | Q(status='I') | Q(status='T'))
         else:
             qs = qs.filter(status=status)
+
+
+        if airport and airport != 'All':
+            qs = qs.filter(airport_id=airport)
+
+
+        if customer and customer != 'All':
+            qs = qs.filter(customer_id=customer)
+
 
         # apply date range filters
         if arrivalDateFrom:

@@ -15,8 +15,8 @@ class CustomersView(ListAPIView):
 
     def get_queryset(self):
         name = self.request.data['name']
-
         open_jobs = self.request.data.get('open_jobs', False)
+        closed_jobs = self.request.data.get('closed_jobs', False)
 
         qs = Customer.objects \
                        .filter(name__icontains=name, active=True) \
@@ -26,6 +26,11 @@ class CustomersView(ListAPIView):
         if open_jobs:
             qs = qs.filter(jobs__status__in=['A', 'U', 'S', 'W']).distinct()
     
+    
+        if closed_jobs:
+            qs = qs.filter(jobs__status__in=['C', 'I', 'T']).distinct()
+
+
         return qs
 
     def post(self, request, *args, **kwargs):

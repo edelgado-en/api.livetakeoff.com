@@ -34,6 +34,8 @@ class JobExportCSVView(APIView):
 
         searchText = self.request.data.get('searchText')
         status = self.request.data.get('status')
+        airport = self.request.data.get('airport')
+        customer = self.request.data.get('customer')
 
         requestedDateFrom = self.request.data.get('requestedDateFrom')
         requestedDateTo = self.request.data.get('requestedDateTo')
@@ -61,15 +63,22 @@ class JobExportCSVView(APIView):
 
         if searchText:
                 qs = qs.filter(Q(tailNumber__icontains=searchText)
-                               | Q(customer__name__icontains=searchText)
                                | Q(purchase_order__icontains=searchText)
-                               | Q(airport__initials__icontains=searchText)
                               )
 
         if status == 'All':
             qs = qs.filter(Q(status='C') | Q(status='I') | Q(status='T'))
         else:
             qs = qs.filter(status=status)
+
+
+        if airport and airport != 'All':
+            qs = qs.filter(airport_id=airport)
+
+
+        if customer and customer != 'All':
+            qs = qs.filter(customer_id=customer)
+        
 
         # apply date range filters
         if arrivalDateFrom:
