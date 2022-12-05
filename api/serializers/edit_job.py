@@ -16,6 +16,7 @@ class JobEditSerializer(serializers.ModelSerializer):
         model = Job
         fields = (
             'tailNumber',
+            'customer_purchase_order',
             'customer',
             'status',
             'aircraftType',

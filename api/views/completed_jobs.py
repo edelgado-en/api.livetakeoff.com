@@ -47,6 +47,7 @@ class CompletedJobsListView(ListAPIView):
 
         if searchText:
                 qs = qs.filter(Q(tailNumber__icontains=searchText)
+                               | Q(customer_purchase_order__icontains=searchText)
                                | Q(purchase_order__icontains=searchText)
                               )
 

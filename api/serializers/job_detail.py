@@ -37,6 +37,7 @@ class JobDetailSerializer(serializers.ModelSerializer):
             'requestDate',
             'status',
             'purchase_order',
+            'customer_purchase_order',
             'aircraftType',
             'airport',
             'fbo',

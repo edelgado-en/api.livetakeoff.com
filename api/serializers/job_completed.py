@@ -29,6 +29,7 @@ class JobCompletedSerializer(serializers.ModelSerializer):
             'status',
             'customer',
             'purchase_order',
+            'customer_purchase_order',
             'aircraftType',
             'airport',
             'fbo',

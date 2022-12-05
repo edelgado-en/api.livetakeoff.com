@@ -21,6 +21,10 @@ class Job(models.Model):
        # This is duplicated. I already have requestDate
     created_at = models.DateTimeField(auto_now_add=True, blank=True)
     purchase_order = models.CharField(max_length=255, blank=True, null=True)
+
+    # provided by the customer
+    customer_purchase_order = models.CharField(max_length=255, blank=True, null=True)
+
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name='jobs')
     requestDate = models.DateTimeField(auto_now_add=True)
     tailNumber = models.CharField(max_length=50)
