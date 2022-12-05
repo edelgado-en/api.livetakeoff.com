@@ -50,6 +50,8 @@ class JobPhotosUploadView(APIView):
             file_name, file_extension = os.path.splitext(photo.name)
             
             filename = name + '_' + str(counter) + file_extension
+
+            photo._name = filename
             
             p = JobPhotos(job=job,
                           uploaded_by=request.user,
