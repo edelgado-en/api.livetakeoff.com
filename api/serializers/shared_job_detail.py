@@ -48,5 +48,6 @@ class SharedJobDetailSerializer(serializers.ModelSerializer):
             'job_photos',
             'job_comments',
             'on_site',
-            'created_by'
+            'created_by',
+            'requested_by'
         )

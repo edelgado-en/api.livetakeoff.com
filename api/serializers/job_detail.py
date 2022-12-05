@@ -50,6 +50,7 @@ class JobDetailSerializer(serializers.ModelSerializer):
             'is_auto_priced',
             'on_site',
             'created_by',
+            'requested_by',
             'completion_date',
             'encoded_id'
         )

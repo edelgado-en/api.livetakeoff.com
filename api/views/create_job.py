@@ -140,6 +140,11 @@ class CreateJobView(APIView):
 
         purchase_order = today_label + '-' + str(jobs_created_today + 1)
 
+        requested_by = data.get('requested_by', '')
+
+        if requested_by == "":
+            requested_by = None
+
         job = Job(purchase_order=purchase_order,
                   customer=customer,
                   tailNumber=tailNumber,
@@ -151,6 +156,7 @@ class CreateJobView(APIView):
                   completeBy=complete_by_date,
                   created_by=user,
                   status=job_status,
+                  requested_by=requested_by,
                   on_site=on_site)
 
         job.save()

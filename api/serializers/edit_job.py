@@ -25,5 +25,6 @@ class JobEditSerializer(serializers.ModelSerializer):
             'estimatedETD',
             'completeBy',
             'price',
-            'on_site'
+            'on_site',
+            'requested_by'
             )
