@@ -105,6 +105,11 @@ class TailStatsDetailView(APIView):
         # get recent JobStatusActivity for this tail number
         recent_activity = JobStatusActivity.objects.filter(job__tailNumber=tail_number)
 
+        # is user is a customer exclude job status canceled (T) from recent_activity
+        if request.user.profile.customer:
+            recent_activity = recent_activity.exclude(status='T')
+
+
         if request.user.profile.customer:
             recent_activity = recent_activity.exclude(Q(status='P') | Q(activity_type='P'))
 

@@ -40,6 +40,7 @@ class TailStatsView(ListAPIView):
         # if the current user is a customer, only get the jobs for that customer
         if self.request.user.profile.customer:
             qs = qs.filter(customer=self.request.user.profile.customer)
+            qs = qs.exclude(status='T')
 
 
         if searchText:
