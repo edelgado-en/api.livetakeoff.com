@@ -43,7 +43,12 @@ class CompletedJobsListView(ListAPIView):
                         .select_related('fbo') \
                         .select_related('aircraftType') \
                         .order_by('-completion_date') \
-                        .all()    
+                        .all()
+
+        # if customer use, then only show jobs for that customer
+        if self.request.user.profile.customer:
+            qs = qs.filter(customer=self.request.user.profile.customer)
+
 
         if searchText:
                 qs = qs.filter(Q(tailNumber__icontains=searchText)
@@ -52,7 +57,12 @@ class CompletedJobsListView(ListAPIView):
                               )
 
         if status == 'All':
-            qs = qs.filter(Q(status='C') | Q(status='I') | Q(status='T'))
+            # if customer user, do not include T status
+            if self.request.user.profile.customer:
+                qs = qs.filter(Q(status='C') | Q(status='I'))
+            else:
+                qs = qs.filter(Q(status='C') | Q(status='I') | Q(status='T'))
+
         else:
             qs = qs.filter(status=status)
 

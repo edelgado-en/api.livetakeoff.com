@@ -25,16 +25,17 @@ class AirportsView(ListAPIView):
 
         # if open_jobs include only airports with open jobs. An open job is a job with status 'A' or 'U', or 'S' or 'W'
         if open_jobs:
-            qs = qs.filter(jobs__status__in=['A', 'U', 'S', 'W']).distinct()
-
+            if self.request.user.profile.customer:
+                qs = qs.filter(jobs__status__in=['A', 'U', 'S', 'W'], jobs__customer=self.request.user.profile.customer).distinct()
+            else:
+                qs = qs.filter(jobs__status__in=['A', 'U', 'S', 'W']).distinct()
 
         if closed_jobs:
-            qs = qs.filter(jobs__status__in=['C', 'I', 'T']).distinct()
-
-
-        if onlyIncludeCustomerJobs:
-            qs = qs.filter(Q(jobs__customer=self.request.user.profile.customer)).distinct()
-
+            # if customer user, do not include T status
+            if self.request.user.profile.customer:
+                qs = qs.filter(jobs__status__in=['C', 'I'], jobs__customer=self.request.user.profile.customer).distinct()
+            else:
+                qs = qs.filter(jobs__status__in=['C', 'I', 'T']).distinct()
 
         return qs
 
