@@ -129,7 +129,4 @@ class CompletedJobsListView(ListAPIView):
 
 
     def can_see_completed_list(self, user):
-        return user.is_superuser \
-                 or user.is_staff \
-                 or user.profile.customer \
-                 or user.groups.filter(name='Account Managers').exists()
+        return not user.groups.filter(name='Project Managers').exists()
