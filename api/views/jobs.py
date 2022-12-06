@@ -97,11 +97,10 @@ class JobListView(ListAPIView):
                                | Q(purchase_order__icontains=searchText)
                               )
 
-            if status != 'All':
-                if status == 'O':
-                    qs = qs.filter(Q(status='A') | Q(status='S') | Q(status='U') | Q(status='W') | Q(status='R'))
-                else:
-                    qs = qs.filter(status=status)
+            if status == 'All':
+                qs = qs.filter(Q(status='A') | Q(status='S') | Q(status='U') | Q(status='W') | Q(status='R'))
+            else:
+                qs = qs.filter(status=status)
 
 
             if airport != 'All':
