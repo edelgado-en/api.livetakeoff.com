@@ -1,7 +1,6 @@
 from django.db.models import Q, F
 from django.db import models
 from django.db.models import Count, Sum, Func
-from django.shortcuts import get_object_or_404
 from rest_framework import (permissions, status)
 from rest_framework .response import Response
 from rest_framework.views import APIView
@@ -123,7 +122,10 @@ class TeamProductivityView(APIView):
 
         users = []
         for item in qs:
-            user_profile = get_object_or_404(UserProfile, user=item['project_manager__id'])
+            try:
+                user_profile = UserProfile.objects.get(user=item['project_manager__id']) 
+            except UserProfile.DoesNotExist:
+                continue
 
             # get the total number of retainer services this user has completed in the last 30 days by querying the RetainerServiceActivity table
             qs_retainer = RetainerServiceActivity.objects.filter(
@@ -155,11 +157,14 @@ class TeamProductivityView(APIView):
 
                 aircraft_type = job.aircraftType
 
-                price_list_entry = get_object_or_404(PriceListEntries,
+                try:
+                    price_list_entry = PriceListEntries.objects.get(
                                                      price_list_id=customer_settings.price_list_id,
                                                      aircraft_type_id=aircraft_type.id,
                                                      service_id=service['service__id'])
-                
+                except PriceListEntries.DoesNotExist:
+                    continue
+
                 total_revenue += price_list_entry.price
 
 
