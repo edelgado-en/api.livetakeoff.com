@@ -61,19 +61,20 @@ class TeamProductivityView(APIView):
             total_retainer_services += item['total']
 
         
-        # Get the sum of price of all jobs with status C or I in the last 30 days by querying the JobStatusActivity table and join to Jobs Table to get the job price
+        # Get the total revenue for the last 30 days. This is the sum of the job price for all distinct job ids in jobStatusActivity table where the status is I
+        # first, get the list of DISTINCT job ids from the jobStatusActivity table where the status is I
         qs = JobStatusActivity.objects.filter(
             Q(status__in=['I']) &
             Q(timestamp__gte=datetime.now() - timedelta(days=30))
-        ).values('job__id').annotate(
-            total=Sum('job__price')
-        ).values('total')
+        ).values('job__id').distinct()
 
-
-        total_jobs_price = 0
+        # then, get the sum of the job price for all the jobs in the list
+        total_jobs_revenue = 0
         for item in qs:
-            if item['total'] is not None:
-                total_jobs_price += item['total']
+            job = Job.objects.get(id=item['job__id'])
+            if job.price is not None:
+                total_jobs_revenue += job.price
+
 
 
         # Get the top 5 services in the last 30 days by querying the ServiceActivity table and join to Services Table to get the service name. The resulset should be service name with its corresponding times the service was completed in the last 30 days
@@ -187,7 +188,7 @@ class TeamProductivityView(APIView):
             'total_jobs': total_jobs,
             'total_services': total_services,
             'total_retainer_services': total_retainer_services,
-            'total_jobs_price': total_jobs_price,
+            'total_jobs_price': total_jobs_revenue,
             'top_services': top_services,
             'top_retainer_services': top_retainer_services,
             'users': users
