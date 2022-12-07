@@ -22,9 +22,9 @@ class TeamProductivityView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request):
-        # Get the total number of jobs with status C or I in the last 30 days by querying at the jobStatusActivity table
+        # Get the total number of jobs with status I in the last 30 days by querying at the jobStatusActivity table
         qs = JobStatusActivity.objects.filter(
-            Q(status__in=['C', 'I']) &
+            Q(status__in=['I']) &
             Q(timestamp__gte=datetime.now() - timedelta(days=30))
         ).values('job__id').annotate(
             total=Count('job__id')
@@ -63,7 +63,7 @@ class TeamProductivityView(APIView):
         
         # Get the sum of price of all jobs with status C or I in the last 30 days by querying the JobStatusActivity table and join to Jobs Table to get the job price
         qs = JobStatusActivity.objects.filter(
-            Q(status__in=['C', 'I']) &
+            Q(status__in=['I']) &
             Q(timestamp__gte=datetime.now() - timedelta(days=30))
         ).values('job__id').annotate(
             total=Sum('job__price')
