@@ -43,9 +43,9 @@ class TeamProductivityView(APIView):
             total=Count('service__id')
         ).values('service__name', 'total')
 
-        total_services = 0
+        grand_total_services = 0
         for item in qs:
-            total_services += item['total']
+            grand_total_services += item['total']
 
         
         # Get the total number of retainer services with status C in the last 30 days by querying at the retainerServiceActivity table
@@ -56,9 +56,9 @@ class TeamProductivityView(APIView):
             total=Count('retainer_service__id')
         ).values('retainer_service__name', 'total')
 
-        total_retainer_services = 0
+        grand_total_retainer_services = 0
         for item in qs:
-            total_retainer_services += item['total']
+            grand_total_retainer_services += item['total']
 
         
         # Get the total revenue for the last 30 days. This is the sum of the job price for all distinct job ids in jobStatusActivity table where the status is I
@@ -91,7 +91,7 @@ class TeamProductivityView(APIView):
             top_services.append({
                 'name': item['service__name'],
                 'total': item['total'],
-                'percentage': round((item['total'] / total_services) * 100, 2)
+                'percentage': round((item['total'] / grand_total_services) * 100, 2)
             })
 
         
@@ -109,7 +109,7 @@ class TeamProductivityView(APIView):
             top_retainer_services.append({
                 'name': item['retainer_service__name'],
                 'total': item['total'],
-                'percentage': round((item['total'] / total_retainer_services) * 100, 2)
+                'percentage': round((item['total'] / grand_total_retainer_services) * 100, 2)
             })
 
 
@@ -202,8 +202,8 @@ class TeamProductivityView(APIView):
         
         return Response({
             'total_jobs': total_jobs,
-            'total_services': total_services,
-            'total_retainer_services': total_retainer_services,
+            'total_services': grand_total_services,
+            'total_retainer_services': grand_total_retainer_services,
             'total_jobs_price': total_jobs_revenue,
             'top_services': top_services,
             'top_retainer_services': top_retainer_services,
