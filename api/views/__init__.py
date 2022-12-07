@@ -51,3 +51,4 @@ from .tail_stats import TailStatsView
 from .tail_stats_detail import TailStatsDetailView
 from .services_by_airport import ServiceByAirportView
 from .customer_retainers import CustomerRetainersView
+from .team_productivity import TeamProductivityView

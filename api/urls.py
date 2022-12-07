@@ -50,7 +50,8 @@ from .views import (
         TailStatsView,
         TailStatsDetailView,
         ServiceByAirportView,
-        CustomerRetainersView
+        CustomerRetainersView,
+        TeamProductivityView
     )
 
 urlpatterns = [
@@ -112,4 +113,5 @@ urlpatterns = [
     path('tail-stats/<str:tail_number>/', TailStatsDetailView.as_view()),
 
     path('services-by-airport', ServiceByAirportView.as_view()),
+    path('team-productivity', TeamProductivityView.as_view()),
 ]
