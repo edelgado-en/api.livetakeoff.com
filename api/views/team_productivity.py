@@ -128,6 +128,20 @@ class TeamProductivityView(APIView):
             except UserProfile.DoesNotExist:
                 continue
 
+            # get the total number of services this user has completed in the last 30 days by querying the ServiceActivity table
+            qs = ServiceActivity.objects.filter(
+                Q(status='C') &
+                Q(timestamp__gte=datetime.now() - timedelta(days=30)) &
+                Q(project_manager__id=item['project_manager__id'])
+            ).values('service__id').annotate(
+                total=Count('service__id')
+            ).values('total')
+
+            total_services = 0
+            for service in qs:
+                total_services += service['total']
+
+
             # get the total number of retainer services this user has completed in the last 30 days by querying the RetainerServiceActivity table
             qs_retainer = RetainerServiceActivity.objects.filter(
                 Q(status='C') &
@@ -169,7 +183,6 @@ class TeamProductivityView(APIView):
                 total_revenue += price_list_entry.price
 
 
-
             total_retainer_services = 0
             for item in qs_retainer:
                 total_retainer_services += item['total']
@@ -178,7 +191,7 @@ class TeamProductivityView(APIView):
                 'first_name': user_profile.user.first_name,
                 'last_name': user_profile.user.last_name,
                 'avatar': user_profile.avatar.url,
-                'total_services': item['total'],
+                'total_services': total_services,
                 'total_retainer_services': total_retainer_services,
                 'total_revenue': total_revenue
             })
