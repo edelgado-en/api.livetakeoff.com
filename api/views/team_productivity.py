@@ -182,6 +182,9 @@ class TeamProductivityView(APIView):
                 'total_retainer_services': total_retainer_services,
                 'total_revenue': total_revenue
             })
+
+        # sort users by highest total_revenue
+        users = sorted(users, key=lambda k: k['total_revenue'], reverse=True)
            
         
         return Response({
