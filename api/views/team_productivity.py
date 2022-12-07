@@ -39,9 +39,9 @@ class TeamProductivityView(APIView):
         qs = ServiceActivity.objects.filter(
             Q(status='C') &
             Q(timestamp__gte=datetime.now() - timedelta(days=30))
-        ).values('service__id').annotate(
+        ).values('service__name').annotate(
             total=Count('service__id')
-        ).values('total')
+        ).values('service__name', 'total')
 
         total_services = 0
         for item in qs:
@@ -52,9 +52,9 @@ class TeamProductivityView(APIView):
         qs = RetainerServiceActivity.objects.filter(
             Q(status='C') &
             Q(timestamp__gte=datetime.now() - timedelta(days=30))
-        ).values('retainer_service__id').annotate(
+        ).values('retainer_service__name').annotate(
             total=Count('retainer_service__id')
-        ).values('total')
+        ).values('retainer_service__name', 'total')
 
         total_retainer_services = 0
         for item in qs:
