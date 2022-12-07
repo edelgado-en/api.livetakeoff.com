@@ -22,10 +22,78 @@ class TeamProductivityView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request):
+        dateSelected = request.data.get('dateSelected')
+
+        # get start date and end date based on the dateSelected value provided
+        if dateSelected == 'yesterday':
+            yesterday = datetime.now() - timedelta(days=1)
+            start_date = datetime(yesterday.year, yesterday.month, yesterday.day, 0, 0, 0)
+            end_date = datetime(yesterday.year, yesterday.month, yesterday.day, 23, 59, 59)
+        
+        elif dateSelected == 'last7Days':
+            today = date.today()
+            start_date = today - timedelta(days=7)
+            end_date = today
+
+        elif dateSelected == 'lastWeek':
+            today = date.today()
+            start_date = today - timedelta(days=today.weekday(), weeks=1)
+            end_date = start_date + timedelta(days=6)
+
+        elif dateSelected == 'MTD':
+            today = date.today()
+            start_date = date(today.year, today.month, 1)
+            end_date = datetime.now()
+
+        elif dateSelected == 'lastMonth':
+            today = date.today()
+            first = today.replace(day=1)
+            lastMonth = first - timedelta(days=1)
+            start_date = lastMonth.replace(day=1)
+            
+            # check if last month has 31 days or 30 days or 28 days
+            if lastMonth.month == 1 or lastMonth.month == 3 or lastMonth.month == 5 or lastMonth.month == 7 or lastMonth.month == 8 or lastMonth.month == 10 or lastMonth.month == 12:
+                end_date = lastMonth.replace(day=31)
+            elif lastMonth.month == 4 or lastMonth.month == 6 or lastMonth.month == 9 or lastMonth.month == 11:
+                end_date = lastMonth.replace(day=30)
+            else:
+                end_date = lastMonth.replace(day=28)
+
+        elif dateSelected == 'lastQuarter':
+            today = date.today()
+            # get today's month and check it is in the first, second, third or fourth quarter. if it is first quarter, then get the previous year's last quarter
+            if today.month in [1,2,3]:
+                start_date = date(today.year - 1, 10, 1)
+                end_date = date(today.year - 1, 12, 31)
+            
+            elif today.month in [4,5,6]:
+                start_date = date(today.year, 1, 1)
+                end_date = date(today.year, 3, 31)
+            
+            elif today.month in [7,8,9]:
+                start_date = date(today.year, 4, 1)
+                end_date = date(today.year, 6, 30)
+            
+            elif today.month in [10,11,12]:
+                start_date = date(today.year, 7, 1)
+                end_date = date(today.year, 9, 30)
+
+        
+        elif dateSelected == 'YTD':
+            year = datetime.now().year
+            start_date = datetime(year, 1, 1)
+            end_date = datetime.now()
+        
+        elif dateSelected == 'lastYear':
+            today = date.today()
+            start_date = date(today.year - 1, 1, 1)
+            end_date = date(today.year - 1, 12, 31)
+
+
         # Get the total number of jobs with status I in the last 30 days by querying at the jobStatusActivity table
         qs = JobStatusActivity.objects.filter(
             Q(status__in=['I']) &
-            Q(timestamp__gte=datetime.now() - timedelta(days=30))
+            Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date)
         ).values('job__id').annotate(
             total=Count('job__id')
         ).values('total')
@@ -38,7 +106,7 @@ class TeamProductivityView(APIView):
         # Get the total number of services with statuc C in the last 30 days by querying at the serviceActivity table
         qs = ServiceActivity.objects.filter(
             Q(status='C') &
-            Q(timestamp__gte=datetime.now() - timedelta(days=30))
+            Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date)
         ).values('service__name').annotate(
             total=Count('service__id')
         ).values('service__name', 'total')
@@ -51,7 +119,7 @@ class TeamProductivityView(APIView):
         # Get the total number of retainer services with status C in the last 30 days by querying at the retainerServiceActivity table
         qs = RetainerServiceActivity.objects.filter(
             Q(status='C') &
-            Q(timestamp__gte=datetime.now() - timedelta(days=30))
+            Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date)
         ).values('retainer_service__name').annotate(
             total=Count('retainer_service__id')
         ).values('retainer_service__name', 'total')
@@ -65,7 +133,7 @@ class TeamProductivityView(APIView):
         # first, get the list of DISTINCT job ids from the jobStatusActivity table where the status is I
         qs = JobStatusActivity.objects.filter(
             Q(status__in=['I']) &
-            Q(timestamp__gte=datetime.now() - timedelta(days=30))
+            Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date)
         ).values('job__id').distinct()
 
         # then, get the sum of the job price for all the jobs in the list
@@ -76,11 +144,10 @@ class TeamProductivityView(APIView):
                 total_jobs_revenue += job.price
 
 
-
         # Get the top 5 services in the last 30 days by querying the ServiceActivity table and join to Services Table to get the service name. The resulset should be service name with its corresponding times the service was completed in the last 30 days
         qs = ServiceActivity.objects.filter(
             Q(status='C') &
-            Q(timestamp__gte=datetime.now() - timedelta(days=30))
+            Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date)
         ).values('service__name').annotate(
             total=Count('service__id')
         ).values('service__name', 'total').order_by('-total')[:5]
@@ -98,7 +165,7 @@ class TeamProductivityView(APIView):
         # Get the top 5 retainer services in the last 30 days by querying the RetainerServiceActivity table and join to RetainerServices Table to get the retainer service name. The resulset should be retainer service name with its corresponding times the retainer service was completed in the last 30 days
         qs = RetainerServiceActivity.objects.filter(
             Q(status='C') &
-            Q(timestamp__gte=datetime.now() - timedelta(days=30))
+            Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date)
         ).values('retainer_service__name').annotate(
             total=Count('retainer_service__id')
         ).values('retainer_service__name', 'total').order_by('-total')[:5]
@@ -116,7 +183,7 @@ class TeamProductivityView(APIView):
         # get the list of all users that completed services in the last 30 days. The resultSet should be the user first name, last name and avatar (by querying the userProfile table) with the total number of services and retainer services completed, and the total revenue generated by the user in the last 30 days. The revenue generated by each user is calculated based on service, aircraft type, and price list of the customer associated with the job for which the service was completed. The price is calculated only based on services, not retainer services.
         qs = ServiceActivity.objects.filter(
             Q(status='C') &
-            Q(timestamp__gte=datetime.now() - timedelta(days=30))
+            Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date)
         ).values('project_manager__id').annotate(
             total=Count('service__id')
         ).values('project_manager__id', 'total')
@@ -131,7 +198,7 @@ class TeamProductivityView(APIView):
             # get the total number of services this user has completed in the last 30 days by querying the ServiceActivity table
             qs = ServiceActivity.objects.filter(
                 Q(status='C') &
-                Q(timestamp__gte=datetime.now() - timedelta(days=30)) &
+                Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date) &
                 Q(project_manager__id=item['project_manager__id'])
             ).values('service__id').annotate(
                 total=Count('service__id')
@@ -145,7 +212,7 @@ class TeamProductivityView(APIView):
             # get the total number of retainer services this user has completed in the last 30 days by querying the RetainerServiceActivity table
             qs_retainer = RetainerServiceActivity.objects.filter(
                 Q(status='C') &
-                Q(timestamp__gte=datetime.now() - timedelta(days=30)) &
+                Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date) &
                 Q(project_manager_id=item['project_manager__id'])
             ).values('retainer_service__id').annotate(
                 total=Count('retainer_service__id')
@@ -155,7 +222,7 @@ class TeamProductivityView(APIView):
             # first get the list of service ids completed with its corresponding job id by this user in the last 30 days
             qs_service = ServiceActivity.objects.filter(
                 Q(status='C') &
-                Q(timestamp__gte=datetime.now() - timedelta(days=30)) &
+                Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date) &
                 Q(project_manager_id=item['project_manager__id'])
             ).values('service__id', 'job__id')
 
