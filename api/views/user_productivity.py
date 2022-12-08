@@ -150,7 +150,6 @@ class UserProductivityView(APIView):
                                                 .filter(Q(project_manager=user) & Q(status='C')) \
                                                 .order_by('-count')[:5]
 
-        
         # Get the last 100 services with status W by the user by querying the serviceActivity table
         # and filtering by the user and the status of the service
         # and then ordering by the timestamp of the service
@@ -249,6 +248,15 @@ class UserProductivityView(APIView):
                 continue
 
             total_revenue += price_list_entry.price
+        
+        last_retainer = None
+        last_service = None
+
+        if not last_retainer_service_date:
+            last_retainer = last_retainer_service_date.timestamp
+
+        if not last_service_date:
+            last_service = last_service_date.timestamp
 
         return Response({
             'user': user,
@@ -259,8 +267,8 @@ class UserProductivityView(APIView):
             'retainers_completed': retainer_services_completed,
             'photos_uploaded': photos_uploaded,
             'comments_created': comments_created,
-            'last_service_date': last_service_date.timestamp,
-            'last_retainer_service_date': last_retainer_service_date.timestamp,
+            'last_service_date': last_service,
+            'last_retainer_service_date': last_retainer,
             'top_five_services': top_services,
             'top_five_retainer_services': top_retainer_services,
             'top_five_aircraft_types': top_five_aircraft_types,
