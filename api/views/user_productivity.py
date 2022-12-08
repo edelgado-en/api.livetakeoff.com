@@ -139,7 +139,11 @@ class UserProductivityView(APIView):
                     time_to_complete = (service_activity_c.timestamp - service_activity.timestamp).total_seconds() / 3600
 
                     # append the service name, job_aircraftType__name, and how long it took to go from status w to status C in hours to the recent_service_stats list
-                    recent_service_stats.append([service_name, job_aircraftType_name, time_to_complete])
+                    
+                    #only append if an entry for this service_name and job_aircraftType_name does not already exist
+                    if not any(d['service_name'] == service_name and d['job_aircraftType_name'] == job_aircraftType_name for d in recent_service_stats):
+                        recent_service_stats.append({'service_name': service_name, 'job_aircraftType_name': job_aircraftType_name, 'time_to_complete': time_to_complete})
+                    #recent_service_stats.append([service_name, job_aircraftType_name, time_to_complete])
             
             except ServiceActivity.DoesNotExist:
                 continue
@@ -148,7 +152,26 @@ class UserProductivityView(APIView):
         # iterate through recent_service_stats list, group by service name and job aircraft type name and get the average time to complete
         # the resultset should look like this: service_name, job_aircraftType_name, average_time_to_complete
         # the resultset should be sorted by average_time_to_complete
-        recent_service_stats = sorted(recent_service_stats, key=lambda x: x[2])
+        #recent_service_stats = sorted(recent_service_stats, key=lambda x: x[2])
+        
+
+        # create a dictionary out of recent_service_stats where data is grouped by service_name. Each entry should look like this:
+        # service_name: [job_aircraftType_name, average_time_to_complete]
+        recent_service_stats_dict = {}
+        for stat in recent_service_stats:
+            service_name = stat['service_name']
+            job_aircraftType_name = stat['job_aircraftType_name']
+            time_to_complete = stat['time_to_complete']
+
+            if service_name in recent_service_stats_dict:
+                recent_service_stats_dict[service_name].append({"aircraft":job_aircraftType_name, "time_to_complete": time_to_complete})
+            else:
+                recent_service_stats_dict[service_name] = [{"aircraft":job_aircraftType_name, "time_to_complete": time_to_complete}]
+
+        # each entry in recent_service_stats_dict should be sorted by time_to_complete
+        for service_name in recent_service_stats_dict:
+            recent_service_stats_dict[service_name] = sorted(recent_service_stats_dict[service_name], key=lambda x: x['time_to_complete'])
+
 
         comments = []
         #iterate through last_five_comments and get the comment and date and append to comments list
@@ -205,7 +228,7 @@ class UserProductivityView(APIView):
             'top_five_services': top_five_services,
             'top_five_retainer_services': top_five_retainer_services,
             'top_five_aircraft_types': top_five_aircraft_types,
-            'recent_service_stats': recent_service_stats
+            'recent_service_stats': recent_service_stats_dict
         }, status=status.HTTP_200_OK)
 
     
