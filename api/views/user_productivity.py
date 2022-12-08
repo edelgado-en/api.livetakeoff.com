@@ -173,8 +173,10 @@ class UserProductivityView(APIView):
                     job_aircraftType_name = service_activity.job.aircraftType.name
                     time_to_complete = (service_activity_c.timestamp - service_activity.timestamp).total_seconds() / 3600
 
-                    # append the service name, job_aircraftType__name, and how long it took to go from status w to status C in hours to the recent_service_stats list
-                    
+                    # if time_to_complete is negative, switch it to positive
+                    if time_to_complete < 0:
+                        time_to_complete = time_to_complete * -1
+
                     #only append if an entry for this service_name and job_aircraftType_name does not already exist
                     if not any(d['service_name'] == service_name and d['job_aircraftType_name'] == job_aircraftType_name for d in recent_service_stats):
                         recent_service_stats.append({'service_name': service_name, 'job_aircraftType_name': job_aircraftType_name, 'time_to_complete': time_to_complete})
