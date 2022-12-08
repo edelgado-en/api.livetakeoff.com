@@ -172,6 +172,11 @@ class UserProductivityView(APIView):
         for service_name in recent_service_stats_dict:
             recent_service_stats_dict[service_name] = sorted(recent_service_stats_dict[service_name], key=lambda x: x['time_to_complete'])
 
+        # convert time_to_complete in recent_service_stats_dict to the following format: x h y m
+        for service_name in recent_service_stats_dict:
+            for stat in recent_service_stats_dict[service_name]:
+                stat['time_to_complete'] = str(int(stat['time_to_complete'])) + "h " + str(int((stat['time_to_complete'] % 1) * 60)) + "m"
+
 
         comments = []
         #iterate through last_five_comments and get the comment and date and append to comments list
