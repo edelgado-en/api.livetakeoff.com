@@ -51,7 +51,8 @@ from .views import (
         TailStatsDetailView,
         ServiceByAirportView,
         CustomerRetainersView,
-        TeamProductivityView
+        TeamProductivityView,
+        UserProductivityView
     )
 
 urlpatterns = [
@@ -114,4 +115,5 @@ urlpatterns = [
 
     path('services-by-airport', ServiceByAirportView.as_view()),
     path('team-productivity', TeamProductivityView.as_view()),
+    path('user-productivity/<int:id>/', UserProductivityView.as_view())
 ]

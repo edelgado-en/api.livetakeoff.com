@@ -86,6 +86,11 @@ class UserView(APIView):
         elif is_customer:
             access_level_label = 'Customer'
 
+        
+        phone_number = ''
+        if user_profile.phone_number:
+            phone_number = user_profile.phone_number.as_e164
+
 
         content = {
             "initials": first_name[0] + last_name[0],
@@ -94,6 +99,7 @@ class UserView(APIView):
             "first_name": user.first_name,
             "last_name": user.last_name,
             "email": user.email,
+            "phone": phone_number,
             "isProjectManager": is_project_manager,
             "isAccountManager": is_account_manager,
             "isAdmin": user.is_staff,

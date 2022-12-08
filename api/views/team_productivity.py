@@ -22,6 +22,10 @@ class TeamProductivityView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request):
+        if not self.can_view_dashboard(request.user):
+            return Response({'error': 'You do not have permission to view this page'}, status=status.HTTP_403_FORBIDDEN)
+        
+
         dateSelected = request.data.get('dateSelected')
 
         # get start date and end date based on the dateSelected value provided
@@ -255,6 +259,7 @@ class TeamProductivityView(APIView):
                 total_retainer_services += item['total']
 
             users.append({
+                'id': user_profile.user.id,
                 'first_name': user_profile.user.first_name,
                 'last_name': user_profile.user.last_name,
                 'avatar': user_profile.avatar.url,
@@ -276,6 +281,13 @@ class TeamProductivityView(APIView):
             'top_retainer_services': top_retainer_services,
             'users': users
         }, status=status.HTTP_200_OK)
+
+
+    def can_view_dashboard(self, user):
+        if user.is_superuser or user.is_staff or user.groups.filter(name='Account Managers').exists():
+            return True
+        
+        return False
 
 
 

@@ -27,15 +27,6 @@ class CustomerDetail(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, id):
-        """ subject = 'This is my subject'
-        tailNumber = 'NEJ123'
-        body = f'<img src="https://res.cloudinary.com/datidxeqm/image/upload/v1655812995/npcjg9zhd7j4kdfbbpce.jpg" alt=""/><div style="color:\'red\'">Tailnumber: {tailNumber}</div>'
-
-        email_util = EmailUtil()
-        email_util.send_email('enriquedelgado806@gmail.com',
-                              subject,
-                              body) """
-
         customer = Customer.objects.select_related('contact').get(pk=id)
         
         try:
