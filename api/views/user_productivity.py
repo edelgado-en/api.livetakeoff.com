@@ -252,10 +252,11 @@ class UserProductivityView(APIView):
         last_retainer = None
         last_service = None
 
-        if not last_retainer_service_date:
+        # if last_retainer_service_date is not None, get the last retainer service date
+        if last_retainer_service_date:
             last_retainer = last_retainer_service_date.timestamp
 
-        if not last_service_date:
+        if last_service_date:
             last_service = last_service_date.timestamp
 
         return Response({
