@@ -134,7 +134,12 @@ class TailStatsDetailView(APIView):
 
 
         # Get the total number of jobs for this tail number
-        total_jobs = Job.objects.filter(tailNumber=tail_number).count()
+        total_jobs = Job.objects.filter(tailNumber=tail_number)
+
+        if self.request.user.profile.customer:
+            total_jobs = total_jobs.exclude(status='T')
+        
+        total_jobs = total_jobs.count()
 
         # get the total number of invoiced jobs for this tail number
         total_invoiced_jobs = Job.objects.filter(tailNumber=tail_number, status='I').count()
