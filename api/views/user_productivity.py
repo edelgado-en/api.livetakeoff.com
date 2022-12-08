@@ -58,6 +58,12 @@ class UserProductivityView(APIView):
         photos_uploaded = JobStatusActivity.objects.filter(Q(user=user) & Q(activity_type='U')).count()
 
 
+        #Count how many comments the user has made by querying the jobComments table
+        # and filtering by the user
+        # and then counting the number of comments
+        comments_created = JobComments.objects.filter(Q(author=user)).count()
+
+
         # Get the date when this user was created by checking the User table
         # and then converting the date to a string
         #member_since = user.date_joined.strftime("%m/%d/%Y")
@@ -88,10 +94,19 @@ class UserProductivityView(APIView):
         # and then ordering by the number of services
         # and then getting the first five services in the list
         top_five_services = ServiceActivity.objects \
-                                            .values('service__name', 'job__airport__name') \
+                                            .values('service__name') \
                                             .annotate(count=Count('service__id')) \
                                             .filter(Q(project_manager=user) & Q(status='C')) \
                                             .order_by('-count')[:5]
+
+        top_services = []
+        # add a percentage value to each service which is calculated based on the top 5 services provided
+        for item in top_five_services:
+            top_services.append({
+                'name': item['service__name'],
+                'total': item['count'],
+                'percentage': round((item['count'] / services_completed) * 100, 2)
+            })
 
         
         # Get the top 5 retainer services the user has completed by querying the retainerServiceActivity table group by the service and airport
@@ -99,10 +114,19 @@ class UserProductivityView(APIView):
         # and then ordering by the number of services
         # and then getting the first five services in the list
         top_five_retainer_services = RetainerServiceActivity.objects \
-                                                            .values('retainer_service__name', 'job__airport__name') \
+                                                            .values('retainer_service__name') \
                                                             .annotate(count=Count('retainer_service__id')) \
                                                             .filter(Q(project_manager=user) & Q(status='C')) \
                                                             .order_by('-count')[:5]
+
+        top_retainer_services = []
+        # add a percentage value to each retainer service which is calculated based on the top 5 retainer services provided
+        for item in top_five_retainer_services:
+            top_retainer_services.append({
+                'name': item['retainer_service__name'],
+                'total': item['count'],
+                'percentage': round((item['count'] / retainer_services_completed) * 100, 2)
+            })
 
         
         # Get the top 5 aircarft types the user has completed services for by querying the serviceActivity table group by the job__aircraftType
@@ -115,17 +139,28 @@ class UserProductivityView(APIView):
                                                 .annotate(count=Count('job__aircraftType__id')) \
                                                 .filter(Q(project_manager=user) & Q(status='C')) \
                                                 .order_by('-count')[:5]
+
+        # Get the top 5 airports the user has completed services for by querying the serviceActivity table group by the job__airport
+        # and filtering by the user and the status of the service
+        # and then ordering by the number of services
+        # and then getting the first five airports in the list
+        top_five_airports = ServiceActivity.objects \
+                                                .values('job__airport__name') \
+                                                .annotate(count=Count('job__airport__id')) \
+                                                .filter(Q(project_manager=user) & Q(status='C')) \
+                                                .order_by('-count')[:5]
+
         
         # Get the last 100 services with status W by the user by querying the serviceActivity table
         # and filtering by the user and the status of the service
         # and then ordering by the timestamp of the service
         # and then getting the first 100 services in the list
-        last_100_services = ServiceActivity.objects.filter(Q(project_manager=user) & Q(status='W')).order_by('-timestamp')[:100]
+        last_50_services = ServiceActivity.objects.filter(Q(project_manager=user) & Q(status='W')).order_by('-timestamp')[:50]
 
         recent_service_stats = []
 
         # Iterate through last_100_services and get the corresponding service activity with status C for the same job and service
-        for service_activity in last_100_services:
+        for service_activity in last_50_services:
             try:
                 service_activity_c = ServiceActivity.objects.filter(Q(job=service_activity.job)
                                                                 & Q(service=service_activity.service)
@@ -149,33 +184,27 @@ class UserProductivityView(APIView):
                 continue
 
         
-        # iterate through recent_service_stats list, group by service name and job aircraft type name and get the average time to complete
-        # the resultset should look like this: service_name, job_aircraftType_name, average_time_to_complete
-        # the resultset should be sorted by average_time_to_complete
-        #recent_service_stats = sorted(recent_service_stats, key=lambda x: x[2])
-        
+        # create an array out of recent_service_stats where data is grouped by service_name.
+        #  Each entry of the array should look like this:
+        # {service: service_name, stats: [{"aircraft":job_aircraftType_name, "time_to_complete": time_to_complete}]
+        #  }
+        recent_service_stats_grouped = []
+        for item in recent_service_stats:
+            if not any(d['service'] == item['service_name'] for d in recent_service_stats_grouped):
+                recent_service_stats_grouped.append({'service': item['service_name'], 'stats': []})
+            
+            for item2 in recent_service_stats_grouped:
+                if item2['service'] == item['service_name']:
+                    item2['stats'].append({'aircraft': item['job_aircraftType_name'], 'time_to_complete': item['time_to_complete']})
 
-        # create a dictionary out of recent_service_stats where data is grouped by service_name. Each entry should look like this:
-        # service_name: [job_aircraftType_name, average_time_to_complete]
-        recent_service_stats_dict = {}
-        for stat in recent_service_stats:
-            service_name = stat['service_name']
-            job_aircraftType_name = stat['job_aircraftType_name']
-            time_to_complete = stat['time_to_complete']
+        # each entry in recent_service_stats_grouped should be sorted by time_to_complete
+        for item in recent_service_stats_grouped:
+            item['stats'] = sorted(item['stats'], key=lambda k: k['time_to_complete'])
 
-            if service_name in recent_service_stats_dict:
-                recent_service_stats_dict[service_name].append({"aircraft":job_aircraftType_name, "time_to_complete": time_to_complete})
-            else:
-                recent_service_stats_dict[service_name] = [{"aircraft":job_aircraftType_name, "time_to_complete": time_to_complete}]
-
-        # each entry in recent_service_stats_dict should be sorted by time_to_complete
-        for service_name in recent_service_stats_dict:
-            recent_service_stats_dict[service_name] = sorted(recent_service_stats_dict[service_name], key=lambda x: x['time_to_complete'])
-
-        # convert time_to_complete in recent_service_stats_dict to the following format: x h y m
-        for service_name in recent_service_stats_dict:
-            for stat in recent_service_stats_dict[service_name]:
-                stat['time_to_complete'] = str(int(stat['time_to_complete'])) + "h " + str(int((stat['time_to_complete'] % 1) * 60)) + "m"
+        # convert time_to_complete in recent_service_stats_grouped to the following format: xh ym
+        for item in recent_service_stats_grouped:
+            for item2 in item['stats']:
+                item2['time_to_complete'] = '{0}h {1}m'.format(int(item2['time_to_complete']), int((item2['time_to_complete'] % 1) * 60))
 
 
         comments = []
@@ -227,13 +256,15 @@ class UserProductivityView(APIView):
             'services_completed': services_completed,
             'retainers_completed': retainer_services_completed,
             'photos_uploaded': photos_uploaded,
+            'comments_created': comments_created,
             'last_service_date': last_service_date.timestamp,
             'last_retainer_service_date': last_retainer_service_date.timestamp,
-            'last_five_comments': comments,
-            'top_five_services': top_five_services,
-            'top_five_retainer_services': top_five_retainer_services,
+            'top_five_services': top_services,
+            'top_five_retainer_services': top_retainer_services,
             'top_five_aircraft_types': top_five_aircraft_types,
-            'recent_service_stats': recent_service_stats_dict
+            'top_five_airports': top_five_airports,
+            'recent_service_stats': recent_service_stats_grouped,
+            'last_five_comments': comments,
         }, status=status.HTTP_200_OK)
 
     
