@@ -54,7 +54,9 @@ class UserProductivityView(APIView):
         # count how many jobPhotos the user has uploaded by querying the jobPhotos table
         # and filtering by the user
         # and then counting the number of photos
-        photos_uploaded = JobPhotos.objects.filter(Q(uploaded_by=user)).count()
+        # This needs to come from JobStatusActivity table activity_type = 'U'
+        photos_uploaded = JobStatusActivity.objects.filter(Q(user=user) & Q(activity_type='U')).count()
+
 
         # Get the date when this user was created by checking the User table
         # and then converting the date to a string
