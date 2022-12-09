@@ -31,6 +31,7 @@ class UserProductivityView(APIView):
         user_profile = UserProfile.objects.get(user_id=id)
         user = user_profile.user
         member_since = user.date_joined
+        location = user_profile.location
 
         last_service_date = ServiceActivity.objects.filter(Q(project_manager=user)
                                                            & Q(status='C')).order_by('-timestamp').first()
@@ -255,7 +256,8 @@ class UserProductivityView(APIView):
             'first_name': user_profile.user.first_name,
             'last_name': user_profile.user.last_name,
             'avatar': user_profile.avatar.url,
-            'vendor': vendor_name
+            'vendor': vendor_name,
+            'location': location
         }
 
         # total revenue generated
