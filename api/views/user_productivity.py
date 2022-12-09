@@ -8,8 +8,6 @@ from rest_framework.views import APIView
 from django.contrib.auth.models import User
 
 from datetime import (date, datetime, timedelta)
-import pytz
-from email.utils import parsedate_tz, mktime_tz
 
 from api.models import (
     ServiceActivity,
@@ -18,7 +16,6 @@ from api.models import (
     JobStatusActivity,
     UserProfile,
     PriceListEntries,
-    JobPhotos,
     JobComments
 )
 
@@ -34,7 +31,7 @@ class UserProductivityView(APIView):
         user_profile = UserProfile.objects.get(user_id=id)
         user = user_profile.user
         member_since = user.date_joined
-        
+
         last_service_date = ServiceActivity.objects.filter(Q(project_manager=user)
                                                            & Q(status='C')).order_by('-timestamp').first()
         

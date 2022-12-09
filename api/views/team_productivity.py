@@ -6,8 +6,6 @@ from rest_framework .response import Response
 from rest_framework.views import APIView
 
 from datetime import (date, datetime, timedelta)
-import pytz
-from email.utils import parsedate_tz, mktime_tz
 
 from api.models import (
     ServiceActivity,
@@ -56,10 +54,14 @@ class TeamProductivityView(APIView):
             start_date = lastMonth.replace(day=1)
             
             # check if last month has 31 days or 30 days or 28 days
-            if lastMonth.month == 1 or lastMonth.month == 3 or lastMonth.month == 5 or lastMonth.month == 7 or lastMonth.month == 8 or lastMonth.month == 10 or lastMonth.month == 12:
+            if lastMonth.month == 1 or lastMonth.month == 3 \
+                or lastMonth.month == 5 or lastMonth.month == 7 or lastMonth.month == 8 \
+                or lastMonth.month == 10 or lastMonth.month == 12:
                 end_date = lastMonth.replace(day=31)
+            
             elif lastMonth.month == 4 or lastMonth.month == 6 or lastMonth.month == 9 or lastMonth.month == 11:
                 end_date = lastMonth.replace(day=30)
+            
             else:
                 end_date = lastMonth.replace(day=28)
 

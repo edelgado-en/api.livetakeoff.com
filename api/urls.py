@@ -52,7 +52,8 @@ from .views import (
         ServiceByAirportView,
         CustomerRetainersView,
         TeamProductivityView,
-        UserProductivityView
+        UserProductivityView,
+        PremiumContactView
     )
 
 urlpatterns = [
@@ -115,5 +116,6 @@ urlpatterns = [
 
     path('services-by-airport', ServiceByAirportView.as_view()),
     path('team-productivity', TeamProductivityView.as_view()),
-    path('user-productivity/<int:id>/', UserProductivityView.as_view())
+    path('user-productivity/<int:id>/', UserProductivityView.as_view()),
+    path('premium/contact', PremiumContactView.as_view()),
 ]

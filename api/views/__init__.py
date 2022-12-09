@@ -53,3 +53,4 @@ from .services_by_airport import ServiceByAirportView
 from .customer_retainers import CustomerRetainersView
 from .team_productivity import TeamProductivityView
 from .user_productivity import UserProductivityView
+from .premium_contact import PremiumContactView
