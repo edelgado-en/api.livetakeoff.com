@@ -15,4 +15,5 @@ class UserProfile(models.Model):
     avatar = models.ImageField(upload_to='profiles/', blank=True, null=True)
     phone_number = PhoneNumberField(blank=True, null=True)
     location = models.CharField(max_length=255, blank=True, null=True)
+    enable_estimates = models.BooleanField(default=False)
 

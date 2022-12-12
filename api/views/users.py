@@ -114,7 +114,8 @@ class UserView(APIView):
             "canSeePrice": canSeePrice,
             "receive_sms_notifications": user_profile.sms_notifications,
             "receive_email_notifications": user_profile.email_notifications,
-            'showSpendingInfo': showSpendingInfo
+            'showSpendingInfo': showSpendingInfo,
+            'enableEstimates': user_profile.enable_estimates,
         }
 
         return Response(content)
