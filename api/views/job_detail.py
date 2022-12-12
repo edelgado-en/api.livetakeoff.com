@@ -12,6 +12,8 @@ from ..serializers import (
      JobDetailSerializer,
      )
 
+from ..pricebreakdown_service import PriceBreakdownService
+
 from ..models import (
         Job,
         JobServiceAssignment,
@@ -149,6 +151,16 @@ class JobDetail(APIView):
         job.retainer_service_assignments = job_retainer_service_assignments
 
         job.total_photos = JobPhotos.objects.filter(job=job).count()
+
+        # Check if the price of the job is different from the price of the services and update the job price
+        if job.is_auto_priced and job.status != 'I' and job.status != 'T':
+            price_breakdown = PriceBreakdownService().get_price_breakdown(job)
+            price = price_breakdown.get('totalPrice')
+            
+            if price != job.price:
+                job.price = price
+                job.save()
+            
 
         # do not include the price in the serializer if the user is a project manager or a customer user with the customer setting show_job_price set to false
         
