@@ -21,10 +21,14 @@ class JobEstimateView(ListAPIView):
     def get_queryset(self):
         status = self.request.data.get('status')
         customer = self.request.data.get('customer')
+        searchText = self.request.data.get('searchText')
 
         qs = JobEstimate.objects.select_related('customer') \
                              .select_related('aircraftType') \
                              .all()
+
+        if searchText:
+            qs = qs.filter(Q(tailNumber__icontains=searchText))
 
         if status != 'All':
             qs = qs.filter(status=status)
