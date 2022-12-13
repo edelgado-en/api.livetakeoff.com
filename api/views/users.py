@@ -99,7 +99,7 @@ class UserView(APIView):
             "first_name": user.first_name,
             "last_name": user.last_name,
             "email": user.email,
-            "phone": phone_number,
+            "phone_number": phone_number,
             "isProjectManager": is_project_manager,
             "isAccountManager": is_account_manager,
             "isAdmin": user.is_staff,
@@ -127,7 +127,8 @@ class UserView(APIView):
         user_profile.about = request.data['about']
         user_profile.email_notifications = request.data['email_notifications']
         user_profile.sms_notifications = request.data['sms_notifications']
-        
+        user_profile.phone_number = request.data.get('phone_number', None)
+
         user_profile.save()
 
         user.username = request.data['username']
