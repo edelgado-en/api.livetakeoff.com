@@ -27,14 +27,15 @@ class JobEstimateFormInfoView(APIView):
         customers = Customer.objects.all().order_by('name')
 
         aircraft_types = AircraftType.objects.filter(active=True).all().order_by('name')
-        
-        airports = Airport.objects.filter(public=True, active=True).all().order_by('name')
-        
-        fbos = FBO.objects.filter(public=True, active=True).all().order_by('name')
 
-        # only get public services
-        services = Service.objects.filter(public=True, active=True).all().order_by('name')
-
+        if request.user.profile.customer:
+            airports = Airport.objects.filter(public=True, active=True).order_by('name')
+            fbos = FBO.objects.filter(public=True, active=True).order_by('name')
+            services = Service.objects.filter(public=True, active=True).order_by('name')
+        else:
+            airports = Airport.objects.filter(active=True).all().order_by('name')
+            fbos = FBO.objects.filter(active=True).all().order_by('name')
+            services = Service.objects.filter(active=True).all().order_by('name')
 
         customer_dtos = []
         for customer in customers:
