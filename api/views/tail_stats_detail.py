@@ -12,7 +12,9 @@ from api.models import (
     Job,
     Airport,
     UserProfile,
-    JobStatusActivity
+    JobStatusActivity,
+    ServiceActivity,
+    RetainerServiceActivity
 )
 
 from api.serializers import (JobActivitySerializer, CustomerSerializer, AircraftTypeSerializer)
@@ -55,36 +57,39 @@ class TailStatsDetailView(APIView):
 
         # get the list of the last 10 services for the given tail number with their corresponding dates
         # and sort by most recent date first
-        job_service_assignments = JobServiceAssignment.objects \
-                                                      .filter(job__tailNumber=tail_number, status__in=['C', 'W']) \
-                                                      .order_by('-job__requestDate')[:10]
+        # query the ServiceActivity table
+        service_activity = ServiceActivity.objects.filter(job__tailNumber=tail_number, status='C').order_by('-timestamp')[:10]
+
         
         # get the service name and the updated_at date
-        recent_services = job_service_assignments.values('service__name', 'updated_at')
+        recent_services = service_activity.values('service__name', 'timestamp')
         
         # get the list of the last 10 retainer services for the given tail number with their corresponding dates
         # and sort by most recent date first
-        job_retainer_service_assignments = JobRetainerServiceAssignment.objects \
-                                                       .filter(job__tailNumber=tail_number, status__in=['C', 'W']) \
-                                                       .order_by('-job__requestDate')[:10]
+        # qeury the RetainerServiceActivity table
+        retainer_service_activity = RetainerServiceActivity.objects.filter(job__tailNumber=tail_number, status='C').order_by('-timestamp')[:10]
+
         
         # get the retainer service name and the updated_at date
-        recent_retainer_services = job_retainer_service_assignments.values('retainer_service__name', 'updated_at')
+        recent_retainer_services = retainer_service_activity.values('retainer_service__name', 'timestamp')
 
 
         # get the list of service names with how many times they have been completed for the given tail_number
-        # and sort by highest number of jobs first. This should only include status completed (C) or W
-        service_stats = JobServiceAssignment.objects.values('service__name') \
-                                            .filter(job__tailNumber=tail_number, status__in=['C', 'W']) \
-                                            .annotate(services_count=Count('service__name')) \
-                                            .order_by('-services_count') \
-        
+        # and sort by highest number of services first. This should only include status completed (C)
+        # query the ServiceActivity table
+        service_stats = ServiceActivity.objects.filter(job__tailNumber=tail_number, status='C') \
+                                                  .values('service__name') \
+                                                  .annotate(services_count=Count('service__name')) \
+                                                  .order_by('-services_count')
+
         # get the list of retainer service names with how many times they have been completed for the given tail_number
-        # and sort by highest number of jobs first
-        retainer_service_stats = JobRetainerServiceAssignment.objects.values('retainer_service__name') \
-                                            .filter(job__tailNumber=tail_number, status__in=['C', 'W']) \
-                                            .annotate(services_count=Count('retainer_service__name')) \
-                                            .order_by('-services_count') \
+        # and sort by highest number of services first
+        # query the RetainerServiceActivity table
+        retainer_service_stats = RetainerServiceActivity.objects.filter(job__tailNumber=tail_number, status='C') \
+                                                                    .values('retainer_service__name') \
+                                                                    .annotate(services_count=Count('retainer_service__name')) \
+                                                                    .order_by('-services_count')
+
 
         # get the list of airports with how many times they have been used for the given tail_number
         # and sort by highest number of jobs first
@@ -121,7 +126,7 @@ class TailStatsDetailView(APIView):
                  or request.user.groups.filter(name='Account Managers').exists() \
                  or (request.user.profile.customer and self.request.user.profile.customer.customer_settings.show_spending_info):
             
-            total_price = Job.objects.filter(tailNumber=tail_number, status__in=['C', 'I']) \
+            total_price = Job.objects.filter(tailNumber=tail_number, status__in=['I']) \
                                  .aggregate(total_price=Sum('price'))
 
             if not total_price['total_price']:

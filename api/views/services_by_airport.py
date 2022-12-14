@@ -11,7 +11,9 @@ from api.models import (
     JobRetainerServiceAssignment,
     Airport,
     Job,
-    Customer
+    Customer,
+    ServiceActivity,
+    RetainerServiceActivity
 )
 
 from api.serializers import (
