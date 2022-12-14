@@ -80,6 +80,10 @@ class JobRetainerServiceAssignmentView(APIView):
         else:
             status = 'U'
 
+        # if the job is in status W, then change the assignment status to W
+        if job.status == 'W':
+            status = 'W'
+
         retainer_assignment = JobRetainerServiceAssignment(job=job,
                                                            project_manager=project_manager,
                                                            retainer_service=retainer_service,

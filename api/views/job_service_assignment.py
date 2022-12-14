@@ -154,6 +154,10 @@ class JobServiceAssignmentView(APIView):
         else:
             status = 'U'
 
+        # if the job is in status W, then change the assignment status to W
+        if job.status == 'W':
+            status = 'W'
+
         assignment = JobServiceAssignment(job=job, project_manager=project_manager, service=service, status=status)
         assignment.save()
 
