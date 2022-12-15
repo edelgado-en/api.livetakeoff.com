@@ -55,7 +55,8 @@ from .views import (
         UserProductivityView,
         PremiumContactView,
         UsersView,
-        UserDetailView
+        UserDetailView,
+        UserAvailableAirportsView
     )
 
 urlpatterns = [
@@ -104,6 +105,8 @@ urlpatterns = [
     path('users/me/avatar', UserAvatarView.as_view()),
     path('users/me/reset-password', UserResetPasswordView.as_view()),
     path('users/signup', UserSignupView.as_view()),
+    path('users/available-airports', UserAvailableAirportsView.as_view()),
+    path('users/available-airports/<int:id>/', UserAvailableAirportsView.as_view()),
     
     path('shared/jobs/<str:encoded_id>/', SharedJobDetailView.as_view()),
     path('shared/contact', ContactView.as_view()),
@@ -122,4 +125,5 @@ urlpatterns = [
     path('team-productivity', TeamProductivityView.as_view()),
     path('user-productivity/<int:id>/', UserProductivityView.as_view()),
     path('premium/contact', PremiumContactView.as_view()),
+    
 ]

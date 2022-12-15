@@ -56,3 +56,4 @@ from .team_productivity import TeamProductivityView
 from .user_productivity import UserProductivityView
 from .premium_contact import PremiumContactView
 from .user_detail import UserDetailView
+from .user_available_airports import UserAvailableAirportsView

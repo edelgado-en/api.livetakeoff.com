@@ -37,3 +37,4 @@ from .job_estimate_additional_fee import JobEstimateAdditionalFee
 from .service_type import ServiceType
 from .service_activity import ServiceActivity
 from .retainer_service_activity import RetainerServiceActivity
+from .user_available_airport import UserAvailableAirport
