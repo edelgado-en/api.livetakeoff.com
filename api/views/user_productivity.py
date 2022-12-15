@@ -252,10 +252,14 @@ class UserProductivityView(APIView):
         if user_profile.vendor:
             vendor_name = user_profile.vendor.name
 
+        avatar = ''
+        if user_profile.avatar:
+            avatar = user_profile.avatar.url
+
         user = {
             'first_name': user_profile.user.first_name,
             'last_name': user_profile.user.last_name,
-            'avatar': user_profile.avatar.url,
+            'avatar': avatar,
             'vendor': vendor_name,
             'location': location
         }
