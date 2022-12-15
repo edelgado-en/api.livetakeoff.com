@@ -16,6 +16,8 @@ class UsersSerializer(serializers.Serializer):
     customer_name = serializers.SerializerMethodField()
     vendor_name = serializers.SerializerMethodField()
     location = serializers.SerializerMethodField()
+    phone_number = serializers.SerializerMethodField()
+    member_since = serializers.SerializerMethodField()
 
 
     def get_is_project_manager(self, obj):
@@ -42,6 +44,15 @@ class UsersSerializer(serializers.Serializer):
     def get_location(self, obj):
         return obj.profile.location
 
+    def get_phone_number(self, obj):
+        if obj.profile.phone_number:
+            return obj.profile.phone_number.as_e164
+
+        return None
+
+    def get_member_since(self, obj):
+        return obj.date_joined
+
     class Meta:
         fields = (
             'id',
@@ -57,5 +68,6 @@ class UsersSerializer(serializers.Serializer):
             'groups',
             'avatar',
             'customerName',
-            'vendorName'
+            'vendorName',
+            'phone_number'
         )
