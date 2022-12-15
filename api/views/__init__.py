@@ -1,5 +1,6 @@
 from .jobs import JobListView
-from .users import UserView
+from .user import UserView
+from .users import UsersView
 from .job_detail import JobDetail
 from .job_service_assignment import (
     JobServiceAssignmentView
@@ -54,3 +55,4 @@ from .customer_retainers import CustomerRetainersView
 from .team_productivity import TeamProductivityView
 from .user_productivity import UserProductivityView
 from .premium_contact import PremiumContactView
+from .user_detail import UserDetailView

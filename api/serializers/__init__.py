@@ -30,3 +30,4 @@ from .job_estimate_basic import JobEstimateSerializer
 from .job_basic import JobBasicSerializer
 from .tail_stats import TailStatsSerializer
 from .customer_retainer import CustomerRetainerSerializer
+from .users import UsersSerializer
