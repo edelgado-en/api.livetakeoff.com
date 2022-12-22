@@ -116,6 +116,7 @@ class UserView(APIView):
             "receive_email_notifications": user_profile.email_notifications,
             'showSpendingInfo': showSpendingInfo,
             'enableEstimates': user_profile.enable_estimates,
+            'enableInvoices': user_profile.enable_invoice,
         }
 
         return Response(content)
