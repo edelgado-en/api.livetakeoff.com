@@ -56,7 +56,8 @@ from .views import (
         PremiumContactView,
         UsersView,
         UserDetailView,
-        UserAvailableAirportsView
+        UserAvailableAirportsView,
+        ForgotPasswordView
     )
 
 urlpatterns = [
@@ -125,5 +126,7 @@ urlpatterns = [
     path('team-productivity', TeamProductivityView.as_view()),
     path('user-productivity/<int:id>/', UserProductivityView.as_view()),
     path('premium/contact', PremiumContactView.as_view()),
+
+    path('forgot-password', ForgotPasswordView.as_view()),
     
 ]
