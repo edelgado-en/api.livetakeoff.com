@@ -31,12 +31,24 @@ class JobPhotosUploadView(APIView):
         if not self.can_view_job(request.user, job):
             return Response({'error': 'You do not have permission to view this job'}, status=status.HTTP_403_FORBIDDEN)
         
-        is_interior = request.data['is_interior']
+        is_interior = request.data.get('is_interior')
+        is_exterior = request.data.get('is_exterior')
+        is_customer = request.data.get('is_customer')
+        
         interior = False
+        customer = False
+        
         if (is_interior == 'true'):
             interior = True
 
-        total_photos = JobPhotos.objects.filter(job=jobid, interior=interior, customer_uploaded=False).count()
+        if (is_exterior == 'true'):
+            interior = False
+        
+        if (is_customer == 'true'):
+            customer = True
+        
+
+        total_photos = JobPhotos.objects.filter(job=jobid, interior=interior, customer_uploaded=customer).count()
 
         # check if the total photos plus the new ones is greater than the max
         if total_photos + len(request.data.getlist('photo')) > TOTAL_PHOTOS_MAX_COUNT:
@@ -58,7 +70,8 @@ class JobPhotosUploadView(APIView):
                           image=photo,
                           name=filename,
                           size=photo.size,
-                          interior=interior)
+                          interior=interior,
+                          customer_uploaded=customer)
             p.save()
 
             counter = counter + 1
