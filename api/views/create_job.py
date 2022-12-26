@@ -119,6 +119,7 @@ class CreateJobView(APIView):
         t = data['tags']
         services = []
         retainer_services = []
+        tags = []
 
         if s: 
             service_ids = data['services'].split(',')
