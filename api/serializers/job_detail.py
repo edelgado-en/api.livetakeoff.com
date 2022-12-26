@@ -6,6 +6,7 @@ from .customer import CustomerSerializer
 from .job_service_assignment import GenericServiceAssignmentSerializer
 from ..models import Job
 from .basic_user import BasicUserSerializer
+from .job_tag import JobTagSerializer
 
 class JobDetailSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
@@ -25,6 +26,7 @@ class JobDetailSerializer(serializers.ModelSerializer):
     total_assignees = serializers.IntegerField(read_only=True)
     created_by = BasicUserSerializer(read_only=True)
     encoded_id = serializers.CharField(max_length=100, read_only=True, required=False)
+    tags = JobTagSerializer(many=True)
 
     class Meta:
         model = Job
@@ -53,7 +55,8 @@ class JobDetailSerializer(serializers.ModelSerializer):
             'created_by',
             'requested_by',
             'completion_date',
-            'encoded_id'
+            'encoded_id',
+            'tags'
         )
 
 

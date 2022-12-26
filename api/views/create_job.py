@@ -29,7 +29,9 @@ from ..models import (
         TailServiceLookup,
         TailRetainerServiceLookup,
         UserProfile,
-        JobEstimate
+        JobEstimate,
+        Tag,
+        JobTag
     )
 
 from api.notification_util import NotificationUtil
@@ -114,6 +116,7 @@ class CreateJobView(APIView):
 
         s = data['services']
         r = data['retainer_services']
+        t = data['tags']
         services = []
         retainer_services = []
 
@@ -124,6 +127,10 @@ class CreateJobView(APIView):
         if r:
             retainer_service_ids = data['retainer_services'].split(',')
             retainer_services = RetainerService.objects.filter(id__in=retainer_service_ids)
+
+        if t:
+            tag_ids = data['tags'].split(',')
+            tags = Tag.objects.filter(id__in=tag_ids)
 
         user = request.user
 
@@ -170,6 +177,9 @@ class CreateJobView(APIView):
             assignment = JobRetainerServiceAssignment(job=job, retainer_service=retainer_service)
             assignment.save()
 
+        for tag in tags:
+            job_tag = JobTag(job=job, tag=tag)
+            job_tag.save()
 
         # TODO: Calculate estimated completion time based on the estimated times of the selected services and aircraft type
 

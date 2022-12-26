@@ -9,7 +9,8 @@ from ..models import (
         FBO,
         Service,
         RetainerService,
-        UserProfile   
+        UserProfile,
+        Tag   
 )
 
 class JobFormInfoView(APIView):
@@ -27,6 +28,7 @@ class JobFormInfoView(APIView):
 
         customers = Customer.objects.all().order_by('name')
         aircraft_types = AircraftType.objects.all().order_by('name')
+        tags = Tag.objects.all().order_by('name')
         
         #if user is a customer, only show their airports, fbos, and services that are public
         if request.user.profile.customer:
@@ -94,6 +96,16 @@ class JobFormInfoView(APIView):
             }
 
             retainer_service_dtos.append(r)
+
+        tag_dtos = []
+        for tag in tags:
+            t = {
+                'id': tag.id,
+                'name': tag.name,
+                'description': tag.description,
+            }
+
+            tag_dtos.append(t)
         
         if not customer_dtos:
             return Response({'error': 'No customers found'}, status=status.HTTP_404_NOT_FOUND)
@@ -117,6 +129,7 @@ class JobFormInfoView(APIView):
             'fbos': fbo_dtos,
             'services': service_dtos,
             'retainer_services': retainer_service_dtos,
+            'tags': tag_dtos,
         }
 
         return Response(response, status.HTTP_200_OK)

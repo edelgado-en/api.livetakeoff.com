@@ -31,7 +31,8 @@ from api.models import (
     EstimatedServiceTime,
     JobStatusActivity,
     JobServiceAssignment,
-    JobRetainerServiceAssignment
+    JobRetainerServiceAssignment,
+    Tag,
 )
 
 class UserProfileInline(admin.StackedInline):
@@ -269,3 +270,12 @@ class VendorAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'active']
     list_per_page = 100
     search_fields = ['name']
+
+
+@admin.register(Tag)
+class TagAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name', 'description', 'color']
+    list_per_page = 100
+    search_fields = ['name']
+
+

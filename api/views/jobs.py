@@ -42,6 +42,7 @@ class JobListView(ListAPIView):
 
             qs = Job.objects.prefetch_related('job_service_assignments') \
                              .prefetch_related('job_retainer_service_assignments') \
+                             .prefetch_related('tags') \
                              .select_related('customer') \
                              .select_related('aircraftType')\
                              .select_related('airport') \

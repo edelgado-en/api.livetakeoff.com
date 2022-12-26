@@ -38,3 +38,5 @@ from .service_type import ServiceType
 from .service_activity import ServiceActivity
 from .retainer_service_activity import RetainerServiceActivity
 from .user_available_airport import UserAvailableAirport
+from .tag import Tag
+from .job_tag import JobTag

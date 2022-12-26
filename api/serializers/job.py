@@ -4,6 +4,8 @@ from .airport import AirportSerializer
 from .fbo import FBOSerializer
 from ..models import Job
 
+from .job_tag import JobTagSerializer
+
 class JobSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
     aircraftType = AircraftTypeSerializer()
@@ -12,6 +14,7 @@ class JobSerializer(serializers.ModelSerializer):
     completeBy = serializers.DateTimeField(format="%m/%d %H:%M")
     estimatedETA = serializers.DateTimeField(format="%m/%d %H:%M")
     completion_date = serializers.DateTimeField(format="%m/%d %H:%M")
+    tags = JobTagSerializer(many=True)
 
     class Meta:
         model = Job
@@ -26,6 +29,7 @@ class JobSerializer(serializers.ModelSerializer):
             'completeBy',
             'estimatedETA',
             'completion_date',
-            'on_site'
+            'on_site',
+            'tags'
             )
 

@@ -17,7 +17,9 @@ from ..models import (
     JobServiceAssignment,
     JobRetainerServiceAssignment,
     ServiceActivity,
-    RetainerServiceActivity
+    RetainerServiceActivity,
+    Tag,
+    JobTag,
     )
 
 
@@ -78,6 +80,15 @@ class EditJobView(APIView):
 
             # only non-customer users can edit this part
             if not request.user.profile.customer:
+                JobTag.objects.filter(job=job).delete()
+                tag_ids = request.data['tags']
+                tags = []
+                if tag_ids:
+                    tags = Tag.objects.filter(id__in=tag_ids)
+
+                for tag in tags:
+                    JobTag.objects.create(job=job, tag=tag)
+
                 new_status = serializer.data['status']
 
                 if current_status != new_status:
