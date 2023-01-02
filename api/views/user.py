@@ -18,6 +18,7 @@ class UserView(APIView):
             avatar = user_profile.avatar.url
 
         customerName = None
+        customerId = None
 
         canSeePrice = False
 
@@ -28,6 +29,7 @@ class UserView(APIView):
         if user_profile and user_profile.customer:
             customerName = user_profile.customer.name
             canSeePrice = user_profile.customer.customer_settings.show_job_price
+            customerId = user_profile.customer.id
 
 
         first_name = ''
@@ -110,6 +112,7 @@ class UserView(APIView):
             "avatar": avatar,
             "customerLogo": customerLogo,
             "customerName": customerName,
+            "customerId": customerId,
             "isPremiumMember": is_premium_member,
             "canSeePrice": canSeePrice,
             "receive_sms_notifications": user_profile.sms_notifications,
