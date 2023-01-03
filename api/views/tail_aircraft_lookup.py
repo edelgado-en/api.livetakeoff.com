@@ -2,8 +2,11 @@ from rest_framework import (permissions, status)
 from rest_framework .response import Response
 from rest_framework.views import APIView
 
-from api.models import (TailAircraftLookup, TailServiceLookup, TailRetainerServiceLookup)
-
+from api.models import (
+    TailAircraftLookup,
+    TailServiceLookup,
+    TailRetainerServiceLookup
+)
 
 class TailAircraftLookupView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
@@ -46,7 +49,7 @@ class TailAircraftLookupView(APIView):
 
             except TailRetainerServiceLookup.DoesNotExist:
                 pass
-
+            
 
             return Response({
                 'aircraft_id': aircraft_type.id,
@@ -54,7 +57,7 @@ class TailAircraftLookupView(APIView):
                 'customer_id': lookup.customer.id,
                 'customer_name': lookup.customer.name,
                 'services': services,
-                'retainer_services': retainer_services
+                'retainer_services': retainer_services,
             }, status=status.HTTP_200_OK) 
 
         except TailAircraftLookup.DoesNotExist:

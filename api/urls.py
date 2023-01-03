@@ -57,7 +57,10 @@ from .views import (
         UsersView,
         UserDetailView,
         UserAvailableAirportsView,
-        ForgotPasswordView
+        ForgotPasswordView,
+        TailAlertsView,
+        CreateTailAlertView,
+        TailAlertLookupView
     )
 
 urlpatterns = [
@@ -85,7 +88,10 @@ urlpatterns = [
     path('retainer-services', RetainerServicesView.as_view()),
     path('airports', AirportsView.as_view()),
     path('aircraft-types', AircraftTypesView.as_view()),
+
     path('tail-aircraft-lookup/<str:tailnumber>/', TailAircraftLookupView.as_view()),
+    path('tail-alert-lookup/<str:tailnumber>/', TailAlertLookupView.as_view()),
+
     path('fbos', FBOsView.as_view()),
     path('pricing-plans', PricePlansView.as_view()),
     path('pricing-plans/<int:id>/', PricePlansView.as_view()),
@@ -128,5 +134,9 @@ urlpatterns = [
     path('premium/contact', PremiumContactView.as_view()),
 
     path('forgot-password', ForgotPasswordView.as_view()),
+
+    path('tail-alerts', TailAlertsView.as_view()),
+    path('tail-alerts/<int:id>/', TailAlertsView.as_view()),
+    path('create-tail-alert', CreateTailAlertView.as_view()),
     
 ]
