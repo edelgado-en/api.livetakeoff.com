@@ -13,6 +13,7 @@ class JobSerializer(serializers.ModelSerializer):
     fbo = FBOSerializer()
     completeBy = serializers.DateTimeField(format="%m/%d %H:%M")
     estimatedETA = serializers.DateTimeField(format="%m/%d %H:%M")
+    estimatedETD = serializers.DateTimeField(format="%m/%d %H:%M")
     completion_date = serializers.DateTimeField(format="%m/%d %H:%M")
     tags = JobTagSerializer(many=True)
 
@@ -28,6 +29,7 @@ class JobSerializer(serializers.ModelSerializer):
             'fbo',
             'completeBy',
             'estimatedETA',
+            'estimatedETD',
             'completion_date',
             'on_site',
             'tags'
