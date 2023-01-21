@@ -22,13 +22,15 @@ from rest_framework_simplejwt.views import (
 
 import debug_toolbar
 
+from .views import (MyTokenObtainPairView)
+
 admin.site.site_header = 'LiveTakeoff Admin'
 admin.site.index_title = 'Admin'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('__debug__/', include(debug_toolbar.urls)),
 ]
