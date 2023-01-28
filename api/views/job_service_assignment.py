@@ -32,12 +32,6 @@ class JobServiceAssignmentView(APIView):
 
 
     def get(self, request, id):
-
-        if not self.can_view_assignment_list(request.user):
-           return Response({'error': 'You do not have permission to access this view'},
-                            status=status.HTTP_403_FORBIDDEN)
-
-
         job = get_object_or_404(Job, pk=id)
 
         assignments = JobServiceAssignment \
@@ -334,15 +328,6 @@ class JobServiceAssignmentView(APIView):
 
 
         return Response({'message': 'Delete successfully'}, status.HTTP_200_OK)
-
-
-    def can_view_assignment_list(self, user):
-        if user.is_superuser \
-           or user.is_staff \
-           or user.groups.filter(name='Account Managers').exists():
-           return True
-
-        return False
 
 
     def can_view_assignment(self, user, job_service_assignment):
