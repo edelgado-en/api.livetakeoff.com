@@ -48,7 +48,7 @@ admin.site.register(User, UserAdmin)
 
 @admin.register(Service)
 class ServiceAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'description', 'active', 'public', 'type']
+    list_display = ['id', 'name', 'description', 'active', 'public', 'type', 'category']
     list_per_page = 100
     ordering = ['name', 'active']
     search_fields = ['name', 'active']
@@ -72,7 +72,7 @@ class ServicTypeeAdmin(admin.ModelAdmin):
 
 @admin.register(RetainerService)
 class RetainerServiceAdmin(admin.ModelAdmin):
-    list_display = ['name', 'description', 'active']
+    list_display = ['name', 'description', 'active', 'category']
     list_per_page = 100
     ordering = ['name', 'active']
     search_fields = ['name', 'active']

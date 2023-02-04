@@ -2,6 +2,13 @@ from django.db import models
 from .service_type import ServiceType
 
 class Service(models.Model):
+    
+    CATEGORY_CHOICES = [
+        ('I', 'Interior'),
+        ('E', 'Exterior'),
+        ('O', 'Other'),
+    ]
+
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)
     active = models.BooleanField(default=True)
@@ -10,6 +17,7 @@ class Service(models.Model):
     public = models.BooleanField(default=False)
     checklistActions = models.ManyToManyField('ChecklistAction', related_name='checklist_actions', blank=True)
     type = models.ForeignKey(ServiceType, on_delete=models.CASCADE, related_name='type', blank=True, null=True)
+    category = models.CharField(max_length=1, choices=CATEGORY_CHOICES, default='O')
 
     def __str__(self) -> str:
         return self.name
