@@ -84,6 +84,7 @@ class JobFormInfoView(APIView):
             s = {
                 'id': service.id,
                 'name': service.name,
+                'category': service.category
             }
 
             service_dtos.append(s)
@@ -93,6 +94,7 @@ class JobFormInfoView(APIView):
             r = {
                 'id': retainer_service.id,
                 'name': retainer_service.name,
+                'category': retainer_service.category
             }
 
             retainer_service_dtos.append(r)

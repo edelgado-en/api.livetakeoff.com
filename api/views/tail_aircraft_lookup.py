@@ -31,7 +31,10 @@ class TailAircraftLookupView(APIView):
                                         .order_by('service__id')
             
                 for service in lookup_services:
-                    services.append({'id': service.service.id, 'name': service.service.name})
+                    services.append({'id': service.service.id,
+                                     'name': service.service.name,
+                                     'category': service.service.category
+                                    })
 
             except TailServiceLookup.DoesNotExist:
                 pass
@@ -45,7 +48,10 @@ class TailAircraftLookupView(APIView):
                                         .order_by('retainer_service__id')
             
                 for service in lookup_retainer_services:
-                    retainer_services.append({'id': service.retainer_service.id, 'name': service.retainer_service.name})
+                    retainer_services.append({'id': service.retainer_service.id,
+                                              'name': service.retainer_service.name,
+                                              'category': service.retainer_service.category
+                                            })
 
             except TailRetainerServiceLookup.DoesNotExist:
                 pass

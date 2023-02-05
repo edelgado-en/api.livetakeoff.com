@@ -82,6 +82,7 @@ class JobEstimateFormInfoView(APIView):
             s = {
                 'id': service.id,
                 'name': service.name,
+                'category': service.category,
             }
 
             service_dtos.append(s)
