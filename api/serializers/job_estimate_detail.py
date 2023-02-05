@@ -13,7 +13,6 @@ class EstimateServiceSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
     price = serializers.DecimalField(max_digits=10, decimal_places=2)
-    category = serializers.CharField()
 
 
 class JobEstimateDiscountSerializer(serializers.Serializer):
