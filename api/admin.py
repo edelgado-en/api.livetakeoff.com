@@ -33,6 +33,8 @@ from api.models import (
     JobServiceAssignment,
     JobRetainerServiceAssignment,
     Tag,
+    JobEstimate,
+    JobServiceEstimate
 )
 
 class UserProfileInline(admin.StackedInline):
@@ -277,5 +279,15 @@ class TagAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'description', 'color']
     list_per_page = 100
     search_fields = ['name']
+
+@admin.register(JobEstimate)
+class JobEstimateAdmin(admin.ModelAdmin):
+    list_display = ['id', 'job', 'tailNumber', 'services_price', 'discounted_price', 'total_price']
+    list_per_page = 100
+
+@admin.register(JobServiceEstimate)
+class JobServiceEstimateAdmin(admin.ModelAdmin):
+    list_display = ['id', 'job_estimate', 'service', 'price']
+    list_per_page = 100
 
 
