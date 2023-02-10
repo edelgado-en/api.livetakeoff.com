@@ -12,6 +12,7 @@ class UsersSerializer(serializers.Serializer):
     is_superuser = serializers.BooleanField()
     is_project_manager = serializers.SerializerMethodField()
     is_account_manager = serializers.SerializerMethodField()
+    is_internal_coordinator = serializers.SerializerMethodField()
     avatar = serializers.SerializerMethodField()
     customer_name = serializers.SerializerMethodField()
     vendor_name = serializers.SerializerMethodField()
@@ -25,6 +26,9 @@ class UsersSerializer(serializers.Serializer):
 
     def get_is_account_manager(self, obj):
         return obj.groups.filter(name='Account Managers').exists()
+
+    def get_is_internal_coordinator(self, obj):
+        return obj.groups.filter(name='Internal Coordinators').exists()
 
     def get_avatar(self, obj):
         if obj.profile.avatar:
@@ -65,6 +69,7 @@ class UsersSerializer(serializers.Serializer):
             'is_superuser',
             'is_project_manager',
             'is_account_manager',
+            'is_internal_coordinator',
             'groups',
             'avatar',
             'customerName',

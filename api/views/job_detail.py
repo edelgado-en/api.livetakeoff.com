@@ -64,7 +64,8 @@ class JobDetail(APIView):
         if request.user.is_superuser \
             or request.user.is_staff \
             or (request.user.profile.customer and request.user.profile.customer == job.customer) \
-            or request.user.groups.filter(name='Account Managers').exists():
+            or request.user.groups.filter(name='Account Managers').exists() \
+            or request.user.groups.filter(name='Internal Coordinators').exists():
                 
                 # return all services attached to this job
                 service_assignments = job.job_service_assignments \
@@ -352,7 +353,8 @@ class JobDetail(APIView):
     def can_view_job(self, user, job):
         if user.is_superuser \
           or user.is_staff \
-          or user.groups.filter(name='Account Managers').exists():
+          or user.groups.filter(name='Account Managers').exists() \
+          or user.groups.filter(name='Internal Coordinators').exists():
            return True
 
         # check if the user is a customer by checking its profile and customer field. If the job's customer matches the user's customer, then the user can view the job

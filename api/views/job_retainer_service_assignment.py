@@ -107,6 +107,7 @@ class JobRetainerServiceAssignmentView(APIView):
     def can_view_assignment(self, user, job_retainer_service_assignment):
         if user.is_superuser \
            or user.is_staff \
+           or user.groups.filter(name='Internal Coordinators').exists() \
            or user.groups.filter(name='Account Managers').exists():
            return True
            

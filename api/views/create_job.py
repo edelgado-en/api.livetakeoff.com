@@ -319,7 +319,8 @@ class CreateJobView(APIView):
         if user.is_superuser \
                  or user.is_staff \
                  or is_customer \
-                 or user.groups.filter(name='Account Managers').exists():
+                 or user.groups.filter(name='Account Managers').exists() \
+                 or user.groups.filter(name='Internal Coordinators').exists():
             return True
         else:
             return False

@@ -35,6 +35,9 @@ class UsersView(ListAPIView):
             
             elif role == 'Admins':
                 users = users.filter(is_staff=True)
+            
+            elif role == 'Internal Coordinators':
+                users = users.filter(groups__name=role)
 
 
         return users

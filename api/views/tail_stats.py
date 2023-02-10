@@ -33,6 +33,7 @@ class TailStatsView(ListAPIView):
         if self.request.user.is_superuser \
                  or self.request.user.is_staff \
                  or self.request.user.groups.filter(name='Account Managers').exists() \
+                 or self.request.user.groups.filter(name='Internal Coordinators').exists() \
                  or (self.request.user.profile.customer and self.request.user.profile.customer.customer_settings.show_spending_info):
             qs = qs.annotate(total_price=Sum('price', filter=Q(status__in=['C', 'I'])))
 

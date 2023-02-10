@@ -87,7 +87,8 @@ class JobPhotosUploadView(APIView):
     def can_view_job(self, user, job):
         if user.is_superuser \
           or user.is_staff \
-          or user.groups.filter(name='Account Managers').exists():
+          or user.groups.filter(name='Account Managers').exists() \
+          or user.groups.filter(name='Internal Coordinators').exists():
            return True
 
         # You are a Project Manager

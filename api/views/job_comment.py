@@ -163,6 +163,7 @@ class JobCommentView(ListCreateAPIView):
         if user.is_superuser \
           or user.is_staff \
           or user.groups.filter(name='Project Managers').exists() \
+          or user.groups.filter(name='Internal Coordinators').exists() \
           or user.groups.filter(name='Account Managers').exists():
            return True
 

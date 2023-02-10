@@ -49,6 +49,7 @@ class UserView(APIView):
 
         is_project_manager = user.groups.filter(name='Project Managers').exists()
         is_account_manager = user.groups.filter(name='Account Managers').exists()
+        is_internal_coordinator = user.groups.filter(name='Internal Coordinators').exists()
 
         #a user is consider a customer when its profile has a reference to customer
         is_customer = user_profile and user_profile.customer is not None
@@ -88,6 +89,9 @@ class UserView(APIView):
         elif is_customer:
             access_level_label = 'Customer'
 
+        elif is_internal_coordinator:
+            access_level_label = 'Internal Coordinator'
+
         
         phone_number = ''
         if user_profile.phone_number:
@@ -104,6 +108,7 @@ class UserView(APIView):
             "phone_number": phone_number,
             "isProjectManager": is_project_manager,
             "isAccountManager": is_account_manager,
+            "isInternalCoordinator": is_internal_coordinator,
             "isAdmin": user.is_staff,
             "isSuperUser": user.is_superuser,
             "isCustomer": user.is_customer,

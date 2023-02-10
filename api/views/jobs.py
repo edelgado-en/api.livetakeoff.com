@@ -24,7 +24,8 @@ class JobListView(ListAPIView):
     def get_serializer_class(self):
         if self.request.user.is_superuser \
           or self.request.user.is_staff \
-          or self.request.user.groups.filter(name='Account Managers').exists():
+          or self.request.user.groups.filter(name='Account Managers').exists() \
+          or self.request.user.groups.filter(name='Internal Coordinators').exists():
             return JobAdminSerializer
 
         return JobSerializer
@@ -33,7 +34,8 @@ class JobListView(ListAPIView):
     def get_queryset(self):
         if self.request.user.is_superuser \
           or self.request.user.is_staff \
-          or self.request.user.groups.filter(name='Account Managers').exists():
+          or self.request.user.groups.filter(name='Account Managers').exists() \
+          or self.request.user.groups.filter(name='Internal Coordinators').exists():
 
             searchText = self.request.data['searchText']
             status = self.request.data['status']
