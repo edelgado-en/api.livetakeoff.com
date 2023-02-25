@@ -37,6 +37,7 @@ class SharedJobEstimateDetailView(APIView):
                 'id': job_service_estimate.id,
                 'name': job_service_estimate.service.name,
                 'price': job_service_estimate.price,
+                'category': job_service_estimate.service.category
             })
 
         estimate.services = job_service_estimates

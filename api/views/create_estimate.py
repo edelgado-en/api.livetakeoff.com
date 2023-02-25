@@ -34,6 +34,7 @@ class CreateEstimateView(APIView):
         airport_id = request.data.get('airport_id')
         fbo_id = request.data.get('fbo_id')
         customer_id = request.data.get('customer_id')
+        show_totals = request.data.get('show_totals')
 
         s = request.data.get('services')
         services = []
@@ -165,7 +166,8 @@ class CreateEstimateView(APIView):
             fbo=selected_fbo,
             services_price=services_price,
             discounted_price=discounted_price,
-            total_price=total_price
+            total_price=total_price,
+            show_totals=show_totals,
         )
 
         # create job service estimates

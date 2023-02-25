@@ -36,5 +36,7 @@ class JobEstimate(models.Model):
     # This is the total price of the estimated after applying discounts and applying additional fees. This is here for quick lookups
     total_price = models.DecimalField(max_digits=9, decimal_places=2, null=True)
 
+    show_totals = models.BooleanField(default=True)
+
     def __str__(self) -> str:
         return str(self.id) + ' - ' + self.tailNumber + ' - ' + self.aircraftType.name
