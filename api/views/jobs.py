@@ -41,6 +41,7 @@ class JobListView(ListAPIView):
             status = self.request.data['status']
             customer = self.request.data.get('customer')
             airport = self.request.data.get('airport')
+            project_manager = self.request.data.get('project_manager')
 
             qs = Job.objects.prefetch_related('job_service_assignments') \
                              .prefetch_related('job_retainer_service_assignments') \
@@ -50,6 +51,12 @@ class JobListView(ListAPIView):
                              .select_related('airport') \
                              .select_related('fbo') \
                              .all()
+            
+            # if project_manager then only include the jobs where the project_manager is assigned. You can find the project manager in the job_service_assignments
+            if project_manager != 'All':
+                qs = qs.filter(Q(job_service_assignments__project_manager_id=project_manager)
+                                | Q(job_retainer_service_assignments__project_manager_id=project_manager))
+
 
             if searchText:
                 qs = qs.filter(Q(tailNumber__icontains=searchText)

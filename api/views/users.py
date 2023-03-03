@@ -8,6 +8,7 @@ from ..pagination import CustomPageNumberPagination
 
 from api.serializers import UsersSerializer
 
+
 class UsersView(ListAPIView):
     permission_classes = (permissions.IsAuthenticated,)
     pagination_class = CustomPageNumberPagination
@@ -19,12 +20,24 @@ class UsersView(ListAPIView):
         # if the role is 'All', then do not filter by role
         role = self.request.data.get('role')
 
-        users = User.objects.filter(Q(username__icontains=name)
-                                     | Q(first_name__icontains=name)
-                                     | Q(last_name__icontains=name)) \
-                            .filter(is_active=True) \
+        users = User.objects.filter(is_active=True) \
                             .select_related('profile') \
                             .order_by('first_name', 'last_name')
+        
+        open_jobs_only = self.request.data.get('open_jobs_only', False)
+        
+        if name:
+            users = users.filter(Q(first_name__icontains=name)
+                                    | Q(last_name__icontains=name)
+                                    | Q(username__icontains=name))
+
+        if open_jobs_only:
+            users = users.filter(Q(job_service_assignments__status__in=['A', 'W']) 
+                                | Q(job_retainer_service_assignments__status__in=['A', 'W'])).distinct()
+            
+            users = users.filter(Q(job_service_assignments__job__status__in=['A', 'S', 'U', 'W'])
+                                  | Q(job_retainer_service_assignments__job__status__in=['A', 'S', 'U', 'W'])).distinct()
+
 
         if role != 'All':
             if role == 'Customers':
