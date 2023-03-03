@@ -55,7 +55,7 @@ class JobListView(ListAPIView):
             # if project_manager then only include the jobs where the project_manager is assigned. You can find the project manager in the job_service_assignments
             if project_manager != 'All':
                 qs = qs.filter(Q(job_service_assignments__project_manager_id=project_manager)
-                                | Q(job_retainer_service_assignments__project_manager_id=project_manager))
+                                | Q(job_retainer_service_assignments__project_manager_id=project_manager)).distinct()
 
 
             if searchText:
