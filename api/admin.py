@@ -276,7 +276,7 @@ class VendorAdmin(admin.ModelAdmin):
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'description', 'color']
+    list_display = ['id', 'name', 'short_name', 'description', 'color']
     list_per_page = 100
     search_fields = ['name']
 

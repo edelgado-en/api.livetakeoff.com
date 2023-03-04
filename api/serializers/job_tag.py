@@ -6,9 +6,10 @@ from ..models import (
 class JobTagSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
     tag_name = serializers.CharField(source='tag.name')
+    tag_short_name = serializers.CharField(source='tag.short_name')
     tag_description = serializers.CharField(source='tag.description')
     tag_color = serializers.CharField(source='tag.color')
 
     class Meta:
         model = JobTag
-        fields = ['id', 'tag_name', 'tag_description', 'tag_color']
+        fields = ['id', 'tag_name', 'tag_short_name', 'tag_description', 'tag_color']

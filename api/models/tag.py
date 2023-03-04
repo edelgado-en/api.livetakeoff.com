@@ -13,6 +13,7 @@ class Tag(models.Model):
     ]
 
     name = models.CharField(max_length=255, unique=True)
+    short_name = models.CharField(max_length=255, blank=True, null=True, help_text='Short name for use in the UI (e.g. "LA" for "Late Arrival")')
     description = models.TextField(blank=True, null=True)
     color = models.CharField(max_length=255, choices=COLOR_CHOICES, default='red')
 
