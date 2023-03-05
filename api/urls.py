@@ -60,7 +60,8 @@ from .views import (
         ForgotPasswordView,
         TailAlertsView,
         CreateTailAlertView,
-        TailAlertLookupView
+        TailAlertLookupView,
+        TagListView
     )
 
 urlpatterns = [
@@ -138,5 +139,7 @@ urlpatterns = [
     path('tail-alerts', TailAlertsView.as_view()),
     path('tail-alerts/<int:id>/', TailAlertsView.as_view()),
     path('create-tail-alert', CreateTailAlertView.as_view()),
+
+    path('tags', TagListView.as_view()),
     
 ]

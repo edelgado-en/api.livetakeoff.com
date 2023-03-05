@@ -42,6 +42,7 @@ class JobListView(ListAPIView):
             customer = self.request.data.get('customer')
             airport = self.request.data.get('airport')
             project_manager = self.request.data.get('project_manager')
+            tags = self.request.data.get('tags')
 
             qs = Job.objects.prefetch_related('job_service_assignments') \
                              .prefetch_related('job_retainer_service_assignments') \
@@ -56,6 +57,9 @@ class JobListView(ListAPIView):
             if project_manager != 'All':
                 qs = qs.filter(Q(job_service_assignments__project_manager_id=project_manager)
                                 | Q(job_retainer_service_assignments__project_manager_id=project_manager)).distinct()
+                
+            if tags:
+                qs = qs.filter(tags__tag_id__in=tags)
 
 
             if searchText:

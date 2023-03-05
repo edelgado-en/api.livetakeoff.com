@@ -33,3 +33,4 @@ from .customer_retainer import CustomerRetainerSerializer
 from .users import UsersSerializer
 from .job_tag import JobTagSerializer
 from .tail_alert import TailAlertSerializer
+from .tag import TagSerializer
