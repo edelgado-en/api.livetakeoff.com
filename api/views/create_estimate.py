@@ -103,39 +103,30 @@ class CreateEstimateView(APIView):
                                       'discount': customer_discount.discount, 'isPercentage': customer_discount.percentage})
                         break
         
-        # do all services have a price?
-        all_services_have_price = True
-        for service in services_with_prices:
-            if service['price'] == 0:
-                all_services_have_price = False
-                break
-        
         
         # get additional fees for this customer
         additional_fees = []
         customer_additional_fees = customer.customer_settings.fees.all()
         
         for customer_additional_fee in customer_additional_fees:
-            # if there are no services, we only apply FIXED additional fees, not percentages
-            if all_services_have_price or (not all_services_have_price and not customer_additional_fee.percentage):
-                if customer_additional_fee.type == 'G':
-                    additional_fees.append({'id': customer_additional_fee.id, 'name': customer_additional_fee.type,
-                                            'fee': customer_additional_fee.fee, 'isPercentage': customer_additional_fee.percentage})
-                
-                elif customer_additional_fee.type == 'F':
-                    for fbo in customer_additional_fee.fbos.all():
-                        if selected_fbo == fbo.fbo:
-                            additional_fees.append({'id': customer_additional_fee.id, 'name': customer_additional_fee.type,
-                                                    'fee': customer_additional_fee.fee, 'isPercentage': customer_additional_fee.percentage})
-                            break
-
-                elif customer_additional_fee.type == 'A':
-                    upcharged_airports = customer_additional_fee.airports.all()
-                    for upcharged_airport in upcharged_airports:
-                        if airport == upcharged_airport.airport:
-                            additional_fees.append({'id': customer_additional_fee.id, 'name': customer_additional_fee.type,
+            if customer_additional_fee.type == 'G':
+                additional_fees.append({'id': customer_additional_fee.id, 'name': customer_additional_fee.type,
+                                        'fee': customer_additional_fee.fee, 'isPercentage': customer_additional_fee.percentage})
+            
+            elif customer_additional_fee.type == 'F':
+                for fbo in customer_additional_fee.fbos.all():
+                    if selected_fbo == fbo.fbo:
+                        additional_fees.append({'id': customer_additional_fee.id, 'name': customer_additional_fee.type,
                                                 'fee': customer_additional_fee.fee, 'isPercentage': customer_additional_fee.percentage})
-                            break
+                        break
+
+            elif customer_additional_fee.type == 'A':
+                upcharged_airports = customer_additional_fee.airports.all()
+                for upcharged_airport in upcharged_airports:
+                    if airport == upcharged_airport.airport:
+                        additional_fees.append({'id': customer_additional_fee.id, 'name': customer_additional_fee.type,
+                                            'fee': customer_additional_fee.fee, 'isPercentage': customer_additional_fee.percentage})
+                        break
 
         # calculate total price discounts first, then additional fees
         total_price = services_price
@@ -151,7 +142,9 @@ class CreateEstimateView(APIView):
 
         for additional_fee in additional_fees:
             if additional_fee['isPercentage']:
-                total_price += total_price * additional_fee['fee'] / 100
+                if additional_fee['fee'] > 0:
+                    total_price += total_price * additional_fee['fee'] / 100
+           
             else:
                 total_price += additional_fee['fee']
 
