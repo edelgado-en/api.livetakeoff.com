@@ -49,7 +49,7 @@ class Job(models.Model):
     # by reading the job status activity table
     actual_completion_time = models.PositiveIntegerField(blank=True, null=True, verbose_name='Actual Completion Time (minutes)') 
 
-    price = models.DecimalField(max_digits=6, decimal_places=2, null=True)
+    price = models.DecimalField(max_digits=9, decimal_places=2, null=True)
 
     is_auto_priced = models.BooleanField(default=True)
 
