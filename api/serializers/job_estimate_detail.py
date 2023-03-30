@@ -23,7 +23,7 @@ class JobEstimateDiscountSerializer(serializers.Serializer):
 
 
 class JobEstimateAdditionalFeeSerializer(serializers.Serializer):
-    amount = serializers.DecimalField(max_digits=6, decimal_places=2)
+    amount = serializers.DecimalField(max_digits=9, decimal_places=2)
     percentage = serializers.BooleanField()
     type = serializers.CharField()
 

@@ -10,7 +10,7 @@ class JobEstimateAdditionalFee(models.Model):
     ]
 
     job_estimate = models.ForeignKey(JobEstimate, on_delete=models.CASCADE, related_name='job_estimate_additional_fees')
-    amount = models.DecimalField(max_digits=6, decimal_places=2)
+    amount = models.DecimalField(max_digits=9, decimal_places=2)
     type = models.CharField(max_length=1, choices=FEE_TYPE_CHOICES)
     percentage = models.BooleanField(default=False)
 
