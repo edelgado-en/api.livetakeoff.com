@@ -251,7 +251,12 @@ class JobDetail(APIView):
                     phone_number = admin.profile.phone_number
                     if phone_number:
                         # send a text message
-                        message = f'Job {job.purchase_order} for tail number {job.tailNumber} has been COMPLETED. Please review the job and close it out https://livetakeoff.com/completed/review/{job.id}'
+                        
+                        #Adding a link is throwing a 30007 error in Twilio
+                        #message = f'Job {job.purchase_order} for tail number {job.tailNumber} has been COMPLETED. Please review the job and close it out https://livetakeoff.com/completed/review/{job.id}'
+
+                        message = f'Job {job.purchase_order} for tail number {job.tailNumber} has been COMPLETED.'
+                        
                         notification_util.send(message, phone_number.as_e164)
 
                 # set the actual_completion_date to today
@@ -291,7 +296,11 @@ class JobDetail(APIView):
                     phone_number = admin.profile.phone_number
                     if phone_number:
                         # send a text message
-                        message = f'Job {job.purchase_order} for tail number {job.tailNumber} has been ACCEPTED by {request.user.username}. You can checkout the job at https://livetakeoff.com/jobs/{job.id}/details'
+                        
+                        #message = f'Job {job.purchase_order} for tail number {job.tailNumber} has been ACCEPTED by {request.user.username}. You can checkout the job at https://livetakeoff.com/jobs/{job.id}/details'
+
+                        message = f'Job {job.purchase_order} for tail number {job.tailNumber} has been ACCEPTED by {request.user.username}.'
+                        
                         notification_util.send(message, phone_number.as_e164)
 
 
@@ -314,7 +323,10 @@ class JobDetail(APIView):
                     phone_number = admin.profile.phone_number
                     if phone_number:
                         # send a text message
-                        message = f'Job {job.purchase_order} for tail number {job.tailNumber} has been CANCELLED by {request.user.username}. You can checkout the job at https://livetakeoff.com/jobs/{job.id}/details'
+                        #message = f'Job {job.purchase_order} for tail number {job.tailNumber} has been CANCELLED by {request.user.username}. You can checkout the job at https://livetakeoff.com/jobs/{job.id}/details'
+
+                        message = f'Job {job.purchase_order} for tail number {job.tailNumber} has been CANCELLED by {request.user.username}.'
+                        
                         notification_util.send(message, phone_number.as_e164)
 
             

@@ -92,7 +92,12 @@ class SharedJobEstimateDetailView(APIView):
 
         if phone_number:
             # send a text message
-            message = f'Your estimate for tail {estimate.tailNumber} at airport {estimate.airport.initials} has been {status_name}. You can checkout it out at https://livetakeoff.com/estimates/{estimate.id}'
+            
+            #Adding a link is throwing a 30007 error in Twilio
+            #message = f'Your estimate for tail {estimate.tailNumber} at airport {estimate.airport.initials} has been {status_name}. You can checkout it out at https://livetakeoff.com/estimates/{estimate.id}'
+
+            message = f'Your estimate for tail {estimate.tailNumber} at airport {estimate.airport.initials} has been {status_name}.'
+            
             notification_util.send(message, phone_number.as_e164)
 
         

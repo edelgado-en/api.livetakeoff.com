@@ -245,7 +245,10 @@ class CreateJobView(APIView):
         if is_customer:
             # send SMS to all admins and account managers
             notification_util = NotificationUtil()
-            message = f'Customer {job.customer.name} has submitted job {job.purchase_order} for Tail number {job.tailNumber}. Check it out at  http://livetakeoff.com/jobs/{job.id}/details'
+
+            # the link is throwing a 30007 error in Twilio
+            #message = f'Customer {job.customer.name} has submitted job {job.purchase_order} for Tail number {job.tailNumber}. Check it out at  http://livetakeoff.com/jobs/{job.id}/details'
+            message = f'Customer {job.customer.name} has submitted job {job.purchase_order} for Tail number {job.tailNumber}'
 
             admins = User.objects.filter(Q(is_superuser=True) | Q(is_staff=True) | Q(groups__name='Account Managers'))
 

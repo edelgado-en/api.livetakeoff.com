@@ -111,7 +111,11 @@ class JobCommentView(ListCreateAPIView):
         # if send_sms then send notification to all project managers assigned to this job
         if send_sms:
             notification_util = NotificationUtil()
-            message = f'An important message has been added to job {job.purchase_order} for Tail number {job.tailNumber}. Check it out at  http://livetakeoff.com/jobs/{job.id}/comments'
+
+            # Adding a link is throwing a 30007 error in Twilio
+            #message = f'An important message has been added to job {job.purchase_order} for Tail number {job.tailNumber}. Check it out at  http://livetakeoff.com/jobs/{job.id}/comments'
+
+            message = f'An important message has been added to job {job.purchase_order} for Tail number {job.tailNumber}.'
 
             # get all phone numbers for all project managers assigned to this job
             # iterate through jobServiceAssignments and JobRetainerServiceAssignments and get all the unique phone numbers
