@@ -20,6 +20,7 @@ class JobAdminSerializer(serializers.ModelSerializer):
     airport = AirportSerializer()
     fbo = FBOSerializer()
     completeBy = serializers.DateTimeField(format="%m/%d %H:%M")
+    completeByFullDate = serializers.DateTimeField(source="completeBy", format="%Y-%m-%d %H:%M")
     estimatedETA = serializers.DateTimeField(format="%m/%d %H:%M")
     estimatedETD = serializers.DateTimeField(format="%m/%d %H:%M")
     requestDate = serializers.DateTimeField(format="%m/%d %H:%M", read_only=True)
@@ -38,6 +39,7 @@ class JobAdminSerializer(serializers.ModelSerializer):
             'estimatedETA',
             'estimatedETD',
             'completeBy',
+            'completeByFullDate',
             'status',
             'customer',
             'purchase_order',
