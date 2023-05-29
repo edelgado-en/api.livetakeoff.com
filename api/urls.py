@@ -61,7 +61,8 @@ from .views import (
         TailAlertsView,
         CreateTailAlertView,
         TailAlertLookupView,
-        TagListView
+        TagListView,
+        JobReturnView
     )
 
 urlpatterns = [
@@ -73,6 +74,7 @@ urlpatterns = [
     path('jobs/completed', CompletedJobsListView.as_view()),
     path('jobs/completed/<int:id>/', CompletedJobsListView.as_view()),
     path('jobs/closeout/<int:id>/', JobCloseoutView.as_view()),
+    path('jobs/return/<int:id>/', JobReturnView.as_view()),
     path('jobs/price-breakdown/<int:id>/', JobPriceBreakdownView.as_view()),
     path('jobs/<int:id>/', JobDetail.as_view()),
     path('jobs/basic/<int:id>/', JobDetailBasicView.as_view()),

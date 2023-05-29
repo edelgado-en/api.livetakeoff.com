@@ -62,3 +62,4 @@ from .tail_alert import TailAlertsView
 from .create_tail_alert import CreateTailAlertView
 from .tail_alert_lookup import TailAlertLookupView
 from .tags import TagListView
+from .job_return import JobReturnView
