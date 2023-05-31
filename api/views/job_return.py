@@ -68,7 +68,7 @@ class JobReturnView(APIView):
             phone_number = admin.profile.phone_number
             
             if phone_number:
-                message = f'Job {job.purchase_order} for tail number {job.tailNumber} was returned by {request.user.username}.'
+                message = f'Job {job.purchase_order} for tail number {job.tailNumber} was RETURNED by {request.user.username}.'
                 
                 notification_util.send(message, phone_number.as_e164)
 
