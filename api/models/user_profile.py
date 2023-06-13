@@ -17,4 +17,5 @@ class UserProfile(models.Model):
     location = models.CharField(max_length=255, blank=True, null=True)
     enable_estimates = models.BooleanField(default=False)
     enable_invoice = models.BooleanField(default=False)
+    show_job_price = models.BooleanField(default=False)
 

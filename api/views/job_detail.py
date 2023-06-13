@@ -353,7 +353,7 @@ class JobDetail(APIView):
 
                         # check if the request_by is different than the user who is updating the job. Only send notification if the user is different
                         if phone_number and job.created_by != request.user:
-                            notification_util.send(f'Job {job.purchase_order} for tail number {job.tailNumber} has been {status_name}. You can checkout the job at https://livetakeoff.com/jobs/{job.id}/details', phone_number.as_e164)
+                            notification_util.send(f'Job {job.purchase_order} for tail number {job.tailNumber} has been {status_name}.', phone_number.as_e164)
 
 
             return Response(serializer.data)
