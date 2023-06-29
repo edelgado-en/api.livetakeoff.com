@@ -13,4 +13,5 @@ class ServiceActivity(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     service = models.ForeignKey(Service, on_delete=models.PROTECT, related_name='activities')
     job = models.ForeignKey(Job, on_delete=models.PROTECT, related_name='service_activities')
+    price = models.DecimalField(max_digits=9, decimal_places=2, null=True)
     project_manager = models.ForeignKey('auth.User', on_delete=models.PROTECT, related_name='service_activities')
