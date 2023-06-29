@@ -263,7 +263,7 @@ class TeamProductivityView(APIView):
             })
 
         # sort users by highest total_revenue
-        users = sorted(users, key=lambda k: k['total_revenue'], reverse=True)
+        users = sorted(users, key=lambda k: k['total_services'], reverse=True)
            
         
         return Response({
