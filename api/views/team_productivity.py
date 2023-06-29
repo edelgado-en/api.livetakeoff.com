@@ -135,19 +135,11 @@ class TeamProductivityView(APIView):
             grand_total_retainer_services += item['total']
 
         
-        # Get the total revenue for the last 30 days. This is the sum of the job price for all distinct job ids in jobStatusActivity table where the status is I
-        # first, get the list of DISTINCT job ids from the jobStatusActivity table where the status is I
-        qs = JobStatusActivity.objects.filter(
-            Q(status__in=['I']) &
-            Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date)
-        ).values('job__id').distinct()
-
-        # then, get the sum of the job price for all the jobs in the list
-        total_jobs_revenue = 0
-        for item in qs:
-            job = Job.objects.get(id=item['job__id'])
-            if job.price is not None:
-                total_jobs_revenue += job.price
+        # Sum the total price from JobStatusActivity where the status = 'I' 
+        total_jobs_revenue = JobStatusActivity.objects.filter(
+             Q(status__in=['I']) &
+             Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date)
+        ).aggregate(Sum('job__price'))['job__price__sum']          
 
 
         # Get the top 5 services in the last 30 days by querying the ServiceActivity table and join to Services Table to get the service name. The resulset should be service name with its corresponding times the service was completed in the last 30 days
@@ -238,7 +230,7 @@ class TeamProductivityView(APIView):
             # With the job_id, get the associated customer and customer settings to find the price list used
             # then get the aircraft type of the job to find the price list entry
             total_revenue = 0
-            for service in qs_service:
+            """ for service in qs_service:
                 job = Job.objects.get(pk=service['job__id'])
 
                 customer_settings = job.customer.customer_settings
@@ -253,7 +245,7 @@ class TeamProductivityView(APIView):
                 except PriceListEntries.DoesNotExist:
                     continue
 
-                total_revenue += price_list_entry.price
+                total_revenue += price_list_entry.price """
 
 
             total_retainer_services = 0
