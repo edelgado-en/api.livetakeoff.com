@@ -20,6 +20,7 @@ from ..models import (
     RetainerServiceActivity,
     Tag,
     JobTag,
+    PriceListEntries
     )
 
 
@@ -155,6 +156,32 @@ class EditJobView(APIView):
                             retainer_service.status = 'U'
                             retainer_service.project_manager = None
                             retainer_service.save(update_fields=['project_manager', 'status'])
+
+                    elif new_status == 'I':
+                        # calculate the price for each service associated with this job
+                        for service in job.job_service_assignments.all():
+                            service_price = 0
+                            customer_settings = job.customer.customer_settings
+                            aircraft_type = job.aircraftType
+                            service_id = service.service.id
+
+                            try:
+                                price_list_entry = PriceListEntries.objects.get(
+                                                                price_list_id=customer_settings.price_list_id,
+                                                                aircraft_type_id=aircraft_type.id,
+                                                                service_id=service_id)
+                            
+                                service_price = price_list_entry.price
+
+                                # Update ServiceActivity for the corresponding service_price with the service_price
+                                service_activity = ServiceActivity.objects.filter(job=job, service_id=service_id, status='C').first()
+
+                                service_activity.price = service_price
+
+                                service_activity.save(update_fields=['price'])
+
+                            except PriceListEntries.DoesNotExist:
+                                continue
 
 
                     JobStatusActivity.objects.create(job=job, user=request.user, status=new_status)

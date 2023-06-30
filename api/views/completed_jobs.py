@@ -5,7 +5,7 @@ from rest_framework .response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from ..pagination import CustomPageNumberPagination
-from api.models import (Job, JobStatusActivity)
+from api.models import (Job, JobStatusActivity, PriceListEntries, ServiceActivity)
 from ..serializers import (
         JobCompletedSerializer,
         JobAdminSerializer
@@ -126,12 +126,34 @@ class CompletedJobsListView(ListAPIView):
 
         serializer = JobAdminSerializer(job, data=request.data, partial=True)
 
-        # TODO: handle invoice processing
-
         if serializer.is_valid():
             serializer.save()
 
             JobStatusActivity.objects.create(job=job, user=request.user, status='I')
+
+            for service in job.job_service_assignments.all():
+                service_price = 0
+                customer_settings = job.customer.customer_settings
+                aircraft_type = job.aircraftType
+                service_id = service.service.id
+
+                try:
+                    price_list_entry = PriceListEntries.objects.get(
+                                                    price_list_id=customer_settings.price_list_id,
+                                                    aircraft_type_id=aircraft_type.id,
+                                                    service_id=service_id)
+                
+                    service_price = price_list_entry.price
+
+                    # Update ServiceActivity for the corresponding service_price with the service_price
+                    service_activity = ServiceActivity.objects.filter(job=job, service_id=service_id, status='C').first()
+
+                    service_activity.price = service_price
+
+                    service_activity.save(update_fields=['price'])
+
+                except PriceListEntries.DoesNotExist:
+                    continue
 
             return Response(serializer.data, status.HTTP_200_OK)
         

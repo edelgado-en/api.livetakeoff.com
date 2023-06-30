@@ -206,7 +206,6 @@ class TeamProductivityView(APIView):
             for service in qs:
                 total_services += service['total']
 
-
             # get the total number of retainer services this user has completed in the last 30 days by querying the RetainerServiceActivity table
             qs_retainer = RetainerServiceActivity.objects.filter(
                 Q(status='C') &
@@ -216,54 +215,36 @@ class TeamProductivityView(APIView):
                 total=Count('retainer_service__id')
             ).values('total')
 
-            
-            # first get the list of service ids completed with its corresponding job id by this user in the last 30 days
-            qs_service = ServiceActivity.objects.filter(
+
+            # Sum the price of each service completed by this user in the last 30 days
+            total_revenue = ServiceActivity.objects.filter(
                 Q(status='C') &
                 Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date) &
                 Q(project_manager_id=item['project_manager__id'])
-            ).values('service__id', 'job__id')
-
-
-            # second, query the PriceListEntries table to get the price list entry for each service, and sum up the price
-            # the price is based on service, aircraft type, and price_list.
-            # With the job_id, get the associated customer and customer settings to find the price list used
-            # then get the aircraft type of the job to find the price list entry
-            total_revenue = 0
-            """ for service in qs_service:
-                job = Job.objects.get(pk=service['job__id'])
-
-                customer_settings = job.customer.customer_settings
-
-                aircraft_type = job.aircraftType
-
-                try:
-                    price_list_entry = PriceListEntries.objects.get(
-                                                     price_list_id=customer_settings.price_list_id,
-                                                     aircraft_type_id=aircraft_type.id,
-                                                     service_id=service['service__id'])
-                except PriceListEntries.DoesNotExist:
-                    continue
-
-                total_revenue += price_list_entry.price """
+            ).aggregate(Sum('price'))['price__sum']
 
 
             total_retainer_services = 0
             for item in qs_retainer:
                 total_retainer_services += item['total']
 
+            avatar_url = user_profile.avatar.url if user_profile.avatar else None
+
+            if total_revenue is None:
+                total_revenue = 0
+
             users.append({
                 'id': user_profile.user.id,
                 'first_name': user_profile.user.first_name,
                 'last_name': user_profile.user.last_name,
-                'avatar': user_profile.avatar.url,
+                'avatar': avatar_url,
                 'total_services': total_services,
                 'total_retainer_services': total_retainer_services,
                 'total_revenue': total_revenue
             })
 
         # sort users by highest total_revenue
-        users = sorted(users, key=lambda k: k['total_services'], reverse=True)
+        users = sorted(users, key=lambda k: k['total_revenue'], reverse=True)
            
         
         return Response({
