@@ -13,6 +13,8 @@ from ..models import (JobComments, Job, JobCommentCheck, JobServiceAssignment, J
 
 from api.notification_util import NotificationUtil
 
+from api.email_util import EmailUtil
+
 class JobCommentView(ListCreateAPIView):
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = JobCommentSerializer
@@ -88,6 +90,7 @@ class JobCommentView(ListCreateAPIView):
         comment = self.request.data['comment']
         send_sms = self.request.data['sendSMS']
         is_public = self.request.data['isPublic']
+        send_email = self.request.data['sendEmail']
 
         is_customer_user = False
 
@@ -156,6 +159,35 @@ class JobCommentView(ListCreateAPIView):
 
             for phone_number in unique_phone_numbers:
                 notification_util.send(message, phone_number.as_e164)
+
+        
+        if send_email:
+            # get the customer associated with the job
+            email_address = job.customer.emailAddress
+
+            if email_address:
+                title = f'[{job.tailNumber}] Job Comment Added'
+                link = f'http://livetakeoff.com/jobs/{job.id}/comments'
+
+                body = f'''
+                <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">Job Comment Added</div>
+                
+                <div>
+                    <div style="padding:5px;font-weight: 700;">Tail Number</div>
+                    <div style="padding:5px">{job.tailNumber}</div>
+                    <div style="padding:5px;font-weight: 700;">Airport</div>
+                    <div style="padding:5px">{job.airport.name}</div>
+                    <div style="padding:5px;font-weight: 700;">Aircraft</div>
+                    <div style="padding:5px">{job.aircraftType.name}</div>
+                    <div style="padding:5px;font-weight: 700;">Comment</div>
+                    <div style="padding:5px">{comment}</div>
+                    <div style="padding:5px;font-weight: 700;">Link</div>
+                    <div style="padding:5px">{link}</div>
+                </div>
+                '''
+
+                email_util = EmailUtil()
+                email_util.send_email(email_address, title, body)
 
 
         serializer = JobCommentSerializer(job_comment)
