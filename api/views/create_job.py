@@ -185,8 +185,14 @@ class CreateJobView(APIView):
         # TODO: Calculate estimated completion time based on the estimated times of the selected services and aircraft type
 
         if comment:
+            is_public = False
+
+            if user.profile.customer:
+                is_public = True
+
             job_comment = JobComments(job=job,
                                     comment=comment,
+                                    is_public=is_public,
                                     author=user)
             job_comment.save()        
 
