@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 from datetime import datetime
 
 from api.notification_util import NotificationUtil
+from api.email_util import EmailUtil
 
 from ..models import (
     Job,
@@ -115,6 +116,33 @@ class EditJobView(APIView):
                                 message = f'Job {job.purchase_order} for tail number {job.tailNumber} has been COMPLETED.'
                                 
                                 notification_util.send(message, phone_number.as_e164)
+
+                        
+                        # send an email notification to the customer user if the job was created by a customer user
+                        if job.created_by.profile.customer \
+                                and job.created_by.profile.email_notifications \
+                                and job.created_by.email:
+                            
+                            title = f'[{job.tailNumber}] Job COMPLETED'
+                            link = f'http://livetakeoff.com/jobs/{job.id}/details'
+
+                            body = f'''
+                            <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">Job has been COMPLETED</div>
+                            
+                            <div>
+                                <div style="padding:5px;font-weight: 700;">Tail Number</div>
+                                <div style="padding:5px">{job.tailNumber}</div>
+                                <div style="padding:5px;font-weight: 700;">Airport</div>
+                                <div style="padding:5px">{job.airport.name}</div>
+                                <div style="padding:5px;font-weight: 700;">Aircraft</div>
+                                <div style="padding:5px">{job.aircraftType.name}</div>
+                                <div style="padding:5px;font-weight: 700;">Link</div>
+                                <div style="padding:5px">{link}</div>
+                            </div>
+                            '''
+
+                            email_util = EmailUtil()
+                            email_util.send_email(job.created_by.email, title, body)
 
 
                         #unassign all services and retainer services
