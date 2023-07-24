@@ -128,6 +128,7 @@ class UserView(APIView):
             'showSpendingInfo': showSpendingInfo,
             'enableEstimates': user_profile.enable_estimates,
             'enableInvoices': user_profile.enable_invoice,
+            'promptRequestedBy': user_profile.prompt_requested_by
         }
 
         return Response(content)

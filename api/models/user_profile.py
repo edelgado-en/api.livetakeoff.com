@@ -18,4 +18,5 @@ class UserProfile(models.Model):
     enable_estimates = models.BooleanField(default=False)
     enable_invoice = models.BooleanField(default=False)
     show_job_price = models.BooleanField(default=False)
+    prompt_requested_by = models.BooleanField(default=False, help_text='For customers users that use generic profiles, this will prompt them to enter their name when creating a job.')
 
