@@ -1,4 +1,5 @@
 from django.db.models import Q, F
+from django.shortcuts import get_object_or_404
 from rest_framework import (permissions, status)
 from rest_framework .response import Response
 from datetime import datetime
@@ -49,3 +50,12 @@ class JobEstimateView(ListAPIView):
 
     def post(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
+    
+    
+    def delete(self, request, *args, **kwargs):
+        estimate = get_object_or_404(JobEstimate, pk=kwargs['id'])
+
+        estimate.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
