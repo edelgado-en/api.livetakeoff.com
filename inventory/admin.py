@@ -12,6 +12,7 @@ from inventory.models import (
     LocationUser,
     Provider,
     Tag,
+    ItemProvider
 )
 
 @admin.register(Brand)
@@ -54,6 +55,14 @@ class ItemTagAdmin(admin.ModelAdmin):
     search_fields = ['item', 'tag']
 
 
+@admin.register(ItemProvider)
+class ItemProviderAdmin(admin.ModelAdmin):
+    list_display = ['id', 'item', 'provider']
+    list_per_page = 100
+    ordering = ['item', 'provider']
+    search_fields = ['item', 'provider']
+
+
 @admin.register(LocationUser)
 class LocationUserAdmin(admin.ModelAdmin):
     list_display = ['id', 'location', 'user', 'is_default']
@@ -80,7 +89,7 @@ class LocationItemActivityAdmin(admin.ModelAdmin):
 
 @admin.register(Item)
 class ItemAdmin(admin.ModelAdmin):
-    list_display = ['id', 'timestamp', 'name', 'description', 'provider', 'brand', 'measure_by', 'area', 'cost_per_unit', 'photo', 'created_by', 'active']
+    list_display = ['id', 'timestamp', 'name', 'description', 'brand', 'measure_by', 'area', 'cost_per_unit', 'photo', 'created_by', 'active']
     list_per_page = 100
     ordering = ['name', 'active']
     search_fields = ['name', 'active']

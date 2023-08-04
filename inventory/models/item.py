@@ -1,5 +1,4 @@
 from django.db import models
-from .provider import Provider
 from .brand import Brand
 
 class Item(models.Model):
@@ -24,7 +23,6 @@ class Item(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)
-    provider = models.ForeignKey(Provider, on_delete=models.PROTECT, related_name='items')
     brand = models.ForeignKey(Brand, on_delete=models.PROTECT, related_name='items')
     measure_by = models.CharField(max_length=1, choices=measure_by_choices, default='U')
     area = models.CharField(max_length=1, choices=area_choices, default='I')
