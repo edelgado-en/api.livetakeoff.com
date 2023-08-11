@@ -1,6 +1,7 @@
 from django.db import models
 from .location import Location
 from .item import Item
+from .brand import Brand
 
 class LocationItem(models.Model):
 
@@ -13,6 +14,8 @@ class LocationItem(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='location_items')
     quantity = models.IntegerField(default=0)
     minimum_required = models.IntegerField(default=0)
+    threshold = models.IntegerField(default=0)
+    brand = models.ForeignKey(Brand, on_delete=models.CASCADE, blank=True, null=True, related_name='location_items')
     status = models.CharField(max_length=1, choices=status_choices, default='U',
                              help_text='User will have the option to change to confirmed while in the Checking Inventory View. \
                                        When an Item gets adjusted by either adding or subtracting, the status will change to unconfirmed.')

@@ -12,7 +12,9 @@ from inventory.models import (
     LocationUser,
     Provider,
     Tag,
-    ItemProvider
+    ItemProvider,
+    Group,
+    LocationGroup
 )
 
 @admin.register(Brand)
@@ -73,7 +75,7 @@ class LocationUserAdmin(admin.ModelAdmin):
 
 @admin.register(LocationItem)
 class LocationItemAdmin(admin.ModelAdmin):
-    list_display = ['id', 'location', 'item', 'quantity', 'minimum_required', 'status']
+    list_display = ['id', 'location', 'item', 'quantity', 'brand',  'minimum_required', 'status']
     list_per_page = 100
     ordering = ['location', 'item', 'quantity']
     search_fields = ['location', 'item']
@@ -89,7 +91,25 @@ class LocationItemActivityAdmin(admin.ModelAdmin):
 
 @admin.register(Item)
 class ItemAdmin(admin.ModelAdmin):
-    list_display = ['id', 'timestamp', 'name', 'description', 'brand', 'measure_by', 'area', 'cost_per_unit', 'photo', 'created_by', 'active']
+    list_display = ['id', 'timestamp', 'name', 'description', 'measure_by', 'area', 'cost_per_unit', 'photo', 'created_by', 'active']
     list_per_page = 100
     ordering = ['name', 'active']
     search_fields = ['name', 'active']
+
+
+@admin.register(Group)
+class GroupAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name', 'description', 'active']
+    list_per_page = 100
+    ordering = ['name', 'active']
+    search_fields = ['name', 'active']
+
+
+@admin.register(LocationGroup)
+class LocationGroupAdmin(admin.ModelAdmin):
+    list_display = ['id', 'location', 'group']
+    list_per_page = 100
+    ordering = ['location', 'group']
+    search_fields = ['location', 'group']
+
+

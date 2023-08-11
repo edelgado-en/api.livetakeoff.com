@@ -1,5 +1,4 @@
 from django.db import models
-from .brand import Brand
 
 class Item(models.Model):
 
@@ -23,7 +22,6 @@ class Item(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)
-    brand = models.ForeignKey(Brand, on_delete=models.PROTECT, related_name='items')
     measure_by = models.CharField(max_length=1, choices=measure_by_choices, default='U')
     area = models.CharField(max_length=1, choices=area_choices, default='I')
     cost_per_unit = models.DecimalField(max_digits=9, decimal_places=2)
