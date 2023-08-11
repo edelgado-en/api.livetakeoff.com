@@ -75,7 +75,7 @@ class LocationUserAdmin(admin.ModelAdmin):
 
 @admin.register(LocationItem)
 class LocationItemAdmin(admin.ModelAdmin):
-    list_display = ['id', 'location', 'item', 'quantity', 'brand',  'minimum_required', 'status']
+    list_display = ['id', 'location', 'item', 'quantity', 'brand',  'minimum_required', 'threshold', 'status']
     list_per_page = 100
     ordering = ['location', 'item', 'quantity']
     search_fields = ['location', 'item']

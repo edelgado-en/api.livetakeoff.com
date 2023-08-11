@@ -25,7 +25,7 @@ class Item(models.Model):
     measure_by = models.CharField(max_length=1, choices=measure_by_choices, default='U')
     area = models.CharField(max_length=1, choices=area_choices, default='I')
     cost_per_unit = models.DecimalField(max_digits=9, decimal_places=2)
-    photo = models.ImageField(upload_to='images/', blank=True)
+    photo = models.ImageField(upload_to='images/', blank=True, null=True)
     active = models.BooleanField(default=True)
     created_by = models.ForeignKey('auth.User', on_delete=models.PROTECT, related_name='items')
 
