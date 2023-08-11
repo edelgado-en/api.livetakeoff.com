@@ -29,6 +29,14 @@ class ItemFormInfoView(APIView):
         brands = Brand.objects.all().order_by('name')
 
         brand_dtos = []
+
+        none_brand = {
+            'id': None,
+            'name': 'None',
+        }
+
+        brand_dtos.append(none_brand)
+
         for brand in brands:
             b = {
                 'id': brand.id,

@@ -50,13 +50,26 @@ class CreateItemView(APIView):
 
         for locationItem in locationItems:
             brand_selected_id = None
+            
             if locationItem['brandSelected'] != None:
                 brand_selected_id = locationItem['brandSelected']['id']
 
-            # convert quantity to integer
+            minimum_required = locationItem.get('minimumRequired', None)
+            if minimum_required == '':
+                minimum_required = None
+
+            if minimum_required != None:
+                minimum_required = int(locationItem['minimumRequired'])
+            
+            threshold = locationItem.get('alertAt', None)
+
+            if threshold == '':
+                threshold = None
+
+            if threshold != None:
+                threshold = int(locationItem['alertAt'])
+            
             quantity = int(locationItem['quantity'])
-            minimum_required = int(locationItem['minimumRequired'])
-            threshold = int(locationItem['alertAt'])
 
             LocationItem.objects.create(
                 item=item,
