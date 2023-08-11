@@ -8,7 +8,8 @@ from inventory.models import (
     Tag,
     Location,
     Group,
-    Item
+    Item,
+    LocationGroup
 )
 
 class ItemFormInfoView(APIView):
@@ -68,7 +69,19 @@ class ItemFormInfoView(APIView):
             l = {
                 'id': location.id,
                 'name': location.name,
+                'groups': []
             }
+
+            # fetch all groups for this location
+            location_groups = LocationGroup.objects.filter(location=location)
+
+            for location_group in location_groups:
+                g = {
+                    'id': location_group.group.id,
+                    'name': location_group.group.name,
+                }
+
+                l['groups'].append(g)
 
             location_dtos.append(l)
         
