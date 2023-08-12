@@ -4,7 +4,8 @@ from inventory.views import (
     ItemFormInfoView,
     CreateItemView,
     InventoryListView,
-    ItemLookupView
+    ItemLookupView,
+    LocationsView
 )
 
 urlpatterns = [
@@ -12,4 +13,5 @@ urlpatterns = [
     path('items/create', CreateItemView.as_view()),
     path('items/list', InventoryListView.as_view()),
     path('items/<str:name>/', ItemLookupView.as_view()),
+    path('locations/list', LocationsView.as_view()),
 ]
