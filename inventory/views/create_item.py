@@ -11,7 +11,8 @@ from inventory.models import (
         Item,
         LocationItem,
         ItemProvider,
-        ItemTag
+        ItemTag,
+        LocationItemBrand
     )
 
 class CreateItemView(APIView):
@@ -49,10 +50,10 @@ class CreateItemView(APIView):
         )
 
         for locationItem in locationItems:
-            brand_selected_id = None
-            
-            if locationItem['brandSelected'] != None:
-                brand_selected_id = locationItem['brandSelected']['id']
+            brand_selected_ids = []
+
+            for brand_selected in locationItem['brandsSelected']:
+                brand_selected_ids.append(brand_selected['id'])
 
             minimum_required = locationItem.get('minimumRequired', None)
             if minimum_required == '':
@@ -64,21 +65,27 @@ class CreateItemView(APIView):
             threshold = locationItem.get('alertAt', None)
 
             if threshold == '':
-                threshold = None
+                threshold = None          
 
             if threshold != None:
                 threshold = int(locationItem['alertAt'])
             
             quantity = int(locationItem['quantity'])
 
-            LocationItem.objects.create(
+            location_item_created = LocationItem.objects.create(
                 item=item,
                 location_id=locationItem['location']['id'],
                 quantity=quantity,
                 minimum_required=minimum_required,
                 threshold=threshold,
-                brand_id=brand_selected_id,
             )
+
+            for brand_selected_id in brand_selected_ids:
+                LocationItemBrand.objects.create(
+                    location_item=location_item_created,
+                    brand_id=brand_selected_id
+                )
+
 
         if tagIds != None:
             tagIds = json.loads(tagIds)

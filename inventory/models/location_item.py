@@ -15,7 +15,6 @@ class LocationItem(models.Model):
     quantity = models.IntegerField(default=0)
     minimum_required = models.IntegerField(default=0, null=True, blank=True)
     threshold = models.IntegerField(default=0, null=True, blank=True)
-    brand = models.ForeignKey(Brand, on_delete=models.CASCADE, blank=True, null=True, related_name='location_items')
     status = models.CharField(max_length=1, choices=status_choices, default='U',
                              help_text='User will have the option to change to confirmed while in the Checking Inventory View. \
                                        When an Item gets adjusted by either adding or subtracting, the status will change to unconfirmed.')

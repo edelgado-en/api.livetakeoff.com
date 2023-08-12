@@ -10,3 +10,4 @@ from .location_item import LocationItem
 from .item_provider import ItemProvider
 from .group import Group
 from .location_group import LocationGroup
+from .location_item_brand import LocationItemBrand
