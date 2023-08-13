@@ -5,7 +5,8 @@ from inventory.views import (
     CreateItemView,
     InventoryListView,
     ItemLookupView,
-    LocationsView
+    LocationsView,
+    LocationItemView
 )
 
 urlpatterns = [
@@ -14,4 +15,5 @@ urlpatterns = [
     path('items/list', InventoryListView.as_view()),
     path('items/<str:name>/', ItemLookupView.as_view()),
     path('locations/list', LocationsView.as_view()),
+    path('location-items/<int:id>/', LocationItemView.as_view()),
 ]
