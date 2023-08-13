@@ -5,7 +5,8 @@ from rest_framework .response import Response
 from rest_framework.views import APIView
 
 from inventory.models import (
-    LocationItem
+    LocationItem,
+    LocationItemActivity
 )
 
 class LocationItemView(APIView):
@@ -14,9 +15,21 @@ class LocationItemView(APIView):
     def patch(self, request, id):
         location_item = LocationItem.objects.get(pk=id)
 
-        item_status = request.data.get('status')
+        action = request.data.get('action')
+        quantity = request.data.get('quantity', None)
 
-        location_item.status = item_status
+        if action == 'confirm':
+            location_item.status = 'C'
+
+        elif action == 'adjust':
+            location_item.quantity = quantity
+            location_item.status = 'U'
+
+        elif action == 'move':
+            location_item.status = 'M'
+        
+        else:
+            return Response({'error': 'Invalid action'}, status=status.HTTP_400_BAD_REQUEST)
 
         location_item.save()
 
