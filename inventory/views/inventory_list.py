@@ -22,6 +22,7 @@ class InventoryListView(ListAPIView):
         location_id = self.request.data.get('location', None)
         measure_by_id = self.request.data.get('measureById', None)
         area_id = self.request.data.get('areaId', None)
+        status = self.request.data.get('status', None)
 
         # search by item name contains
         qs = Item.objects \
@@ -32,6 +33,9 @@ class InventoryListView(ListAPIView):
         if location_id:
             # only fetch the items that are present in LocationItem table
             qs = qs.filter(location_items__location_id=location_id)
+
+            if status:
+                qs = qs.filter(location_items__status=status)
 
         if measure_by_id:
             qs = qs.filter(measure_by=measure_by_id)
