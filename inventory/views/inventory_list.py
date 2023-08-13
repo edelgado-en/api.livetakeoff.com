@@ -26,6 +26,7 @@ class InventoryListView(ListAPIView):
         # search by item name contains
         qs = Item.objects \
                         .filter(name__icontains=name, active=True) \
+                        .prefetch_related('location_items') \
                         .order_by('name')
         
         if location_id:
