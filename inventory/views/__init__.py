@@ -5,3 +5,5 @@ from .item_lookup import ItemLookupView
 from .locations import LocationsView
 from .location_item import LocationItemView
 from .location_user import LocationUserView
+from .provider import ProviderView
+from .location import LocationView
