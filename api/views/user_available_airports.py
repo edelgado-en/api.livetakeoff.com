@@ -32,32 +32,28 @@ class UserAvailableAirportsView(APIView):
     def post(self, request):
         user_id = request.data.get('user_id')
         airport_id = request.data.get('airport_id')
+        action = request.data.get('action')
 
-        user_available_airport, created = UserAvailableAirport.objects.get_or_create(
-            user_id=user_id,
-            airport_id=airport_id
-        )
+        if action == 'add':
+            user_available_airport, created = UserAvailableAirport.objects.get_or_create(
+                user_id=user_id,
+                airport_id=airport_id
+            )
 
-        airport = user_available_airport.airport
+            airport = user_available_airport.airport
 
-        data = {
-            'id': airport.id,
-            'initials': airport.initials,
-            'name': airport.name
-        }
+            data = {
+                'id': airport.id,
+                'initials': airport.initials,
+                'name': airport.name
+            }
 
-        return Response(data, status=status.HTTP_200_OK)
+            return Response(data, status=status.HTTP_200_OK)
         
+        elif action == 'delete':
+            UserAvailableAirport.objects.filter(
+                user_id=user_id,
+                airport_id=airport_id
+            ).delete()
 
-
-    def delete(self, request):
-        user_id = request.data.get('user_id')
-        airport_id = request.data.get('airport_id')
-
-        # delete an entry in the UserAvailableAirport table if it exists
-        UserAvailableAirport.objects.filter(
-            user_id=user_id,
-            airport_id=airport_id
-        ).delete()
-
-        return Response(status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_200_OK)
