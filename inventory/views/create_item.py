@@ -12,7 +12,8 @@ from inventory.models import (
         LocationItem,
         ItemProvider,
         ItemTag,
-        LocationItemBrand
+        LocationItemBrand,
+        LocationItemActivity
     )
 
 class CreateItemView(APIView):
@@ -79,6 +80,16 @@ class CreateItemView(APIView):
                 minimum_required=minimum_required,
                 threshold=threshold,
             )
+
+            total_cost = quantity * costPerUnit
+
+            LocationItemActivity.objects.create(
+                                        location_item=location_item_created,
+                                        activity_type='A',
+                                        quantity=quantity,
+                                        cost=total_cost,
+                                        user=request.user
+                                    )
 
             for brand_selected_id in brand_selected_ids:
                 LocationItemBrand.objects.create(

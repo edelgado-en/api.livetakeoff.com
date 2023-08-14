@@ -16,14 +16,40 @@ class LocationItemView(APIView):
         location_item = LocationItem.objects.get(pk=id)
 
         action = request.data.get('action')
-        quantity = request.data.get('quantity', None)
 
         if action == 'confirm':
             location_item.status = 'C'
 
+            location_item.save()
+
+            LocationItemActivity.objects.create(location_item=location_item,
+                                                activity_type='C',
+                                                quantity=location_item.quantity,
+                                                user=request.user)
+
         elif action == 'adjust':
+            quantity = request.data.get('quantity', None)
+            quantity = int(quantity)
+
+            activity_type = 'A'
+
+            if quantity < location_item.quantity:
+                activity_type = 'S'
+            
+            delta_quantity = abs(quantity - location_item.quantity)
+
+            delta_cost = delta_quantity * location_item.item.cost_per_unit
+
             location_item.quantity = quantity
             location_item.status = 'U'
+
+            location_item.save()
+
+            LocationItemActivity.objects.create(location_item=location_item,
+                                                activity_type=activity_type,
+                                                quantity=delta_quantity,
+                                                cost=delta_cost,
+                                                user=request.user)
 
         elif action == 'move':
             # this is the location id you use to find the corresponding location item entry to increase the quantity with movingQuantity
@@ -35,14 +61,16 @@ class LocationItemView(APIView):
             # this is the quantity that you add to the destionation location item
             movingQuantity = request.data.get('movingQuantity', None)
 
-            # fetch location item for destination location and location_item.item
-            destination_location_item = LocationItem.objects.get(location_id=destinationLocationId, item=location_item.item)
+            destination_location_item = None
 
-            # update destination location item quantity or create a new location item if it does not exits
-            if destination_location_item:
+            # fetch location item for destination location and location_item.item
+            try:
+                destination_location_item = LocationItem.objects.get(location_id=destinationLocationId, item=location_item.item)
+
                 destination_location_item.quantity += movingQuantity
                 destination_location_item.save()
-            else:
+
+            except LocationItem.DoesNotExist:
                 destination_location_item = LocationItem.objects.create(location_id=destinationLocationId,
                                                                         item=location_item.item,
                                                                         quantity=movingQuantity,
@@ -55,10 +83,18 @@ class LocationItemView(APIView):
             location_item.quantity = adjustedQuantity
             location_item.status = 'U'
         
+            location_item.save()
+
+            LocationItemActivity.objects.create(location_item=location_item,
+                                                activity_type='M',
+                                                quantity=movingQuantity,
+                                                moved_from=location_item.location,
+                                                moved_to=destination_location_item.location,
+                                                user=request.user)
+
         else:
             return Response({'error': 'Invalid action'}, status=status.HTTP_400_BAD_REQUEST)
 
-        location_item.save()
-
-        return Response({'success': 'Location item status updated'}, status=status.HTTP_200_OK)
+        
+        return Response({'success': 'Location item updated'}, status=status.HTTP_200_OK)
     

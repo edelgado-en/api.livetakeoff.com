@@ -11,6 +11,7 @@ class LocationItemActivity(models.Model):
         ('C', 'Confirm'),
     )
 
+    timestamp = models.DateTimeField(auto_now_add=True)
     location_item = models.ForeignKey(LocationItem, on_delete=models.CASCADE, related_name='activities')
     activity_type = models.CharField(max_length=1, choices=activity_type_choices)
     quantity = models.IntegerField(default=0)
