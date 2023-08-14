@@ -9,7 +9,9 @@ from inventory.views import (
     LocationItemView,
     LocationUserView,
     ProviderView,
-    LocationView
+    LocationView,
+    TagView,
+    BrandView
 )
 
 urlpatterns = [
@@ -21,5 +23,7 @@ urlpatterns = [
     path('location-items/<int:id>/', LocationItemView.as_view()),
     path('location-users/<int:id>/', LocationUserView.as_view()),
     path('provider', ProviderView.as_view()),
-    path('location', LocationView.as_view())
+    path('location', LocationView.as_view()),
+    path('tag', TagView.as_view()),
+    path('brand', BrandView.as_view())
 ]

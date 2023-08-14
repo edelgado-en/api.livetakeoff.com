@@ -9,6 +9,7 @@ from inventory.models import (
 )
 
 class ProviderView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request):
         name = request.data.get('name')

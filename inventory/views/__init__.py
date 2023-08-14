@@ -7,3 +7,5 @@ from .location_item import LocationItemView
 from .location_user import LocationUserView
 from .provider import ProviderView
 from .location import LocationView
+from .tag import TagView
+from .brand import BrandView
