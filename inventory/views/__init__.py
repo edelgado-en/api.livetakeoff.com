@@ -9,3 +9,5 @@ from .provider import ProviderView
 from .location import LocationView
 from .tag import TagView
 from .brand import BrandView
+from .item_details import ItemDetailsView
+from .location_item_activity import LocationItemActivityListView
