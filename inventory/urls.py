@@ -14,12 +14,14 @@ from inventory.views import (
     BrandView,
     ItemDetailsView,
     LocationItemActivityListView,
-    ItemPhotoView
+    ItemPhotoView,
+    UpdateItemView
 )
 
 urlpatterns = [
     path('items/form-info', ItemFormInfoView.as_view()),
     path('items/create', CreateItemView.as_view()),
+    path('items/update', UpdateItemView.as_view()),
     path('items/list', InventoryListView.as_view()),
     path('items/<str:name>/', ItemLookupView.as_view()),
     path('items/details/<int:id>/', ItemDetailsView.as_view()),
