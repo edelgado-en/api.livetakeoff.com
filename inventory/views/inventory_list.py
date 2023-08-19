@@ -23,6 +23,8 @@ class InventoryListView(ListAPIView):
         measure_by_id = self.request.data.get('measureById', None)
         area_id = self.request.data.get('areaId', None)
         status = self.request.data.get('status', None)
+        threshold_met = self.request.data.get('thresholdMet', False)
+        minimum_required_met = self.request.data.get('minimumRequiredMet', None)
 
         # search by item name contains
         qs = Item.objects \
@@ -36,6 +38,16 @@ class InventoryListView(ListAPIView):
 
             if status:
                 qs = qs.filter(location_items__status=status)
+
+            if threshold_met:
+                # within a specific location_item, if the location_item.quantity is less than the location_item.threshold, then include it in the queryset
+                # the comparison needs to be for each location item, you cannot compare to just any threshold
+                qs = qs.filter(location_items__location_id=location_id, location_items__quantity__lte=F('location_items__threshold'))
+
+            if minimum_required_met:
+                qs = qs.filter(location_items__location_id=location_id, location_items__quantity__lte=F('location_items__minimum_required'))
+
+                
 
         if measure_by_id:
             qs = qs.filter(measure_by=measure_by_id)
