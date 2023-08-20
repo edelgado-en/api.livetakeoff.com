@@ -25,6 +25,7 @@ class InventoryListView(ListAPIView):
         status = self.request.data.get('status', None)
         threshold_met = self.request.data.get('thresholdMet', False)
         minimum_required_met = self.request.data.get('minimumRequiredMet', None)
+        out_of_stock_met = self.request.data.get('outOfStockMet', None)
 
         # search by item name contains
         qs = Item.objects \
@@ -47,14 +48,15 @@ class InventoryListView(ListAPIView):
             if minimum_required_met:
                 qs = qs.filter(location_items__location_id=location_id, location_items__quantity__lte=F('location_items__minimum_required'))
 
-                
+            if out_of_stock_met:
+                qs = qs.filter(location_items__location_id=location_id, location_items__quantity=0)
 
         if measure_by_id:
             qs = qs.filter(measure_by=measure_by_id)
 
         if area_id:
             qs = qs.filter(area=area_id)
-
+        
         return qs
 
 
