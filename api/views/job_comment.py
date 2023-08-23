@@ -163,7 +163,7 @@ class JobCommentView(ListCreateAPIView):
         
         if send_email:
             # get the customer associated with the job
-            email_address = job.customer.emailAddress
+            email_address = job.created_by.email
 
             if email_address:
                 title = f'[{job.tailNumber}] Job Comment Added'
