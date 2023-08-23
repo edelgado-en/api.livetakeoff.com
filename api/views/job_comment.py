@@ -161,7 +161,7 @@ class JobCommentView(ListCreateAPIView):
                 notification_util.send(message, phone_number.as_e164)
 
         
-        if send_email:
+        if send_email and is_customer_user:
             # get the customer associated with the job
             email_address = job.created_by.email
 
