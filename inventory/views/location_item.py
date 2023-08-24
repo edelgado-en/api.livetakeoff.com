@@ -123,8 +123,6 @@ class LocationItemView(APIView):
 
             destination_location_item = None
 
-            # TODO: also add notificaitons when moving items
-
             # fetch location item for destination location and location_item.item
             try:
                 destination_location_item = LocationItem.objects.get(location_id=destinationLocationId, item=location_item.item)
@@ -138,14 +136,71 @@ class LocationItemView(APIView):
                                                                         quantity=movingQuantity,
                                                                         status='U')
 
+            is_out_of_stock = False
+            is_threshold_met = False
+
             # update current location item quantity with the adjusted quantity
             if adjustedQuantity < 0:
                 adjustedQuantity = 0
+
+            if adjustedQuantity == 0:
+                is_out_of_stock = True
+            
+            elif location_item.threshold > 0 and adjustedQuantity <= location_item.threshold:
+                is_threshold_met = True
 
             location_item.quantity = adjustedQuantity
             location_item.status = 'U'
         
             location_item.save()
+
+            admins = User.objects.filter(Q(is_superuser=True) | Q(is_staff=True) | Q(groups__name='Account Managers'))
+
+            if is_out_of_stock:
+                title = f'OUT OF STOCK {location_item.item.name} at {location_item.location.name}'
+
+                body = f'''
+                <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">OUT OF STOCK Item Notification</div>
+                
+                <div>
+                    <div style="padding:5px;font-weight: 700;">Item</div>
+                    <div style="padding:5px">{location_item.item.name}</div>
+                    <div style="padding:5px;font-weight: 700;">Location</div>
+                    <div style="padding:5px">{location_item.location.name}</div>
+                    <div style="padding:5px;font-weight: 700;">Quantity</div>
+                    <div style="padding:5px">OUT OF STOCK</div>
+                </div>
+                '''
+
+                email_util = EmailUtil()
+
+                for admin in admins:
+                    if admin.email:
+                        email_util.send_email(admin.email, title, body)
+            
+            elif is_threshold_met:
+                title = f'THRESHOLD MET {location_item.item.name} at {location_item.location.name}'
+
+                body = f'''
+                <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">THRESHOLD Item Notification</div>
+                
+                <div>
+                    <div style="padding:5px;font-weight: 700;">Item</div>
+                    <div style="padding:5px">{location_item.item.name}</div>
+                    <div style="padding:5px;font-weight: 700;">Location</div>
+                    <div style="padding:5px">{location_item.location.name}</div>
+                    <div style="padding:5px;font-weight: 700;">Quantity</div>
+                    <div style="padding:5px">{location_item.quantity}</div>
+                    <div style="padding:5px;font-weight: 700;">Threshold</div>
+                    <div style="padding:5px">{location_item.threshold}</div>
+                </div>
+                '''
+
+                email_util = EmailUtil()
+
+                for admin in admins:
+                    if admin.email:
+                        email_util.send_email(admin.email, title, body)
 
             LocationItemActivity.objects.create(location_item=location_item,
                                                 activity_type='M',
