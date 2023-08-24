@@ -5,7 +5,7 @@ class Item(models.Model):
     measure_by_choices = (
         ('U', 'Unit'),
         ('G', 'Gallons'),
-        ('B', 'Bottle'),
+        ('B', 'Bottle/Sprayer'),
         ('O', 'Box'),
         ('L', 'Lb'),
         ('J', 'Jar'),
