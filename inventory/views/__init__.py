@@ -13,3 +13,4 @@ from .item_details import ItemDetailsView
 from .location_item_activity import LocationItemActivityListView
 from .item_photo import ItemPhotoView
 from .update_item import UpdateItemView
+from .inventory_dashboard import InventoryDashboardView
