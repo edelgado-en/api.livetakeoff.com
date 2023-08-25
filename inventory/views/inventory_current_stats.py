@@ -18,7 +18,7 @@ from api.models import UserProfile
 class InventoryCurrentStatsView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
-    def post(self, request):
+    def get(self, request):
         if not self.can_view_dashboard(request.user):
             return Response({'error': 'You do not have permission to view this page'}, status=status.HTTP_403_FORBIDDEN)
 
