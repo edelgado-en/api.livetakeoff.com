@@ -181,7 +181,7 @@ class InventoryHistoryStatsView(APIView):
         users_with_stats = []
         for item in qs:
             try:
-                user_profile = UserProfile.objects.get(pk=item['user__id'])
+                user_profile = UserProfile.objects.get(user=item['user__id'])
             except UserProfile.DoesNotExist:
                 continue
             avatar_url = user_profile.avatar.url if user_profile.avatar else None
