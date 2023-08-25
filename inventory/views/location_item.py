@@ -46,10 +46,15 @@ class LocationItemView(APIView):
             if quantity < location_item.quantity:
                 activity_type = 'S'
 
+                threshold = 0
+
+                if location_item.threshold is not None:
+                    threshold = location_item.threshold
+
                 if quantity == 0:
                     is_out_of_stock = True
 
-                elif location_item.threshold > 0 and quantity <= location_item.threshold:
+                elif threshold > 0 and quantity <= threshold:
                     is_threshold_met = True
 
             location_item.quantity = quantity

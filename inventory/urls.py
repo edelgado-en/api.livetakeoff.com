@@ -16,7 +16,8 @@ from inventory.views import (
     LocationItemActivityListView,
     ItemPhotoView,
     UpdateItemView,
-    InventoryDashboardView
+    InventoryCurrentStatsView,
+    InventoryHistoryStatsView
 )
 
 urlpatterns = [
@@ -35,5 +36,6 @@ urlpatterns = [
     path('brand', BrandView.as_view()),
     path('location-items/activity', LocationItemActivityListView.as_view()),
     path('items/photo', ItemPhotoView.as_view()),
-    path('stats', InventoryDashboardView.as_view()),
+    path('stats', InventoryCurrentStatsView.as_view()),
+    path('history-stats', InventoryHistoryStatsView.as_view()),
 ]

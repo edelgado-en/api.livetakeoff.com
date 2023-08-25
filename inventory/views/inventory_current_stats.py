@@ -15,94 +15,16 @@ from inventory.models import (
 
 from api.models import UserProfile
 
-class InventoryDashboardView(APIView):
+class InventoryCurrentStatsView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request):
         if not self.can_view_dashboard(request.user):
             return Response({'error': 'You do not have permission to view this page'}, status=status.HTTP_403_FORBIDDEN)
 
-        dateSelected = request.data.get('dateSelected')
-
-        # get start date and end date based on the dateSelected value provided
-        if dateSelected == 'today':
-            # start_date should be the beginning of the day and end_date should be now
-            today = datetime.now()
-            start_date = datetime(today.year, today.month, today.day)
-            end_date = datetime.now()
-
-        elif dateSelected == 'yesterday':
-            yesterday = datetime.now() - timedelta(days=1)
-            start_date = datetime(yesterday.year, yesterday.month, yesterday.day, 0, 0, 0)
-            end_date = datetime(yesterday.year, yesterday.month, yesterday.day, 23, 59, 59)
-        
-        elif dateSelected == 'last7Days':
-            today = date.today()
-            start_date = today - timedelta(days=7)
-            end_date = today
-
-        elif dateSelected == 'lastWeek':
-            today = date.today()
-            start_date = today - timedelta(days=today.weekday(), weeks=1)
-            end_date = start_date + timedelta(days=6)
-
-        elif dateSelected == 'MTD':
-            today = date.today()
-            start_date = date(today.year, today.month, 1)
-            end_date = datetime.now()
-
-        elif dateSelected == 'lastMonth':
-            today = date.today()
-            first = today.replace(day=1)
-            lastMonth = first - timedelta(days=1)
-            start_date = lastMonth.replace(day=1)
-            
-            # check if last month has 31 days or 30 days or 28 days
-            if lastMonth.month == 1 or lastMonth.month == 3 \
-                or lastMonth.month == 5 or lastMonth.month == 7 or lastMonth.month == 8 \
-                or lastMonth.month == 10 or lastMonth.month == 12:
-                end_date = lastMonth.replace(day=31)
-            
-            elif lastMonth.month == 4 or lastMonth.month == 6 or lastMonth.month == 9 or lastMonth.month == 11:
-                end_date = lastMonth.replace(day=30)
-            
-            else:
-                end_date = lastMonth.replace(day=28)
-
-        elif dateSelected == 'lastQuarter':
-            today = date.today()
-            # get today's month and check it is in the first, second, third or fourth quarter. if it is first quarter, then get the previous year's last quarter
-            if today.month in [1,2,3]:
-                start_date = date(today.year - 1, 10, 1)
-                end_date = date(today.year - 1, 12, 31)
-            
-            elif today.month in [4,5,6]:
-                start_date = date(today.year, 1, 1)
-                end_date = date(today.year, 3, 31)
-            
-            elif today.month in [7,8,9]:
-                start_date = date(today.year, 4, 1)
-                end_date = date(today.year, 6, 30)
-            
-            elif today.month in [10,11,12]:
-                start_date = date(today.year, 7, 1)
-                end_date = date(today.year, 9, 30)
-
-        
-        elif dateSelected == 'YTD':
-            year = datetime.now().year
-            start_date = datetime(year, 1, 1)
-            end_date = datetime.now()
-        
-        elif dateSelected == 'lastYear':
-            today = date.today()
-            start_date = date(today.year - 1, 1, 1)
-            end_date = date(today.year - 1, 12, 31)
-
-
         # get locationItems get where the quantity is greater than zero and multiply item__cost_per_unit by locationItem__quantity in the same query
         total_value_in_stock = LocationItem.objects.filter(quantity__gt=0) \
-                                            .aggregate(total_value_out_of_stock=Sum(F('item__cost_per_unit') * F('quantity')))['total_value_out_of_stock']
+                                .aggregate(total_value_out_of_stock=Sum(F('item__cost_per_unit') * F('quantity')))['total_value_out_of_stock']
 
         if total_value_in_stock is None:
             total_value_in_stock = 0
@@ -224,6 +146,7 @@ class InventoryDashboardView(APIView):
                          'area_current_stats': area_current_stats,
                          'location_accuracy_stats': location_accuracy_stats,
                          }, status=status.HTTP_200_OK)
+
 
     def can_view_dashboard(self, user):
         if user.is_superuser or user.is_staff or user.groups.filter(name='Account Managers').exists():
