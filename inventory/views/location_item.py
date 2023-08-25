@@ -144,6 +144,11 @@ class LocationItemView(APIView):
             is_out_of_stock = False
             is_threshold_met = False
 
+            threshold = 0
+
+            if location_item.threshold is not None:
+                threshold = location_item.threshold
+
             # update current location item quantity with the adjusted quantity
             if adjustedQuantity < 0:
                 adjustedQuantity = 0
@@ -151,7 +156,7 @@ class LocationItemView(APIView):
             if adjustedQuantity == 0:
                 is_out_of_stock = True
             
-            elif location_item.threshold > 0 and adjustedQuantity <= location_item.threshold:
+            elif threshold > 0 and adjustedQuantity <= threshold:
                 is_threshold_met = True
 
             location_item.quantity = adjustedQuantity
