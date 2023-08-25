@@ -81,6 +81,8 @@ class InventoryCurrentStatsView(APIView):
             # add percentage to location_current_stats if total_quantity_in_stock is greater than zero
             if total_quantity_in_stock > 0:
                 location_current_stats[-1]['percentage'] = round(q['total_quantity'] / total_quantity_in_stock * 100, 2)
+            else:
+                location_current_stats[-1]['percentage'] = 0
 
         # sum up the locationItem_quantities per locationItem__item_area. The resultset should include area name, total_quantity
         # also include the total cost per area. The total cost is calculated by locationItem_quantity * item_cost_per_unit
@@ -105,6 +107,8 @@ class InventoryCurrentStatsView(APIView):
             # add percentage to area_current_stats if total_quantity_in_stock is greater than zero
             if total_quantity_in_stock > 0:
                 area_current_stats[-1]['percentage'] = round(q['total_quantity'] / total_quantity_in_stock * 100, 2)
+            else:
+                area_current_stats[-1]['percentage'] = 0
 
         # order area_current_stats by percentage. Highest percentage first
         area_current_stats = sorted(area_current_stats, key=lambda k: k['percentage'], reverse=True)
@@ -131,7 +135,9 @@ class InventoryCurrentStatsView(APIView):
             # add percentage to location_accuracy_stats if total_confirmed + total_unconfirmed is greater than zero
             if (confirmed + unconfirmed) > 0:
                 location_accuracy_stats[-1]['percentage'] = round(confirmed / (confirmed + unconfirmed) * 100, 2)
-
+            else:
+                location_accuracy_stats[-1]['percentage'] = 0
+        
         # order location_accuracy_stats by percentage. Lowest percentage first
         location_accuracy_stats = sorted(location_accuracy_stats, key=lambda k: k['percentage'])
 

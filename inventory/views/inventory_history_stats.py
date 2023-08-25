@@ -122,6 +122,8 @@ class InventoryHistoryStatsView(APIView):
             
             if total_inventory_expense > 0:
                 items_with_highest_expense[-1]['percentage'] = round(item['total_cost'] / total_inventory_expense * 100, 2)
+            else:
+                items_with_highest_expense[-1]['percentage'] = 0
             
         # get the top 10 items with the highest number of transactions. A transaction is an entry in the locationItemActivity table
         #  The result set should include item name and the corresponding number of transactions
@@ -156,6 +158,8 @@ class InventoryHistoryStatsView(APIView):
             
             if total_inventory_expense > 0:
                 locations_with_expense[-1]['percentage'] = round(location['total_expense'] / total_inventory_expense * 100, 2)
+            else:
+                locations_with_expense[-1]['percentage'] = 0
         
         # Get the user id from locationItemActivity with the following information:
         #  total_transactions (this is the count of activities done by this user),
