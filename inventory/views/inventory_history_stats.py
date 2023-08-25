@@ -195,7 +195,7 @@ class InventoryHistoryStatsView(APIView):
                 'total_additions': item['total_additions'],
                 'total_subtractions': item['total_subtractions'],
                 'total_moves': item['total_moves'],
-                'inventory_expense': item['inventory_expense']
+                'inventory_expense': item['inventory_expense'] if item['inventory_expense'] is not None else 0,
                 })
         
         return Response({
