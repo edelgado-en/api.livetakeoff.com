@@ -9,7 +9,8 @@ from datetime import (date, datetime, timedelta)
 
 from inventory.models import (
     LocationItemActivity,
-    LocationItem
+    LocationItem,
+    Item
 )
 
 from api.models import UserProfile
@@ -24,10 +25,16 @@ class InventoryDashboardView(APIView):
         dateSelected = request.data.get('dateSelected')
 
         # get start date and end date based on the dateSelected value provided
-        if dateSelected == 'current':
-            # current means get all the data with no date restrictions
-            start_date = None
-            end_date = None
+        if dateSelected == 'today':
+            # start_date should be the beginning of the day and end_date should be now
+            today = datetime.now()
+            start_date = datetime(today.year, today.month, today.day)
+            end_date = datetime.now()
+
+        elif dateSelected == 'yesterday':
+            yesterday = datetime.now() - timedelta(days=1)
+            start_date = datetime(yesterday.year, yesterday.month, yesterday.day, 0, 0, 0)
+            end_date = datetime(yesterday.year, yesterday.month, yesterday.day, 23, 59, 59)
         
         elif dateSelected == 'last7Days':
             today = date.today()
@@ -92,166 +99,132 @@ class InventoryDashboardView(APIView):
             start_date = date(today.year - 1, 1, 1)
             end_date = date(today.year - 1, 12, 31)
 
-        total_inventory_value = 0
-        total_items_in_stock = 0
-        total_expense = 0
-        total_out_of_stock = 0
-        total_low_stock = 0
-        inventory_accuracy = 0
-        popular_items = []
-        items_with_highest_expense = []
-        locations_with_expense = []
-        user_with_stats = []
 
-        date_range_specified = False
-        if start_date and end_date:
-            date_range_specified = True
+        # get locationItems get where the quantity is greater than zero and multiply item__cost_per_unit by locationItem__quantity in the same query
+        total_value_in_stock = LocationItem.objects.filter(quantity__gt=0) \
+                                            .aggregate(total_value_out_of_stock=Sum(F('item__cost_per_unit') * F('quantity')))['total_value_out_of_stock']
 
-        qs = LocationItemActivity.objects.filter(activity_type='A')
-        if date_range_specified:
-            qs = qs.filter(timestamp__range=(start_date, end_date))
+        if total_value_in_stock is None:
+            total_value_in_stock = 0
 
-        total_cost_value = qs.aggregate(Sum('cost'))['cost__sum']
+        # sum up the quantities of all locationItems
+        total_quantity_in_stock = LocationItem.objects.filter(quantity__gt=0) \
+                                            .aggregate(total_quantity_in_stock=Sum('quantity'))['total_quantity_in_stock']
         
-        qs = LocationItemActivity.objects.filter(activity_type='S')
-        if date_range_specified:
-            qs = qs.filter(timestamp__range=(start_date, end_date))
-        
-        total_cost_subtracted = qs.aggregate(Sum('cost'))['cost__sum']
-    
-        total_expense = total_cost_subtracted
+        if total_quantity_in_stock is None:
+            total_quantity_in_stock = 0
 
-        total_inventory_value = total_cost_value - total_cost_subtracted
-
-        qs = LocationItemActivity.objects.filter(activity_type='A')
-        if date_range_specified:
-            qs = qs.filter(timestamp__range=(start_date, end_date))
-
-        total_items_added = qs.aggregate(Sum('quantity'))['quantity__sum']
-        
-        qs = LocationItemActivity.objects.filter(activity_type='S')
-        if date_range_specified:
-            qs = qs.filter(timestamp__range=(start_date, end_date))
-
-        total_items_subtracted = qs.aggregate(Sum('quantity'))['quantity__sum']
-        
-        total_items_in_stock = total_items_added - total_items_subtracted
-
-        # count locationItems where the quantity is zero
         total_out_of_stock = LocationItem.objects.filter(quantity=0).count()
 
-        # count locationItems where the quantity is less or equal than minimum_required and bigger than zero
         total_low_stock = LocationItem.objects.filter(quantity__lte=F('minimum_required'),
                                                         quantity__gt=0, minimum_required__gt=1).count()
-
-        # count all locationItems and count locationItems where status = 'C'. The percentage of accuracy is calculated by dividing the count of locationItems where status = 'C' by the total count of locationItems
-        total_location_items = LocationItem.objects.all().count()
-        total_confirmed_location_items = LocationItem.objects.filter(status='C').count()
-
-        if total_location_items > 0:
-            inventory_accuracy = (total_confirmed_location_items / total_location_items) * 100
-            inventory_accuracy = round(inventory_accuracy, 2)
-
-
-        qs = LocationItemActivity.objects.all()
-        if date_range_specified:
-            qs = qs.filter(timestamp__range=(start_date, end_date))
-
-        total_location_item_activities = qs.count()
-
-        # get the top 10 most popular items
-        qs = LocationItemActivity.objects.all()
-        if date_range_specified:
-            qs = qs.filter(timestamp__range=(start_date, end_date))
-
-        qs = qs.values('location_item__item__name')
-        qs = qs.annotate(count=Count('location_item__item__name'))
-        qs = qs.order_by('-count')[:10]
         
-        for item in qs:
-            popular_items.append({
-                'name': item['location_item__item__name'],
-                'count': item['count'],
-                'percentage': round((item['count'] / total_location_item_activities) * 100, 2)
-                })
-            
-        # get the top 10 items with the highest expense. Expense is determined by the summation of locationItemActivities where the activity_type is 'S'. The result set should include item name and the corresponding cost
-        qs = LocationItemActivity.objects.filter(activity_type='S') 
-        if date_range_specified:
-            qs = qs.filter(timestamp__range=(start_date, end_date))
+        # sum up the quantities of all locationItems_quantity where the status = 'C'
+        total_confirmed = LocationItem.objects.filter(status='C') \
+                        .aggregate(total_confirmed=Sum('quantity'))['total_confirmed']
 
-        qs = qs.values('location_item__item__name')
-        qs = qs.annotate(cost=Sum('cost')) 
-        qs = qs.order_by('-cost')[:10]
+        # sum up the quantities of all locationItems_quantity where the status = 'U'
+        total_unconfirmed = LocationItem.objects.filter(status='U') \
+                        .aggregate(total_unconfirmed=Sum('quantity'))['total_unconfirmed']
         
-        for item in qs:
-            items_with_highest_expense.append({
-                'name': item['location_item__item__name'],
-                'cost': item['cost'],
-                'percentage': round((item['cost'] / total_expense) * 100, 2)
-                })
-            
-        # get locations with the highest expense. Expense is determined by the summation of locationItemActivities where the activity_type is 'S'. The result set should include location name and the corresponding cost
-        qs = LocationItemActivity.objects.filter(activity_type='S') 
-        if date_range_specified:
-            qs = qs.filter(timestamp__range=(start_date, end_date))
+        if total_confirmed is None:
+            total_confirmed = 0
 
-        qs = qs.values('location_item__location__name') 
-        qs = qs.annotate(cost=Sum('cost')) 
-        qs = qs.order_by('-cost')
+        if total_unconfirmed is None:
+            total_unconfirmed = 0
+
+        inventory_accuracy = 0
+
+        if (total_confirmed + total_unconfirmed) > 0:
+            inventory_accuracy = round(total_confirmed / (total_confirmed + total_unconfirmed) * 100, 2)
+
+
+        # sum up the locationItem_quantities per locationItem_location__name. The resultset should include location name, total_quantity
+        # also include the total cost per location. The total cost is calculated by locationItem_quantity * item_cost_per_unit
+        qs = LocationItem.objects.filter(quantity__gt=0) \
+                                .values('location__name') \
+                                .annotate(total_quantity=Sum('quantity')) \
+                                .annotate(total_cost=Sum(F('item__cost_per_unit') * F('quantity'))) \
+                                .order_by('location__name')
         
-        for item in qs:
-            locations_with_expense.append({
-                'name': item['location_item__location__name'],
-                'cost': item['cost'],
-                'percentage': round((item['cost'] / total_expense) * 100, 2)
-                })
-            
-        # get the user id from locationItemActivity with the following information: total_transactions (this is the count of activities done by this user), total_additions (this is the count of activities of activity_type 'A' done by this user), total_subtractions (this is the count of activities of activity_type 'S' done by this user), total_moves (this is the count of activities of activity_type 'M' done by this user), inventory_expense (this is the sum of cost of activity_type 'S' done by this user)
-        qs = LocationItemActivity.objects.values('user__id') 
-        if date_range_specified:
-            qs = qs.filter(timestamp__range=(start_date, end_date))
-
-        qs = qs.annotate(total_transactions=Count('user__id'),
-                            total_additions=Count('user__id', filter=Q(activity_type='A')),
-                            total_subtractions=Count('user__id', filter=Q(activity_type='S')),
-                            total_moves=Count('user__id', filter=Q(activity_type='M')),
-                            inventory_expense=Sum('cost', filter=Q(activity_type='S'))) 
-        qs = qs.order_by('-total_transactions')
+        location_current_stats = []
         
-        for item in qs:
-            try:
-                user_profile = UserProfile.objects.get(pk=item['user__id'])
-            except UserProfile.DoesNotExist:
-                continue
-            
-            avatar_url = user_profile.avatar.url if user_profile.avatar else None
+        for q in qs:
+            location_current_stats.append({
+                'location': q['location__name'],
+                'total_quantity': q['total_quantity'],
+                'total_cost': q['total_cost'],
+            })
 
-            user_with_stats.append({
-                'id': user_profile.user.id,
-                'first_name': user_profile.user.first_name,
-                'last_name': user_profile.user.last_name,
-                'avatar': avatar_url,
-                'total_transactions': item['total_transactions'],
-                'total_additions': item['total_additions'],
-                'total_subtractions': item['total_subtractions'],
-                'total_moves': item['total_moves'],
-                'inventory_expense': item['inventory_expense']
-                })
-            
-        return Response({'total_inventory_value': total_inventory_value,
-                         'total_items_in_stock': total_items_in_stock,
-                         'total_expense': total_expense,
+            # add percentage to location_current_stats if total_quantity_in_stock is greater than zero
+            if total_quantity_in_stock > 0:
+                location_current_stats[-1]['percentage'] = round(q['total_quantity'] / total_quantity_in_stock * 100, 2)
+
+        # sum up the locationItem_quantities per locationItem__item_area. The resultset should include area name, total_quantity
+        # also include the total cost per area. The total cost is calculated by locationItem_quantity * item_cost_per_unit
+        qs = LocationItem.objects.filter(quantity__gt=0) \
+                                .values('item__area') \
+                                .annotate(total_quantity=Sum('quantity')) \
+                                .annotate(total_cost=Sum(F('item__cost_per_unit') * F('quantity'))) \
+                                .order_by('item__area')
+        
+        # order location_current_stats by percentage. Highest percentage first
+        location_current_stats = sorted(location_current_stats, key=lambda k: k['percentage'], reverse=True)
+        
+        area_current_stats = []
+
+        for q in qs:
+            area_current_stats.append({
+                'area': q['item__area'],
+                'total_quantity': q['total_quantity'],
+                'total_cost': q['total_cost'],
+            })
+
+            # add percentage to area_current_stats if total_quantity_in_stock is greater than zero
+            if total_quantity_in_stock > 0:
+                area_current_stats[-1]['percentage'] = round(q['total_quantity'] / total_quantity_in_stock * 100, 2)
+
+        # order area_current_stats by percentage. Highest percentage first
+        area_current_stats = sorted(area_current_stats, key=lambda k: k['percentage'], reverse=True)
+        
+        # sum up the locationItem_quantities per locationItem__status per locationItem__location_name. The resultset should include location name, total_confirmed, total_unconfirmed
+        # where total_confirmed is the sum of all locationItem_quantities where status = 'C' and total_unconfirmed is the sum of all locationItem_quantities where status = 'U'
+        qs = LocationItem.objects.values('location__name') \
+                                .annotate(total_confirmed=Sum('quantity', filter=Q(status='C'))) \
+                                .annotate(total_unconfirmed=Sum('quantity', filter=Q(status='U'))) \
+                                .order_by('location__name')
+        
+        location_accuracy_stats = []
+
+        for q in qs:
+            confirmed = q['total_confirmed'] if q['total_confirmed'] is not None else 0
+            unconfirmed = q['total_unconfirmed'] if q['total_unconfirmed'] is not None else 0
+
+            location_accuracy_stats.append({
+                'location': q['location__name'],
+                'total_confirmed': confirmed,
+                'total_unconfirmed': unconfirmed,
+            })
+
+            # add percentage to location_accuracy_stats if total_confirmed + total_unconfirmed is greater than zero
+            if (confirmed + unconfirmed) > 0:
+                location_accuracy_stats[-1]['percentage'] = round(confirmed / (confirmed + unconfirmed) * 100, 2)
+
+        # order location_accuracy_stats by percentage. Lowest percentage first
+        location_accuracy_stats = sorted(location_accuracy_stats, key=lambda k: k['percentage'])
+
+        return Response({'total_value_in_stock': total_value_in_stock,
+                         'total_quantity_in_stock': total_quantity_in_stock,
                          'total_out_of_stock': total_out_of_stock,
                          'total_low_stock': total_low_stock,
                          'inventory_accuracy': inventory_accuracy,
-                         'popular_items': popular_items,
-                         'items_with_highest_expense': items_with_highest_expense,
-                         'locations_with_expense': locations_with_expense,
-                         'user_with_stats': user_with_stats
+                         'total_confirmed': total_confirmed,
+                         'total_unconfirmed': total_unconfirmed,
+                         'location_current_stats': location_current_stats,
+                         'area_current_stats': area_current_stats,
+                         'location_accuracy_stats': location_accuracy_stats,
                          }, status=status.HTTP_200_OK)
 
-    
     def can_view_dashboard(self, user):
         if user.is_superuser or user.is_staff or user.groups.filter(name='Account Managers').exists():
             return True

@@ -21,4 +21,4 @@ class LocationItemActivity(models.Model):
     user = models.ForeignKey('auth.User', on_delete=models.PROTECT)
 
     def __str__(self) -> str:
-        return f'{self.item.name} - {self.location.name} - {self.activity_type} - {self.quantity} - {self.activity_date}'
+        return f'{self.location_item}'
