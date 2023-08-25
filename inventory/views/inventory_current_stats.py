@@ -38,8 +38,8 @@ class InventoryCurrentStatsView(APIView):
 
         total_out_of_stock = LocationItem.objects.filter(quantity=0).count()
 
-        total_low_stock = LocationItem.objects.filter(quantity__lte=F('minimum_required'),
-                                                        quantity__gt=0, minimum_required__gt=1).count()
+        # minimum_required is not null, quantity is less than or equal to minimum_required, quantity is greater than zero
+        total_low_stock = LocationItem.objects.filter(minimum_required__isnull=False, quantity__lte=F('minimum_required'), quantity__gt=0, minimum_required__gt=1).count()
         
         # sum up the quantities of all locationItems_quantity where the status = 'C'
         total_confirmed = LocationItem.objects.filter(status='C') \
