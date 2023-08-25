@@ -84,6 +84,9 @@ class InventoryCurrentStatsView(APIView):
             else:
                 location_current_stats[-1]['percentage'] = 0
 
+        # order location_current_stats by percentage. Highest percentage first
+        location_current_stats = sorted(location_current_stats, key=lambda k: k['percentage'], reverse=True)
+
         # sum up the locationItem_quantities per locationItem__item_area. The resultset should include area name, total_quantity
         # also include the total cost per area. The total cost is calculated by locationItem_quantity * item_cost_per_unit
         qs = LocationItem.objects.filter(quantity__gt=0) \
@@ -91,9 +94,6 @@ class InventoryCurrentStatsView(APIView):
                                 .annotate(total_quantity=Sum('quantity')) \
                                 .annotate(total_cost=Sum(F('item__cost_per_unit') * F('quantity'))) \
                                 .order_by('item__area')
-        
-        # order location_current_stats by percentage. Highest percentage first
-        location_current_stats = sorted(location_current_stats, key=lambda k: k['percentage'], reverse=True)
         
         area_current_stats = []
 
@@ -118,7 +118,7 @@ class InventoryCurrentStatsView(APIView):
         qs = LocationItem.objects.values('location__name') \
                                 .annotate(total_confirmed=Sum('quantity', filter=Q(status='C'))) \
                                 .annotate(total_unconfirmed=Sum('quantity', filter=Q(status='U'))) \
-                                .order_by('location__name')
+                                .order_by('location__name')[:5]
         
         location_accuracy_stats = []
 
@@ -126,17 +126,14 @@ class InventoryCurrentStatsView(APIView):
             confirmed = q['total_confirmed'] if q['total_confirmed'] is not None else 0
             unconfirmed = q['total_unconfirmed'] if q['total_unconfirmed'] is not None else 0
 
-            location_accuracy_stats.append({
-                'location': q['location__name'],
-                'total_confirmed': confirmed,
-                'total_unconfirmed': unconfirmed,
-            })
-
-            # add percentage to location_accuracy_stats if total_confirmed + total_unconfirmed is greater than zero
             if (confirmed + unconfirmed) > 0:
+                location_accuracy_stats.append({
+                    'location': q['location__name'],
+                    'total_confirmed': confirmed,
+                    'total_unconfirmed': unconfirmed,
+                })
+
                 location_accuracy_stats[-1]['percentage'] = round(confirmed / (confirmed + unconfirmed) * 100, 2)
-            else:
-                location_accuracy_stats[-1]['percentage'] = 0
         
         # order location_accuracy_stats by percentage. Lowest percentage first
         location_accuracy_stats = sorted(location_accuracy_stats, key=lambda k: k['percentage'])
