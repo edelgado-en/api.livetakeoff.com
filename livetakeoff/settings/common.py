@@ -33,8 +33,11 @@ INSTALLED_APPS = [
     'api',
     'inventory',
     'phonenumber_field',
-    'debug_toolbar'
+    'debug_toolbar',
+    'django_apscheduler'
 ]
+
+SCHEDULER_AUTOSTART = True
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
