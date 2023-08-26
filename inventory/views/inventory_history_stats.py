@@ -184,6 +184,7 @@ class InventoryHistoryStatsView(APIView):
                             .annotate(total_subtractions=Count('id', filter=models.Q(activity_type='S'))) \
                             .annotate(total_moves=Count('id', filter=models.Q(activity_type='M'))) \
                             .annotate(inventory_expense=Sum('cost', filter=models.Q(activity_type='S'))) \
+                            .annotate(total_confirmations=Count('id', filter=models.Q(activity_type='C'))) \
                             .order_by('-total_transactions')
         
         users_with_stats = []
@@ -203,6 +204,7 @@ class InventoryHistoryStatsView(APIView):
                 'total_additions': item['total_additions'],
                 'total_subtractions': item['total_subtractions'],
                 'total_moves': item['total_moves'],
+                'total_confirmations': item['total_confirmations'],
                 'inventory_expense': item['inventory_expense'] if item['inventory_expense'] is not None else 0,
                 })
             
