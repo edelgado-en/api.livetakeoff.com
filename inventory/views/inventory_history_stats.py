@@ -209,7 +209,7 @@ class InventoryHistoryStatsView(APIView):
         return Response({
             'items_with_highest_expense': items_with_highest_expense,
             'popular_items': items_with_highest_transactions,
-            'total_inventory_expense': total_inventory_expense,
+            'total_inventory_expense': total_inventory_expense if total_inventory_expense is not None else 0,
             'locations_with_expense': locations_with_expense,
             'users_with_stats': users_with_stats,
             })
