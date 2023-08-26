@@ -34,7 +34,6 @@ INSTALLED_APPS = [
     'inventory',
     'phonenumber_field',
     'debug_toolbar',
-    'django_apscheduler'
 ]
 
 SCHEDULER_AUTOSTART = True
