@@ -124,6 +124,9 @@ class InventoryHistoryStatsView(APIView):
                 items_with_highest_expense[-1]['percentage'] = round(item['total_cost'] / total_inventory_expense * 100, 2)
             else:
                 items_with_highest_expense[-1]['percentage'] = 0
+
+        # count the total number of locationItemActivities in the time specified
+        total_activities = LocationItemActivity.objects.filter(timestamp__range=(start_date, end_date)).count()
             
         # get the top 10 items with the highest number of transactions. A transaction is an entry in the locationItemActivity table
         #  The result set should include item name and the corresponding number of transactions
@@ -139,6 +142,11 @@ class InventoryHistoryStatsView(APIView):
                 'name': item['location_item__item__name'],
                 'total_transactions': item['total_transactions'],
                 })
+            
+            if total_activities > 0:
+                items_with_highest_transactions[-1]['percentage'] = round(item['total_transactions'] / total_activities * 100, 2)
+            else:
+                items_with_highest_transactions[-1]['percentage'] = 0
             
         # Get all locations with their corresponsing expense. Expense is determined by the summation
         #  of locationItemActivities where the activity_type is 'S'.
@@ -197,13 +205,13 @@ class InventoryHistoryStatsView(APIView):
                 'total_moves': item['total_moves'],
                 'inventory_expense': item['inventory_expense'] if item['inventory_expense'] is not None else 0,
                 })
-        
+            
         return Response({
             'items_with_highest_expense': items_with_highest_expense,
-            'items_with_highest_transactions': items_with_highest_transactions,
+            'popular_items': items_with_highest_transactions,
             'total_inventory_expense': total_inventory_expense,
             'locations_with_expense': locations_with_expense,
-            'users_with_stats': users_with_stats
+            'users_with_stats': users_with_stats,
             })
 
 
