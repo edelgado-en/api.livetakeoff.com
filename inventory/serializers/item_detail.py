@@ -6,9 +6,14 @@ from inventory.serializers.item_provider import ItemProviderSerializer
 
 class ItemDetailSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
-    location_items = LocationItemSerializer(many=True, read_only=True)
+    location_items = serializers.SerializerMethodField()
     tags = ItemTagSerializer(many=True, read_only=True)
     providers = ItemProviderSerializer(many=True, read_only=True)
+
+    def get_location_items(self, obj):
+        location_items = obj.location_items.all().order_by('location__name')
+        serializer = LocationItemSerializer(location_items, many=True)
+        return serializer.data
 
     class Meta:
         model = Item
