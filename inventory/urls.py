@@ -17,7 +17,8 @@ from inventory.views import (
     ItemPhotoView,
     UpdateItemView,
     InventoryCurrentStatsView,
-    InventoryHistoryStatsView
+    InventoryHistoryStatsView,
+    LocationItemsListView
 )
 
 urlpatterns = [
@@ -29,6 +30,7 @@ urlpatterns = [
     path('items/details/<int:id>/', ItemDetailsView.as_view()),
     path('locations/list', LocationsView.as_view()),
     path('location-items/<int:id>/', LocationItemView.as_view()),
+    path('location-items/list', LocationItemsListView.as_view()),
     path('location-users/<int:id>/', LocationUserView.as_view()),
     path('provider', ProviderView.as_view()),
     path('location', LocationView.as_view()),

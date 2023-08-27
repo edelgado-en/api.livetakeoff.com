@@ -17,10 +17,12 @@ SIMPLE_JWT = {
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'livetakeoff',
-        'USER': 'root',
+        'USER': 'postgres',
         'PASSWORD': '',
         'HOST': 'localhost',
     }
 }
+
+ALLOWED_HOSTS = ['10.0.2.2', '127.0.0.1']
