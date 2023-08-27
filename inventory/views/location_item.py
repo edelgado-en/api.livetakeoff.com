@@ -8,7 +8,8 @@ from django.contrib.auth.models import User
 
 from inventory.models import (
     LocationItem,
-    LocationItemActivity
+    LocationItemActivity,
+    LocationItemBrand
 )
 
 from api.email_util import EmailUtil
@@ -224,4 +225,21 @@ class LocationItemView(APIView):
 
         
         return Response({'success': 'Location item updated'}, status=status.HTTP_200_OK)
+    
+
+    def delete(self, request, id):
+        location_item = LocationItem.objects.get(pk=id)
+
+        # delete all the locationItemActivity entries for this location item
+        LocationItemActivity.objects.filter(location_item=location_item).delete()
+
+        # delete all the locationItemBrand entries for this location item
+        LocationItemBrand.objects.filter(location_item=location_item).delete()
+
+        # delete the location item
+        location_item.delete()
+
+        return Response({'success': 'Location item deleted'}, status=status.HTTP_200_OK)
+
+        
     
