@@ -220,6 +220,24 @@ class LocationItemView(APIView):
                                                 moved_to=destination_location_item.location,
                                                 user=request.user)
 
+        elif action == 'update':
+            minimum_required = request.data.get('minimumRequired', None)
+            threshold = request.data.get('threshold', None)
+
+            if minimum_required is not None:
+                if minimum_required == '':
+                    minimum_required = 0
+
+                location_item.minimum_required = minimum_required
+
+            if threshold is not None:
+                if threshold == '':
+                    threshold = 0
+
+                location_item.threshold = threshold
+
+            location_item.save()
+
         else:
             return Response({'error': 'Invalid action'}, status=status.HTTP_400_BAD_REQUEST)
 
