@@ -1,3 +1,4 @@
+apscheduler==3.10.1
 asgiref==3.5.2
 backports.zoneinfo;python_version<"3.9"
 certifi==2022.9.24
@@ -5,6 +6,7 @@ charset-normalizer==2.1.1
 cloudinary==1.30.0
 dj-database-url==1.0.0
 Django==4.1.1
+django-apscheduler==0.6.2
 django-cloudinary-storage==0.3.0
 django-cors-headers==3.13.0
 django-debug-toolbar==3.6.0
