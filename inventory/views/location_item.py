@@ -90,7 +90,7 @@ class LocationItemView(APIView):
                 email_util = EmailUtil()
 
                 for admin in admins:
-                    if admin.email:
+                    if admin.email and admin.profile.inventory_email_notifications:
                         email_util.send_email(admin.email, title, body)
             
             elif is_threshold_met:
@@ -114,7 +114,7 @@ class LocationItemView(APIView):
                 email_util = EmailUtil()
 
                 for admin in admins:
-                    if admin.email:
+                    if admin.email and admin.profile.inventory_email_notifications:
                         email_util.send_email(admin.email, title, body)
 
         elif action == 'move':
@@ -186,7 +186,7 @@ class LocationItemView(APIView):
                 email_util = EmailUtil()
 
                 for admin in admins:
-                    if admin.email:
+                    if admin.email and admin.profile.inventory_email_notifications:
                         email_util.send_email(admin.email, title, body)
             
             elif is_threshold_met:
@@ -210,7 +210,7 @@ class LocationItemView(APIView):
                 email_util = EmailUtil()
 
                 for admin in admins:
-                    if admin.email:
+                    if admin.email and admin.profile.inventory_email_notifications:
                         email_util.send_email(admin.email, title, body)
 
             LocationItemActivity.objects.create(location_item=location_item,

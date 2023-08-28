@@ -9,6 +9,7 @@ class UserProfile(models.Model):
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='user_profiles', null=True, blank=True)
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='user_profiles', null=True, blank=True)
     email_notifications = models.BooleanField(default=False)
+    inventory_email_notifications = models.BooleanField(default=True, help_text='Only applicable to admins and account managers')
     sms_notifications = models.BooleanField(default=False)
     allow_set_as_busy = models.BooleanField(default=False)
     about = models.TextField(blank=True, null=True)
