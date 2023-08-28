@@ -16,3 +16,4 @@ from .update_item import UpdateItemView
 from .inventory_current_stats import InventoryCurrentStatsView
 from .inventory_history_stats import InventoryHistoryStatsView
 from .location_items import LocationItemsListView
+from .location_item_total_quantity import LocationItemTotalQuantityView
