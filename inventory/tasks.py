@@ -25,9 +25,9 @@ def collect_daily_inventory_stats():
 
 
 # run job every day at 11pm
-scheduler.add_job(collect_daily_inventory_stats, 'cron', hour=23, minute=0, second=0)
+#scheduler.add_job(collect_daily_inventory_stats, 'cron', hour=23, minute=0, second=0)
 
 # run job every 20 minutes
-#scheduler.add_job(collect_daily_inventory_stats, 'interval', minutes=10)
+scheduler.add_job(collect_daily_inventory_stats, 'interval', minutes=10)
 
 scheduler.start()
