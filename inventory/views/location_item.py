@@ -146,6 +146,7 @@ class LocationItemView(APIView):
             is_threshold_met = False
 
             threshold = 0
+            total_moving_cost = 0
 
             if location_item.threshold is not None:
                 threshold = location_item.threshold
@@ -213,9 +214,12 @@ class LocationItemView(APIView):
                     if admin.email and admin.profile.inventory_email_notifications:
                         email_util.send_email(admin.email, title, body)
 
+            total_moving_cost = movingQuantity * location_item.item.cost_per_unit
+
             LocationItemActivity.objects.create(location_item=location_item,
                                                 activity_type='M',
                                                 quantity=movingQuantity,
+                                                cost=total_moving_cost,
                                                 moved_from=location_item.location,
                                                 moved_to=destination_location_item.location,
                                                 user=request.user)

@@ -11,3 +11,6 @@ from .item_provider import ItemProvider
 from .group import Group
 from .location_group import LocationGroup
 from .location_item_brand import LocationItemBrand
+from .daily_general_stats import DailyGeneralStats
+from .daily_location_stats import DailyLocationStats
+from .daily_stats_audit import DailyStatsAudit

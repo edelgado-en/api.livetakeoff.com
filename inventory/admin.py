@@ -15,7 +15,10 @@ from inventory.models import (
     ItemProvider,
     Group,
     LocationGroup,
-    LocationItemBrand
+    LocationItemBrand,
+    DailyGeneralStats,
+    DailyLocationStats,
+    DailyStatsAudit
 )
 
 @admin.register(Brand)
@@ -122,3 +125,24 @@ class LocationItemBrandAdmin(admin.ModelAdmin):
     search_fields = ['location_item', 'brand']
 
 
+@admin.register(DailyGeneralStats)
+class DailyGeneralStatsAdmin(admin.ModelAdmin):
+    list_display = ['id', 'date', 'total_items', 'total_quantity', 'total_cost',
+                    'total_moving_items', 'total_moving_quantity', 'total_moving_cost', 'total_additions', 'total_add_cost', 'total_subtractions', 'total_expense']
+    list_per_page = 100
+    ordering = ['date']
+    search_fields = ['date']
+
+
+@admin.register(DailyLocationStats)
+class DailyLocationStatsAdmin(admin.ModelAdmin):
+    list_display = ['id', 'date', 'location', 'total_items', 'total_quantity', 'total_cost',
+                    'total_moving_items', 'total_moving_quantity', 'total_moving_cost', 'total_additions', 'total_add_cost', 'total_subtractions', 'total_expense']
+    list_per_page = 100
+    ordering = ['date']
+    search_fields = ['date']
+
+
+@admin.register(DailyStatsAudit)
+class DailyStatsAuditAdmin(admin.ModelAdmin):
+    list_display = ['id', 'last_updated']
