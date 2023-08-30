@@ -59,7 +59,9 @@ class LocationItemView(APIView):
                     is_threshold_met = True
 
             location_item.quantity = quantity
-            location_item.status = 'U'
+
+            # as per requirements, adjusting the quantity of an item will also confirm the item
+            location_item.status = 'C'
 
             location_item.save()
 
@@ -67,6 +69,13 @@ class LocationItemView(APIView):
                                                 activity_type=activity_type,
                                                 quantity=delta_quantity,
                                                 cost=delta_cost,
+                                                user=request.user)
+            
+
+            # also create an locationItemActivity for activity_type = "C" to confirm the item
+            LocationItemActivity.objects.create(location_item=location_item,
+                                                activity_type='C',
+                                                quantity=quantity,
                                                 user=request.user)
             
             admins = User.objects.filter(Q(is_superuser=True) | Q(is_staff=True) | Q(groups__name='Account Managers'))
