@@ -109,18 +109,36 @@ def collect_daily_inventory_stats():
     if total_expense_today is None:
         total_expense_today = 0
 
-    DailyGeneralStats.objects.create(
-        total_items=total_items,
-        total_quantity=total_quantity_in_stock,
-        total_cost=total_value_in_stock,
-        total_moving_items=total_moving_transactions_today,
-        total_moving_quantity=total_moving_quantity_today,
-        total_moving_cost=total_moving_cost_today,
-        total_additions=total_additions_today,
-        total_add_cost=total_add_cost_today,
-        total_subtractions=total_subtractions_today,
-        total_expense=total_expense_today,
-    )
+    # Fetch DailyGeneralStats for today. Don't create a new entry if there is already one
+    qs = DailyGeneralStats.objects.filter(date=today.date()).first()
+
+    if qs is not None:
+        # update existing entry
+        qs.total_items = total_items
+        qs.total_quantity = total_quantity_in_stock
+        qs.total_cost = total_value_in_stock
+        qs.total_moving_items = total_moving_transactions_today
+        qs.total_moving_quantity = total_moving_quantity_today
+        qs.total_moving_cost = total_moving_cost_today
+        qs.total_additions = total_additions_today
+        qs.total_add_cost = total_add_cost_today
+        qs.total_subtractions = total_subtractions_today
+        qs.total_expense = total_expense_today
+        qs.save()
+
+    else:
+        DailyGeneralStats.objects.create(
+            total_items=total_items,
+            total_quantity=total_quantity_in_stock,
+            total_cost=total_value_in_stock,
+            total_moving_items=total_moving_transactions_today,
+            total_moving_quantity=total_moving_quantity_today,
+            total_moving_cost=total_moving_cost_today,
+            total_additions=total_additions_today,
+            total_add_cost=total_add_cost_today,
+            total_subtractions=total_subtractions_today,
+            total_expense=total_expense_today,
+        )
 
     # get all locations and iterate through each location. Calculate all stats per location and create a DailyLocationStats object
     locations = Location.objects.all()
@@ -199,19 +217,37 @@ def collect_daily_inventory_stats():
         if total_expense_today is None:
             total_expense_today = 0
 
-        DailyLocationStats.objects.create(
-            total_items=total_items,
-            location=location,
-            total_quantity=total_quantity_in_stock,
-            total_cost=total_value_in_stock,
-            total_moving_items=total_moving_transactions_today,
-            total_moving_quantity=total_moving_quantity_today,
-            total_moving_cost=total_moving_cost_today,
-            total_additions=total_additions_today,
-            total_add_cost=total_add_cost_today,
-            total_subtractions=total_subtractions_today,
-            total_expense=total_expense_today,
-        )
+        # Fetch DailyLocationStats for today and this location. Don't create a new entry if there is already one
+        qs = DailyLocationStats.objects.filter(date=today.date(), location=location).first()
+
+        if qs is not None:
+            # update existing entry
+            qs.total_items = total_items
+            qs.total_quantity = total_quantity_in_stock
+            qs.total_cost = total_value_in_stock
+            qs.total_moving_items = total_moving_transactions_today
+            qs.total_moving_quantity = total_moving_quantity_today
+            qs.total_moving_cost = total_moving_cost_today
+            qs.total_additions = total_additions_today
+            qs.total_add_cost = total_add_cost_today
+            qs.total_subtractions = total_subtractions_today
+            qs.total_expense = total_expense_today
+            qs.save()
+
+        else:
+            DailyLocationStats.objects.create(
+                total_items=total_items,
+                location=location,
+                total_quantity=total_quantity_in_stock,
+                total_cost=total_value_in_stock,
+                total_moving_items=total_moving_transactions_today,
+                total_moving_quantity=total_moving_quantity_today,
+                total_moving_cost=total_moving_cost_today,
+                total_additions=total_additions_today,
+                total_add_cost=total_add_cost_today,
+                total_subtractions=total_subtractions_today,
+                total_expense=total_expense_today,
+            )
 
     # update or create DailyStatsAudit with last_updated as today
     DailyStatsAudit.objects.update_or_create(
