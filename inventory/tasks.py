@@ -271,6 +271,16 @@ def deleteRepeatedDailyGeneralStats():
         if daily_general_stats_with_same_date.count() > 1:
             daily_general_stats_with_same_date.exclude(id=dgs.id).delete()
 
+    # Do the same for DailyLocationStats
+    daily_location_stats = DailyLocationStats.objects.all()
+
+    for dls in daily_location_stats:
+        daily_location_stats_with_same_date = DailyLocationStats.objects.filter(date=dls.date,
+                                                                                location=dls.location)
+
+        if daily_location_stats_with_same_date.count() > 1:
+            daily_location_stats_with_same_date.exclude(id=dls.id).delete()
+
     print('JOB COMPLETED: deleteRepeatedDailyGeneralStats')
 
 # run job every day at 8pm
