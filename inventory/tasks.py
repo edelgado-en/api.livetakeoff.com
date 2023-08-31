@@ -257,8 +257,8 @@ def collect_daily_inventory_stats():
     print('JOB COMPLETED: collect_daily_inventory_stats')
 
 
-# run job every day at 11pm
-scheduler.add_job(collect_daily_inventory_stats, 'cron', hour=23, minute=0, second=0)
+# run job every day at 8pm
+scheduler.add_job(collect_daily_inventory_stats, 'cron', hour=20, minute=0, second=0)
 
 # run job every 2 minutes
 #scheduler.add_job(collect_daily_inventory_stats, 'interval', minutes=2)
