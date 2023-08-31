@@ -279,6 +279,8 @@ scheduler.add_job(collect_daily_inventory_stats, 'cron', hour=20, minute=0, seco
 # run job every 2 minutes
 #scheduler.add_job(collect_daily_inventory_stats, 'interval', minutes=2)
 
-scheduler.add_job(deleteRepeatedDailyGeneralStats, 'interval', minutes=5)
+# run job every 6 hours
+scheduler.add_job(deleteRepeatedDailyGeneralStats, 'interval', hours=6)
+
 
 scheduler.start()
