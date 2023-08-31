@@ -256,11 +256,29 @@ def collect_daily_inventory_stats():
 
     print('JOB COMPLETED: collect_daily_inventory_stats')
 
+def deleteRepeatedDailyGeneralStats():
+    print('JOB STARTED: deleteRepeatedDailyGeneralStats')
+
+    # get all DailyGeneralStats
+    daily_general_stats = DailyGeneralStats.objects.all()
+
+    # iterate through each DailyGeneralStats
+    for dgs in daily_general_stats:
+        # get all DailyGeneralStats with the same date
+        daily_general_stats_with_same_date = DailyGeneralStats.objects.filter(date=dgs.date)
+
+        # if there are more than one DailyGeneralStats with the same date, then delete all of them except the first one
+        if daily_general_stats_with_same_date.count() > 1:
+            daily_general_stats_with_same_date.exclude(id=dgs.id).delete()
+
+    print('JOB COMPLETED: deleteRepeatedDailyGeneralStats')
 
 # run job every day at 8pm
 scheduler.add_job(collect_daily_inventory_stats, 'cron', hour=20, minute=0, second=0)
 
 # run job every 2 minutes
 #scheduler.add_job(collect_daily_inventory_stats, 'interval', minutes=2)
+
+scheduler.add_job(deleteRepeatedDailyGeneralStats, 'interval', minutes=5)
 
 scheduler.start()
