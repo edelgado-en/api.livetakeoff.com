@@ -20,7 +20,9 @@ from inventory.views import (
     InventoryHistoryStatsView,
     LocationItemsListView,
     LocationItemTotalQuantityView,
-    DailyGeneralStatsListView
+    DailyGeneralStatsListView,
+    GeneralStatsListView,
+    LocationsStatsView
 )
 
 urlpatterns = [
@@ -35,6 +37,7 @@ urlpatterns = [
     path('location-items/list', LocationItemsListView.as_view()),
     path('location-items/total-quantity', LocationItemTotalQuantityView.as_view()),
     path('location-users/<int:id>/', LocationUserView.as_view()),
+    path('locations/stats', LocationsStatsView.as_view()),
     path('provider', ProviderView.as_view()),
     path('location', LocationView.as_view()),
     path('tag', TagView.as_view()),
@@ -44,4 +47,5 @@ urlpatterns = [
     path('stats', InventoryCurrentStatsView.as_view()),
     path('history-stats', InventoryHistoryStatsView.as_view()),
     path('daily-general-stats', DailyGeneralStatsListView.as_view()),
+    path('general-stats', GeneralStatsListView.as_view()),
 ]

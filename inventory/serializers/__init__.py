@@ -9,3 +9,4 @@ from .brand import BrandSerializer
 from .basic_item import BasicItemSerializer
 from .location_item_detail import LocationItemDetailSerializer
 from .daily_general_stats import DailyGeneralStatsSerializer
+from .general_stats import GeneralStatsSerializer
