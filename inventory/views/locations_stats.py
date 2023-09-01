@@ -21,7 +21,7 @@ class LocationsStatsView(APIView):
             # The result set should look like this: [{'name': 'location name', 'quantity_out_of_stock': 5}, {'name': 'location name', 'quantity_out_of_stock': 3}]
             qs = LocationItem.objects \
                             .filter(quantity=0) \
-                            .values('location__name') \
+                            .values('location__name', 'location__id') \
                             .annotate(count=Count('location__name')) \
                             .order_by('-count')
         
@@ -33,7 +33,7 @@ class LocationsStatsView(APIView):
             # The result set should look like this: [{'name': 'location name', 'quantity_out_of_stock': 5}, {'name': 'location name', 'quantity_out_of_stock': 3}]
             qs = LocationItem.objects \
                             .filter(minimum_required__isnull=False, quantity__lte=F('minimum_required'), quantity__gt=0, minimum_required__gt=1) \
-                            .values('location__name') \
+                            .values('location__name', 'location__id') \
                             .annotate(count=Count('location__name')) \
                             .order_by('-count')
             
@@ -42,7 +42,7 @@ class LocationsStatsView(APIView):
         # the result set should look like this: [{'name': 'location name', 'count': 5}, {'name': 'location name', 'count': 3}]
         result = []
         for item in qs:
-            result.append({'name': item['location__name'], 'count': item['count']})
+            result.append({'id': item['location__id'], 'name': item['location__name'], 'count': item['count']})
         
         return Response(result, status=status.HTTP_200_OK)
             
