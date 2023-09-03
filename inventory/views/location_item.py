@@ -29,6 +29,7 @@ class LocationItemView(APIView):
 
             LocationItemActivity.objects.create(location_item=location_item,
                                                 activity_type='C',
+                                                cost=location_item.quantity * location_item.item.cost_per_unit,
                                                 quantity=location_item.quantity,
                                                 user=request.user)
 
@@ -76,6 +77,7 @@ class LocationItemView(APIView):
             LocationItemActivity.objects.create(location_item=location_item,
                                                 activity_type='C',
                                                 quantity=quantity,
+                                                cost=quantity * location_item.item.cost_per_unit,
                                                 user=request.user)
             
             admins = User.objects.filter(Q(is_superuser=True) | Q(is_staff=True) | Q(groups__name='Account Managers'))
