@@ -23,8 +23,7 @@ class LocationItemActivityListView(ListAPIView):
         item_id = self.request.data.get('item_id', None)
         user_id = self.request.data.get('user_id', None)
         item_name = self.request.data.get('item_name', '')
-        activity_type = self.request.data.get('action_type', None)
-
+        activity_type = self.request.data.get('activity_type', None)
         dateSelected = self.request.data.get('dateSelected', None)
 
         # get start date and end date based on the dateSelected value provided
