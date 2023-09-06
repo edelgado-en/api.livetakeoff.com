@@ -89,8 +89,8 @@ class LocationItemAdmin(admin.ModelAdmin):
 class LocationItemActivityAdmin(admin.ModelAdmin):
     list_display = ['id', 'timestamp', 'location_item', 'activity_type', 'quantity', 'cost', 'moved_from', 'moved_to', 'user']
     list_per_page = 100
-    ordering = ['location_item', 'activity_type']
-    search_fields = ['location_item', 'activity_type']
+    ordering = ['timestamp', 'activity_type']
+    search_fields = ['location_item__item__name']
 
 
 @admin.register(Item)
