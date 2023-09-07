@@ -118,7 +118,7 @@ class InventoryCurrentStatsView(APIView):
         qs = LocationItem.objects.values('location__name') \
                                 .annotate(total_confirmed=Sum('quantity', filter=Q(status='C'))) \
                                 .annotate(total_unconfirmed=Sum('quantity', filter=Q(status='U'))) \
-                                .order_by('location__name')[:5]
+                                .order_by('location__name')
         
         location_accuracy_stats = []
 
@@ -137,6 +137,9 @@ class InventoryCurrentStatsView(APIView):
         
         # order location_accuracy_stats by percentage. Lowest percentage first
         location_accuracy_stats = sorted(location_accuracy_stats, key=lambda k: k['percentage'])
+
+        # only get the top 5 location_accuracy_stats
+        location_accuracy_stats = location_accuracy_stats[:5]
 
         return Response({'total_value_in_stock': total_value_in_stock,
                          'total_quantity_in_stock': total_quantity_in_stock,
