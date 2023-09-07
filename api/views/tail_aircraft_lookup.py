@@ -14,11 +14,15 @@ class TailAircraftLookupView(APIView):
 
     def get(self, request, tailnumber):
         
+        # the lookup needs to be case insensitive
         try:
             lookup = TailAircraftLookup.objects \
                                        .select_related('aircraft_type') \
                                        .select_related('customer') \
-                                       .get(tail_number=tailnumber)
+                                       .filter(tail_number__iexact=tailnumber).first()
+            
+            if lookup is None:
+                return Response(None)
 
             aircraft_type = lookup.aircraft_type
 
@@ -27,7 +31,7 @@ class TailAircraftLookupView(APIView):
             try:
                 lookup_services = TailServiceLookup.objects \
                                         .select_related('service') \
-                                        .filter(tail_number=tailnumber) \
+                                        .filter(tail_number__iexact=tailnumber) \
                                         .order_by('service__id')
             
                 for service in lookup_services:
@@ -44,7 +48,7 @@ class TailAircraftLookupView(APIView):
             try:
                 lookup_retainer_services = TailRetainerServiceLookup.objects \
                                         .select_related('retainer_service') \
-                                        .filter(tail_number=tailnumber) \
+                                        .filter(tail_number__iexact=tailnumber) \
                                         .order_by('retainer_service__id')
             
                 for service in lookup_retainer_services:

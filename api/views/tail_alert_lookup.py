@@ -15,7 +15,7 @@ class TailAlertLookupView(APIView):
     def get(self, request, tailnumber):
         # only return 200 to avoid showing a 404 to the user
         try:
-            tailAlert = TailAlert.objects.filter(tailNumber=tailnumber).first()
+            tailAlert = TailAlert.objects.filter(tailNumber__iexact=tailnumber).first()
             if tailAlert:
                 serializer = TailAlertSerializer(tailAlert)
                 return Response(serializer.data, status=status.HTTP_200_OK)
