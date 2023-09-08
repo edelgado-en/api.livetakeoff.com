@@ -36,7 +36,7 @@ class InventoryCurrentStatsView(APIView):
         if total_quantity_in_stock is None:
             total_quantity_in_stock = 0
 
-        total_out_of_stock = LocationItem.objects.filter(quantity=0).count()
+        total_out_of_stock = LocationItem.objects.filter(quantity=0, on_hold=False).count()
 
         # minimum_required is not null, quantity is less than or equal to minimum_required, quantity is greater than zero
         total_low_stock = LocationItem.objects.filter(minimum_required__isnull=False, quantity__lte=F('minimum_required'), quantity__gt=0, minimum_required__gt=1).count()

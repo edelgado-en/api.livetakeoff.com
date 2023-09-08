@@ -20,7 +20,7 @@ class LocationsStatsView(APIView):
             # the result set must be sorted by highest number of out of stock items
             # The result set should look like this: [{'name': 'location name', 'quantity_out_of_stock': 5}, {'name': 'location name', 'quantity_out_of_stock': 3}]
             qs = LocationItem.objects \
-                            .filter(quantity=0) \
+                            .filter(quantity=0, on_hold=False) \
                             .values('location__name', 'location__id') \
                             .annotate(count=Count('location__name')) \
                             .order_by('-count')
