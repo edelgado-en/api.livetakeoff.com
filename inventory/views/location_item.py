@@ -63,6 +63,7 @@ class LocationItemView(APIView):
 
             # as per requirements, adjusting the quantity of an item will also confirm the item
             location_item.status = 'C'
+            location_item.on_hold = False
 
             location_item.save()
 
@@ -238,6 +239,7 @@ class LocationItemView(APIView):
         elif action == 'update':
             minimum_required = request.data.get('minimumRequired', None)
             threshold = request.data.get('threshold', None)
+            toggle_on_hold = request.data.get('toggleOnHold', None)
 
             if minimum_required is not None:
                 if minimum_required == '':
@@ -250,6 +252,9 @@ class LocationItemView(APIView):
                     threshold = 0
 
                 location_item.threshold = threshold
+
+            if toggle_on_hold is not None:
+                location_item.on_hold = not location_item.on_hold
 
             location_item.save()
 

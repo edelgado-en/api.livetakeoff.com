@@ -14,5 +14,5 @@ class LocationItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = LocationItem
         fields = ('id', 'location', 'item', 'quantity',
-                  'minimum_required', 'threshold',
+                  'minimum_required', 'threshold', 'on_hold',
                   'status', 'location_item_brands')
