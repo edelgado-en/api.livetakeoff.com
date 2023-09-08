@@ -25,6 +25,7 @@ class LocationItemsListView(ListAPIView):
         threshold_met = self.request.data.get('thresholdMet', False)
         minimum_required_met = self.request.data.get('minimumRequiredMet', None)
         out_of_stock_met = self.request.data.get('outOfStockMet', None)
+        on_hold = self.request.data.get('onHold', None)
 
         # search by item name contains
         qs = LocationItem.objects \
@@ -55,6 +56,9 @@ class LocationItemsListView(ListAPIView):
         
         if area_id:
             qs = qs.filter(item__area=area_id)
+
+        if on_hold:
+            qs = qs.filter(on_hold=on_hold)
 
         return qs
 
