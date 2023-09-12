@@ -5,6 +5,8 @@ from rest_framework.views import APIView
 
 from ..models import (UserProfile, CustomerSettings)
 
+from inventory.models import LocationUser
+
 class UserView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
@@ -100,7 +102,14 @@ class UserView(APIView):
         if user_profile.phone_number:
             phone_number = user_profile.phone_number.as_e164
 
-
+        #showInventory should be true if the user has at leat one entry in LocationUser or if the user isAdmin, isSuperUser or isAccountManager
+        showInventory = False
+        if user.is_superuser or user.is_staff or user.groups.filter(name='Account Managers').exists():
+            showInventory = True
+        else:
+            if LocationUser.objects.filter(user=user).exists():
+                showInventory = True
+        
         content = {
             "initials": first_name[0] + last_name[0],
             "about": user_profile.about,
@@ -128,7 +137,8 @@ class UserView(APIView):
             'showSpendingInfo': showSpendingInfo,
             'enableEstimates': user_profile.enable_estimates,
             'enableInvoices': user_profile.enable_invoice,
-            'promptRequestedBy': user_profile.prompt_requested_by
+            'promptRequestedBy': user_profile.prompt_requested_by,
+            'showInventory': showInventory,
         }
 
         return Response(content)
