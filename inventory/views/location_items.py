@@ -49,7 +49,7 @@ class LocationItemsListView(ListAPIView):
                 qs = qs.filter(location_id=location_id, quantity__lte=F('minimum_required'), quantity__gt=0)
 
             if out_of_stock_met:
-                qs = qs.filter(location_id=location_id, quantity=0)
+                qs = qs.filter(location_id=location_id, quantity=0, on_hold=False)
 
         if measure_by_id:
             qs = qs.filter(item__measure_by=measure_by_id)
