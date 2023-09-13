@@ -31,7 +31,7 @@ class BrandAdmin(admin.ModelAdmin):
 
 @admin.register(Location)
 class LocationAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'description', 'active']
+    list_display = ['id', 'name', 'description', 'active', 'enable_notifications']
     list_per_page = 100
     ordering = ['name', 'active']
     search_fields = ['name', 'active']

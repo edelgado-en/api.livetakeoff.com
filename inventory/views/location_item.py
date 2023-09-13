@@ -83,51 +83,54 @@ class LocationItemView(APIView):
             
             admins = User.objects.filter(Q(is_superuser=True) | Q(is_staff=True) | Q(groups__name='Account Managers'))
 
-            if is_out_of_stock:
-                title = f'OUT OF STOCK {location_item.item.name} at {location_item.location.name}'
+            enable_notifications = location_item.location.enable_notifications
 
-                body = f'''
-                <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">OUT OF STOCK Item Notification</div>
+            if enable_notifications:
+                if is_out_of_stock:
+                    title = f'OUT OF STOCK {location_item.item.name} at {location_item.location.name}'
+
+                    body = f'''
+                    <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">OUT OF STOCK Item Notification</div>
+                    
+                    <div>
+                        <div style="padding:5px;font-weight: 700;">Item</div>
+                        <div style="padding:5px">{location_item.item.name}</div>
+                        <div style="padding:5px;font-weight: 700;">Location</div>
+                        <div style="padding:5px">{location_item.location.name}</div>
+                        <div style="padding:5px;font-weight: 700;">Quantity</div>
+                        <div style="padding:5px">OUT OF STOCK</div>
+                    </div>
+                    '''
+
+                    email_util = EmailUtil()
+
+                    for admin in admins:
+                        if admin.email and admin.profile.inventory_email_notifications:
+                            email_util.send_email(admin.email, title, body)
                 
-                <div>
-                    <div style="padding:5px;font-weight: 700;">Item</div>
-                    <div style="padding:5px">{location_item.item.name}</div>
-                    <div style="padding:5px;font-weight: 700;">Location</div>
-                    <div style="padding:5px">{location_item.location.name}</div>
-                    <div style="padding:5px;font-weight: 700;">Quantity</div>
-                    <div style="padding:5px">OUT OF STOCK</div>
-                </div>
-                '''
+                elif is_threshold_met:
+                    title = f'THRESHOLD MET {location_item.item.name} at {location_item.location.name}'
 
-                email_util = EmailUtil()
+                    body = f'''
+                    <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">THRESHOLD Item Notification</div>
+                    
+                    <div>
+                        <div style="padding:5px;font-weight: 700;">Item</div>
+                        <div style="padding:5px">{location_item.item.name}</div>
+                        <div style="padding:5px;font-weight: 700;">Location</div>
+                        <div style="padding:5px">{location_item.location.name}</div>
+                        <div style="padding:5px;font-weight: 700;">Quantity</div>
+                        <div style="padding:5px">{location_item.quantity}</div>
+                        <div style="padding:5px;font-weight: 700;">Threshold</div>
+                        <div style="padding:5px">{location_item.threshold}</div>
+                    </div>
+                    '''
 
-                for admin in admins:
-                    if admin.email and admin.profile.inventory_email_notifications:
-                        email_util.send_email(admin.email, title, body)
-            
-            elif is_threshold_met:
-                title = f'THRESHOLD MET {location_item.item.name} at {location_item.location.name}'
+                    email_util = EmailUtil()
 
-                body = f'''
-                <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">THRESHOLD Item Notification</div>
-                
-                <div>
-                    <div style="padding:5px;font-weight: 700;">Item</div>
-                    <div style="padding:5px">{location_item.item.name}</div>
-                    <div style="padding:5px;font-weight: 700;">Location</div>
-                    <div style="padding:5px">{location_item.location.name}</div>
-                    <div style="padding:5px;font-weight: 700;">Quantity</div>
-                    <div style="padding:5px">{location_item.quantity}</div>
-                    <div style="padding:5px;font-weight: 700;">Threshold</div>
-                    <div style="padding:5px">{location_item.threshold}</div>
-                </div>
-                '''
-
-                email_util = EmailUtil()
-
-                for admin in admins:
-                    if admin.email and admin.profile.inventory_email_notifications:
-                        email_util.send_email(admin.email, title, body)
+                    for admin in admins:
+                        if admin.email and admin.profile.inventory_email_notifications:
+                            email_util.send_email(admin.email, title, body)
 
         elif action == 'move':
             # this is the location id you use to find the corresponding location item entry to increase the quantity with movingQuantity
@@ -180,51 +183,54 @@ class LocationItemView(APIView):
 
             admins = User.objects.filter(Q(is_superuser=True) | Q(is_staff=True) | Q(groups__name='Account Managers'))
 
-            if is_out_of_stock:
-                title = f'OUT OF STOCK {location_item.item.name} at {location_item.location.name}'
-
-                body = f'''
-                <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">OUT OF STOCK Item Notification</div>
-                
-                <div>
-                    <div style="padding:5px;font-weight: 700;">Item</div>
-                    <div style="padding:5px">{location_item.item.name}</div>
-                    <div style="padding:5px;font-weight: 700;">Location</div>
-                    <div style="padding:5px">{location_item.location.name}</div>
-                    <div style="padding:5px;font-weight: 700;">Quantity</div>
-                    <div style="padding:5px">OUT OF STOCK</div>
-                </div>
-                '''
-
-                email_util = EmailUtil()
-
-                for admin in admins:
-                    if admin.email and admin.profile.inventory_email_notifications:
-                        email_util.send_email(admin.email, title, body)
+            enable_notifications = location_item.location.enable_notifications
             
-            elif is_threshold_met:
-                title = f'THRESHOLD MET {location_item.item.name} at {location_item.location.name}'
+            if enable_notifications:
+                if is_out_of_stock:
+                    title = f'OUT OF STOCK {location_item.item.name} at {location_item.location.name}'
 
-                body = f'''
-                <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">THRESHOLD Item Notification</div>
+                    body = f'''
+                    <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">OUT OF STOCK Item Notification</div>
+                    
+                    <div>
+                        <div style="padding:5px;font-weight: 700;">Item</div>
+                        <div style="padding:5px">{location_item.item.name}</div>
+                        <div style="padding:5px;font-weight: 700;">Location</div>
+                        <div style="padding:5px">{location_item.location.name}</div>
+                        <div style="padding:5px;font-weight: 700;">Quantity</div>
+                        <div style="padding:5px">OUT OF STOCK</div>
+                    </div>
+                    '''
+
+                    email_util = EmailUtil()
+
+                    for admin in admins:
+                        if admin.email and admin.profile.inventory_email_notifications:
+                            email_util.send_email(admin.email, title, body)
                 
-                <div>
-                    <div style="padding:5px;font-weight: 700;">Item</div>
-                    <div style="padding:5px">{location_item.item.name}</div>
-                    <div style="padding:5px;font-weight: 700;">Location</div>
-                    <div style="padding:5px">{location_item.location.name}</div>
-                    <div style="padding:5px;font-weight: 700;">Quantity</div>
-                    <div style="padding:5px">{location_item.quantity}</div>
-                    <div style="padding:5px;font-weight: 700;">Threshold</div>
-                    <div style="padding:5px">{location_item.threshold}</div>
-                </div>
-                '''
+                elif is_threshold_met:
+                    title = f'THRESHOLD MET {location_item.item.name} at {location_item.location.name}'
 
-                email_util = EmailUtil()
+                    body = f'''
+                    <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">THRESHOLD Item Notification</div>
+                    
+                    <div>
+                        <div style="padding:5px;font-weight: 700;">Item</div>
+                        <div style="padding:5px">{location_item.item.name}</div>
+                        <div style="padding:5px;font-weight: 700;">Location</div>
+                        <div style="padding:5px">{location_item.location.name}</div>
+                        <div style="padding:5px;font-weight: 700;">Quantity</div>
+                        <div style="padding:5px">{location_item.quantity}</div>
+                        <div style="padding:5px;font-weight: 700;">Threshold</div>
+                        <div style="padding:5px">{location_item.threshold}</div>
+                    </div>
+                    '''
 
-                for admin in admins:
-                    if admin.email and admin.profile.inventory_email_notifications:
-                        email_util.send_email(admin.email, title, body)
+                    email_util = EmailUtil()
+
+                    for admin in admins:
+                        if admin.email and admin.profile.inventory_email_notifications:
+                            email_util.send_email(admin.email, title, body)
 
             total_moving_cost = movingQuantity * location_item.item.cost_per_unit
 

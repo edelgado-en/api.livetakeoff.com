@@ -24,3 +24,14 @@ class LocationView(APIView):
         location = Location.objects.create(name=name, description=description)
 
         return Response({'id': location.id, 'name': location.name}, status=status.HTTP_200_OK)
+    
+    def patch(self, request):
+        location_id = request.data.get('location_id', None)
+        toggleEnableNotifications = request.data.get('toggleEnableNotifications', None)
+
+        if toggleEnableNotifications:
+            location = get_object_or_404(Location, pk=location_id)
+            location.enable_notifications = not location.enable_notifications
+            location.save()
+
+            return Response({'id': location.id, 'enable_notifications': location.enable_notifications}, status=status.HTTP_200_OK)
