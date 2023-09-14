@@ -12,10 +12,14 @@ class FboSearchView(ListAPIView):
 
     def get_queryset(self):
         name = self.request.data.get('name', '')
+        airport_id = self.request.data.get('airport_id', None)
 
         qs = FBO.objects \
                        .filter(name__icontains=name, active=True) \
                        .order_by('name')
+        
+        if airport_id:
+            qs = qs.filter(available_airports__airport_id=airport_id).distinct()
 
         return qs
 
