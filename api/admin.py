@@ -34,7 +34,8 @@ from api.models import (
     JobRetainerServiceAssignment,
     Tag,
     JobEstimate,
-    JobServiceEstimate
+    JobServiceEstimate,
+    ServiceActivity
 )
 
 class UserProfileInline(admin.StackedInline):
@@ -82,6 +83,13 @@ class RetainerServiceAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         # Disable delete because when you want to stop using a service, just set it to inactive
         return False
+    
+@admin.register(ServiceActivity)
+class ServiceActivityAdmin(admin.ModelAdmin):
+    list_display = ['id', 'status', 'timestamp', 'job', 'service', 'price']
+    list_per_page = 100
+    ordering = ['timestamp']
+
 
 @admin.register(ChecklistAction)
 class ChecklistActionAdmin(admin.ModelAdmin):
