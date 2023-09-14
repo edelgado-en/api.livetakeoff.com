@@ -63,3 +63,6 @@ from .create_tail_alert import CreateTailAlertView
 from .tail_alert_lookup import TailAlertLookupView
 from .tags import TagListView
 from .job_return import JobReturnView
+from .fbo_search import FboSearchView
+from .airport_detail import AirportDetailView
+from .airport_available_fbos import AirportAvailableFbosView

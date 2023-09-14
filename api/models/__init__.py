@@ -41,3 +41,4 @@ from .user_available_airport import UserAvailableAirport
 from .tag import Tag
 from .job_tag import JobTag
 from .tail_alert import TailAlert
+from .airport_available_fbo import AirportAvailableFbo

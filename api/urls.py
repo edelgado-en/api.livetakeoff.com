@@ -63,6 +63,9 @@ from .views import (
         TailAlertLookupView,
         TagListView,
         JobReturnView,
+        FboSearchView,
+        AirportDetailView,
+        AirportAvailableFbosView
     )
 
 urlpatterns = [
@@ -90,12 +93,14 @@ urlpatterns = [
     path('services', ServicesView.as_view()),
     path('retainer-services', RetainerServicesView.as_view()),
     path('airports', AirportsView.as_view()),
+    path('airports/<int:id>/', AirportDetailView.as_view()),
     path('aircraft-types', AircraftTypesView.as_view()),
 
     path('tail-aircraft-lookup/<str:tailnumber>/', TailAircraftLookupView.as_view()),
     path('tail-alert-lookup/<str:tailnumber>/', TailAlertLookupView.as_view()),
 
     path('fbos', FBOsView.as_view()),
+    path('fbo-search', FboSearchView.as_view()),
     path('pricing-plans', PricePlansView.as_view()),
     path('pricing-plans/<int:id>/', PricePlansView.as_view()),
     path('price-listing/<int:id>/', PriceListingView.as_view()),
@@ -118,6 +123,9 @@ urlpatterns = [
     path('users/available-airports', UserAvailableAirportsView.as_view()),
     path('users/available-airports/<int:id>/', UserAvailableAirportsView.as_view()),
     
+    path('airports/available-fbos', AirportAvailableFbosView.as_view()),
+    path('airports/available-fbos/<int:id>/', AirportAvailableFbosView.as_view()),
+
     path('shared/jobs/<str:encoded_id>/', SharedJobDetailView.as_view()),
     path('shared/contact', ContactView.as_view()),
     path('shared/estimates/<str:encoded_id>/', SharedJobEstimateDetailView.as_view()),
