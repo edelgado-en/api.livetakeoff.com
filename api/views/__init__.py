@@ -66,3 +66,5 @@ from .job_return import JobReturnView
 from .fbo_search import FboSearchView
 from .airport_detail import AirportDetailView
 from .airport_available_fbos import AirportAvailableFbosView
+from .service_report import ServiceReportView
+from .service_activities import ServiceActivityListView

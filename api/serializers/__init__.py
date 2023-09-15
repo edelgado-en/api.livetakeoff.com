@@ -34,3 +34,4 @@ from .users import UsersSerializer
 from .job_tag import JobTagSerializer
 from .tail_alert import TailAlertSerializer
 from .tag import TagSerializer
+from .service_activity import ServiceActivitySerializer
