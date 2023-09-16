@@ -11,6 +11,7 @@ from api.serializers import (
 from ..pagination import CustomPageNumberPagination
 from api.models import (
         ServiceActivity,
+        UserProfile
     )
 
 class ServiceActivityListView(ListAPIView):
@@ -29,6 +30,9 @@ class ServiceActivityListView(ListAPIView):
         sort_by_timestamp_desc = self.request.data.get('sort_by_timestamp_desc', None)
 
         dateSelected = self.request.data.get('dateSelected')
+
+        user_profile = UserProfile.objects.get(user=self.request.user)
+        is_customer = user_profile and user_profile.customer is not None
 
         # get start date and end date based on the dateSelected value provided
         if dateSelected == 'yesterday':
@@ -114,6 +118,9 @@ class ServiceActivityListView(ListAPIView):
 
         if tail_number:
             qs = qs.filter(job__tailNumber__icontains=tail_number)
+
+        if is_customer:
+            qs = qs.filter(job__customer=user_profile.customer)
 
         if sort_by_price_asc:
             qs = qs.order_by('price')

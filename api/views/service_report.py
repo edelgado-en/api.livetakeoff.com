@@ -9,6 +9,7 @@ from datetime import (date, datetime, timedelta)
 
 from api.models import (
     ServiceActivity,
+    UserProfile
 )
 
 class ServiceReportView(APIView):
@@ -21,6 +22,9 @@ class ServiceReportView(APIView):
         tail_number = self.request.data.get('tail_number', None)
 
         dateSelected = request.data.get('dateSelected')
+
+        user_profile = UserProfile.objects.get(user=request.user)
+        is_customer = user_profile and user_profile.customer is not None
 
         # get start date and end date based on the dateSelected value provided
         if dateSelected == 'yesterday':
@@ -106,6 +110,9 @@ class ServiceReportView(APIView):
 
         if tail_number:
             qs = qs.filter(job__tailNumber__icontains=tail_number)
+
+        if is_customer:
+            qs = qs.filter(job__customer_id=user_profile.customer.id)
 
         # number of services
         number_of_services_completed = qs.count()
