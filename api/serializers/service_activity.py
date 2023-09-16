@@ -10,6 +10,7 @@ class ServiceActivitySerializer(serializers.ModelSerializer):
     airport_name = serializers.SerializerMethodField()
     fbo_name = serializers.SerializerMethodField()
     customer_name = serializers.SerializerMethodField()
+    job_id = serializers.SerializerMethodField()
 
     def get_service_name(self, obj):
         return obj.service.name
@@ -29,6 +30,9 @@ class ServiceActivitySerializer(serializers.ModelSerializer):
     def get_customer_name(self, obj):
         return obj.job.customer.name
 
+    def get_job_id(self, obj):
+        return obj.job.id
+
     class Meta:
         model = ServiceActivity
-        fields = ['id', 'timestamp' , 'purchase_order', 'service_name', 'price', 'tail_number', 'airport_name', 'fbo_name', 'customer_name']
+        fields = ['id', 'timestamp' , 'purchase_order', 'service_name', 'price', 'tail_number', 'airport_name', 'fbo_name', 'customer_name', 'job_id']

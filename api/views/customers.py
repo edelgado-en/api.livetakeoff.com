@@ -4,7 +4,7 @@ from rest_framework .response import Response
 from ..serializers import (CustomerSerializer)
 from rest_framework.generics import ListAPIView
 from ..pagination import CustomPageNumberPagination
-from ..models import (Customer)
+from ..models import (Customer, UserProfile)
 
 
 class CustomersView(ListAPIView):
@@ -17,6 +17,13 @@ class CustomersView(ListAPIView):
         name = self.request.data['name']
         open_jobs = self.request.data.get('open_jobs', False)
         closed_jobs = self.request.data.get('closed_jobs', False)
+
+        user_profile = UserProfile.objects.get(user=self.request.user)
+        is_customer = user_profile and user_profile.customer is not None
+
+        if is_customer:
+            # return empty queryset if user is customer
+            return Customer.objects.none()
 
         qs = Customer.objects \
                        .filter(name__icontains=name, active=True) \
