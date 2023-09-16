@@ -9,7 +9,8 @@ from datetime import (date, datetime, timedelta)
 
 from api.models import (
     ServiceActivity,
-    UserProfile
+    UserProfile,
+    JobStatusActivity
 )
 
 class ServiceReportView(APIView):
@@ -118,7 +119,7 @@ class ServiceReportView(APIView):
         number_of_services_completed = qs.count()
 
         # Price summation
-        total_price = qs.aggregate(total_price=Sum('price'))['total_price']
+        #total_price = qs.aggregate(total_price=Sum('price'))['total_price']
 
         # number of unique tailNumbers
         number_of_unique_tail_numbers = qs.values('job__tailNumber').distinct().count()
@@ -126,11 +127,39 @@ class ServiceReportView(APIView):
         # Number of unique locations
         number_of_unique_locations = qs.values('job__airport__name').distinct().count()
 
+        # Sum the total price from JobStatusActivity where the status = 'I' 
+        qs = JobStatusActivity.objects.filter(
+             Q(status__in=['I']) &
+             Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date)
+        )
+
+        if airport_id:
+            qs = qs.filter(job__airport_id=airport_id)
+        
+        if fbo_id:
+            qs = qs.filter(job__fbo_id=fbo_id)
+        
+        if tail_number:
+            qs = qs.filter(job__tailNumber__icontains=tail_number)
+
+        if service_id:
+            # only include the jobs where the service_id is present in job_service_assignments
+            qs = qs.filter(job__job_service_assignments__service_id=service_id)
+
+        if is_customer:
+            qs = qs.filter(job__customer_id=user_profile.customer.id)
+
+        total_jobs_revenue = qs.aggregate(Sum('job__price'))['job__price__sum']
+
+        if total_jobs_revenue is None:
+            total_jobs_revenue = 0
+
         return Response({
             'number_of_services_completed': number_of_services_completed,
-            'total_price': total_price,
+            #'total_price': total_price,
             'number_of_unique_tail_numbers': number_of_unique_tail_numbers,
             'number_of_unique_locations': number_of_unique_locations,
+            'total_jobs_revenue': total_jobs_revenue
             }
             , status=status.HTTP_200_OK)
                                 
