@@ -24,6 +24,9 @@ class ServiceActivityListView(ListAPIView):
         airport_id = self.request.data.get('airport_id', None)
         fbo_id = self.request.data.get('fbo_id', None)
         tail_number = self.request.data.get('tail_number', None)
+        customer_id = self.request.data.get('customer_id', None)
+
+
         sort_by_price_asc = self.request.data.get('sort_by_price_asc', None)
         sort_by_price_desc = self.request.data.get('sort_by_price_desc', None)
         sort_by_timestamp_asc = self.request.data.get('sort_by_timestamp_asc', None)
@@ -121,6 +124,9 @@ class ServiceActivityListView(ListAPIView):
 
         if is_customer:
             qs = qs.filter(job__customer=user_profile.customer)
+
+        if customer_id:
+            qs = qs.filter(job__customer_id=customer_id)
 
         if sort_by_price_asc:
             qs = qs.order_by('price')

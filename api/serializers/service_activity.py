@@ -19,7 +19,7 @@ class ServiceActivitySerializer(serializers.ModelSerializer):
         return obj.job.tailNumber
 
     def get_airport_name(self, obj):
-        return obj.job.airport.name
+        return obj.job.airport.initials
 
     def get_fbo_name(self, obj):
         return obj.job.fbo.name

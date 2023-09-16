@@ -21,6 +21,7 @@ class ServiceReportView(APIView):
         airport_id = self.request.data.get('airport_id', None)
         fbo_id = self.request.data.get('fbo_id', None)
         tail_number = self.request.data.get('tail_number', None)
+        customer_id = self.request.data.get('customer_id', None)
 
         dateSelected = request.data.get('dateSelected')
 
@@ -115,6 +116,9 @@ class ServiceReportView(APIView):
         if is_customer:
             qs = qs.filter(job__customer_id=user_profile.customer.id)
 
+        if customer_id:
+            qs = qs.filter(job__customer_id=customer_id)
+
         # number of services
         number_of_services_completed = qs.count()
 
@@ -148,6 +152,9 @@ class ServiceReportView(APIView):
 
         if is_customer:
             qs = qs.filter(job__customer_id=user_profile.customer.id)
+
+        if customer_id:
+            qs = qs.filter(job__customer_id=customer_id)
 
         total_jobs_revenue = qs.aggregate(Sum('job__price'))['job__price__sum']
 
