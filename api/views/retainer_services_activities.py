@@ -110,7 +110,7 @@ class RetainerServiceActivityListView(ListAPIView):
                                                     timestamp__gte=start_date, timestamp__lte=end_date)
         
         if service_id:
-            qs = qs.filter(service_id=service_id)
+            qs = qs.filter(retainer_service=service_id)
         
         if airport_id:
             qs = qs.filter(job__airport_id=airport_id)
