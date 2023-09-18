@@ -30,12 +30,10 @@ class UserView(APIView):
 
         if user_profile and user_profile.customer:
             customerName = user_profile.customer.name
-            #canSeePrice = user_profile.customer.customer_settings.show_job_price
             customerId = user_profile.customer.id
-        
-        if user_profile and user_profile.show_job_price:
-            canSeePrice = user_profile.show_job_price
 
+            if user_profile.customer.customer_settings.show_job_price:
+                canSeePrice = user_profile.show_job_price
 
         first_name = ''
         last_name = ''

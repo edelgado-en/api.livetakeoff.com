@@ -107,7 +107,6 @@ class ServiceActivityListView(ListAPIView):
             end_date = date(today.year - 1, 12, 31)
 
         qs = ServiceActivity.objects.filter(status='C',
-                                            price__gt=0,
                                             timestamp__gte=start_date, timestamp__lte=end_date)
         
         if service_id:

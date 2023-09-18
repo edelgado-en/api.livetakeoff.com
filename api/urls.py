@@ -67,7 +67,9 @@ from .views import (
         AirportDetailView,
         AirportAvailableFbosView,
         ServiceReportView,
-        ServiceActivityListView
+        ServiceActivityListView,
+        RetainerServiceActivityListView,
+        RetainerServiceReportView
     )
 
 urlpatterns = [
@@ -99,7 +101,9 @@ urlpatterns = [
     path('aircraft-types', AircraftTypesView.as_view()),
 
     path('service-report', ServiceReportView.as_view()),
+    path('retainer-service-report', RetainerServiceReportView.as_view()),
     path('service-activities', ServiceActivityListView.as_view()),
+    path('retainer-service-activities', RetainerServiceActivityListView.as_view()),
 
     path('tail-aircraft-lookup/<str:tailnumber>/', TailAircraftLookupView.as_view()),
     path('tail-alert-lookup/<str:tailnumber>/', TailAlertLookupView.as_view()),

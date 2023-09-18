@@ -1,31 +1,40 @@
 from django.db.models import Q, F
-from django.db import models
-from django.db.models import Count, Sum, Func
-from rest_framework import (permissions, status)
+from rest_framework import (permissions,status)
 from rest_framework .response import Response
-from rest_framework.views import APIView
-
+from rest_framework.generics import ListAPIView
 from datetime import (date, datetime, timedelta)
 
+from api.serializers import (
+        RetainerServiceActivitySerializer,
+    )
+
+from ..pagination import CustomPageNumberPagination
 from api.models import (
-    ServiceActivity,
-    UserProfile,
-    JobStatusActivity
-)
+        RetainerServiceActivity,
+        UserProfile
+    )
 
-class ServiceReportView(APIView):
+class RetainerServiceActivityListView(ListAPIView):
+    serializer_class = RetainerServiceActivitySerializer
     permission_classes = (permissions.IsAuthenticated,)
+    pagination_class = CustomPageNumberPagination
 
-    def post(self, request):
+    def get_queryset(self):
         service_id = self.request.data.get('service_id', None)
         airport_id = self.request.data.get('airport_id', None)
         fbo_id = self.request.data.get('fbo_id', None)
         tail_number = self.request.data.get('tail_number', None)
         customer_id = self.request.data.get('customer_id', None)
 
-        dateSelected = request.data.get('dateSelected')
 
-        user_profile = UserProfile.objects.get(user=request.user)
+        sort_by_price_asc = self.request.data.get('sort_by_price_asc', None)
+        sort_by_price_desc = self.request.data.get('sort_by_price_desc', None)
+        sort_by_timestamp_asc = self.request.data.get('sort_by_timestamp_asc', None)
+        sort_by_timestamp_desc = self.request.data.get('sort_by_timestamp_desc', None)
+
+        dateSelected = self.request.data.get('dateSelected')
+
+        user_profile = UserProfile.objects.get(user=self.request.user)
         is_customer = user_profile and user_profile.customer is not None
 
         # get start date and end date based on the dateSelected value provided
@@ -97,9 +106,8 @@ class ServiceReportView(APIView):
             start_date = date(today.year - 1, 1, 1)
             end_date = date(today.year - 1, 12, 31)
 
-        qs = ServiceActivity.objects.filter(status='C',
-                                            price__gt=0,
-                                            timestamp__gte=start_date, timestamp__lte=end_date)
+        qs = RetainerServiceActivity.objects.filter(status='C',
+                                                    timestamp__gte=start_date, timestamp__lte=end_date)
         
         if service_id:
             qs = qs.filter(service_id=service_id)
@@ -114,73 +122,22 @@ class ServiceReportView(APIView):
             qs = qs.filter(job__tailNumber__icontains=tail_number)
 
         if is_customer:
-            qs = qs.filter(job__customer_id=user_profile.customer.id)
+            qs = qs.filter(job__customer=user_profile.customer)
 
         if customer_id:
             qs = qs.filter(job__customer_id=customer_id)
 
-        # number of services
-        number_of_services_completed = qs.count()
+        if sort_by_price_asc:
+            qs = qs.order_by('price')
+        elif sort_by_price_desc:
+            qs = qs.order_by('-price')
+        elif sort_by_timestamp_asc:
+            qs = qs.order_by('timestamp')
+        elif sort_by_timestamp_desc:
+            qs = qs.order_by('-timestamp')
 
-        # number of unique tailNumbers
-        number_of_unique_tail_numbers = qs.values('job__tailNumber').distinct().count()
+        return qs
 
-        # Number of unique locations
-        number_of_unique_locations = qs.values('job__airport__name').distinct().count()
 
-        show_retainers = True
-        show_spending_info = True
-
-        if is_customer and user_profile.customer.customer_settings:
-            if user_profile.customer.customer_settings.show_job_price and user_profile.show_job_price:
-                show_spending_info = True
-            else:
-                show_spending_info = False
-
-            if user_profile.customer.customer_settings.retainer_amount is None \
-                    or user_profile.customer.customer_settings.retainer_amount == 0:
-                show_retainers = False
-
-        total_jobs_revenue = 0
-
-        if show_spending_info:
-            # Sum the total price from JobStatusActivity where the status = 'I' 
-            qs = JobStatusActivity.objects.filter(
-                Q(status__in=['I']) &
-                Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date)
-            )
-
-            if airport_id:
-                qs = qs.filter(job__airport_id=airport_id)
-            
-            if fbo_id:
-                qs = qs.filter(job__fbo_id=fbo_id)
-            
-            if tail_number:
-                qs = qs.filter(job__tailNumber__icontains=tail_number)
-
-            if service_id:
-                # only include the jobs where the service_id is present in job_service_assignments
-                qs = qs.filter(job__job_service_assignments__service_id=service_id)
-
-            if is_customer:
-                qs = qs.filter(job__customer_id=user_profile.customer.id)
-
-            if customer_id:
-                qs = qs.filter(job__customer_id=customer_id)
-
-            total_jobs_revenue = qs.aggregate(Sum('job__price'))['job__price__sum']
-
-            if total_jobs_revenue is None:
-                total_jobs_revenue = 0
-
-        return Response({
-            'number_of_services_completed': number_of_services_completed,
-            'number_of_unique_tail_numbers': number_of_unique_tail_numbers,
-            'number_of_unique_locations': number_of_unique_locations,
-            'total_jobs_revenue': total_jobs_revenue,
-            'show_spending_info': show_spending_info,
-            'show_retainers': show_retainers,
-            }
-            , status=status.HTTP_200_OK)
-                                
+    def post(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)

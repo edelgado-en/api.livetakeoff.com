@@ -8,12 +8,11 @@ from rest_framework.views import APIView
 from datetime import (date, datetime, timedelta)
 
 from api.models import (
-    ServiceActivity,
+    RetainerServiceActivity,
     UserProfile,
-    JobStatusActivity
 )
 
-class ServiceReportView(APIView):
+class RetainerServiceReportView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request):
@@ -97,12 +96,11 @@ class ServiceReportView(APIView):
             start_date = date(today.year - 1, 1, 1)
             end_date = date(today.year - 1, 12, 31)
 
-        qs = ServiceActivity.objects.filter(status='C',
-                                            price__gt=0,
+        qs = RetainerServiceActivity.objects.filter(status='C',
                                             timestamp__gte=start_date, timestamp__lte=end_date)
         
         if service_id:
-            qs = qs.filter(service_id=service_id)
+            qs = qs.filter(retainer_service_id=service_id)
         
         if airport_id:
             qs = qs.filter(job__airport_id=airport_id)
@@ -128,59 +126,10 @@ class ServiceReportView(APIView):
         # Number of unique locations
         number_of_unique_locations = qs.values('job__airport__name').distinct().count()
 
-        show_retainers = True
-        show_spending_info = True
-
-        if is_customer and user_profile.customer.customer_settings:
-            if user_profile.customer.customer_settings.show_job_price and user_profile.show_job_price:
-                show_spending_info = True
-            else:
-                show_spending_info = False
-
-            if user_profile.customer.customer_settings.retainer_amount is None \
-                    or user_profile.customer.customer_settings.retainer_amount == 0:
-                show_retainers = False
-
-        total_jobs_revenue = 0
-
-        if show_spending_info:
-            # Sum the total price from JobStatusActivity where the status = 'I' 
-            qs = JobStatusActivity.objects.filter(
-                Q(status__in=['I']) &
-                Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date)
-            )
-
-            if airport_id:
-                qs = qs.filter(job__airport_id=airport_id)
-            
-            if fbo_id:
-                qs = qs.filter(job__fbo_id=fbo_id)
-            
-            if tail_number:
-                qs = qs.filter(job__tailNumber__icontains=tail_number)
-
-            if service_id:
-                # only include the jobs where the service_id is present in job_service_assignments
-                qs = qs.filter(job__job_service_assignments__service_id=service_id)
-
-            if is_customer:
-                qs = qs.filter(job__customer_id=user_profile.customer.id)
-
-            if customer_id:
-                qs = qs.filter(job__customer_id=customer_id)
-
-            total_jobs_revenue = qs.aggregate(Sum('job__price'))['job__price__sum']
-
-            if total_jobs_revenue is None:
-                total_jobs_revenue = 0
-
         return Response({
             'number_of_services_completed': number_of_services_completed,
             'number_of_unique_tail_numbers': number_of_unique_tail_numbers,
             'number_of_unique_locations': number_of_unique_locations,
-            'total_jobs_revenue': total_jobs_revenue,
-            'show_spending_info': show_spending_info,
-            'show_retainers': show_retainers,
             }
             , status=status.HTTP_200_OK)
                                 

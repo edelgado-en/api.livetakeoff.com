@@ -164,17 +164,31 @@ class JobDetail(APIView):
                 job.save()
             
 
-        # do not include the price in the serializer if the user is a project manager or a customer user with the customer setting show_job_price set to false
-        
+        show_job_price = True
+
         # check the customer settings if the user is a customer user to check if show_job_price is True
         if request.user.profile.customer:
-            if not request.user.profile.customer.customer_settings.show_job_price:
-                job.price = None
+            show_job_price_at_customer_level = request.user.profile.customer.customer_settings.show_job_price
 
+            if show_job_price_at_customer_level:
+                show_job_price_at_customer_user_level = request.user.profile.show_job_price
+
+                if show_job_price_at_customer_user_level:
+                    show_job_price = True
+                
+                else:
+                    show_job_price = False
+
+            else:
+                show_job_price = False
+
+        
         # if you are a project manager, set the job price to None
         if request.user.groups.filter(name='Project Managers').exists():
-            job.price = None
+            show_job_price = False
 
+        if show_job_price is False:
+            job.price = None
 
         message = str(job.id) + '-' + job.tailNumber
         message_bytes = message.encode('ascii')

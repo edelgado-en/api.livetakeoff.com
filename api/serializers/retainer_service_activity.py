@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from api.models import ServiceActivity
+from api.models import RetainerServiceActivity
 
-class ServiceActivitySerializer(serializers.ModelSerializer):
+class RetainerServiceActivitySerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
     timestamp = serializers.DateTimeField(format="%m/%d/%Y", input_formats=['%m/%d/%Y'])
     purchase_order = serializers.SerializerMethodField()
@@ -13,7 +13,7 @@ class ServiceActivitySerializer(serializers.ModelSerializer):
     job_id = serializers.SerializerMethodField()
 
     def get_service_name(self, obj):
-        return obj.service.name
+        return obj.retainer_service.name
     
     def get_tail_number(self, obj):
         return obj.job.tailNumber
@@ -34,5 +34,5 @@ class ServiceActivitySerializer(serializers.ModelSerializer):
         return obj.job.id
 
     class Meta:
-        model = ServiceActivity
+        model = RetainerServiceActivity
         fields = ['id', 'timestamp' , 'purchase_order', 'service_name', 'tail_number', 'airport_name', 'fbo_name', 'customer_name', 'job_id']
