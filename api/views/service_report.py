@@ -17,6 +17,12 @@ class ServiceReportView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request):
+        user_profile = UserProfile.objects.get(user=request.user)
+        is_customer = user_profile and user_profile.customer is not None
+
+        if not self.can_view_dashboard(request.user, is_customer):
+            return Response({'error': 'You do not have permission to view this page'}, status=status.HTTP_403_FORBIDDEN)
+
         service_id = self.request.data.get('service_id', None)
         airport_id = self.request.data.get('airport_id', None)
         fbo_id = self.request.data.get('fbo_id', None)
@@ -25,8 +31,6 @@ class ServiceReportView(APIView):
 
         dateSelected = request.data.get('dateSelected')
 
-        user_profile = UserProfile.objects.get(user=request.user)
-        is_customer = user_profile and user_profile.customer is not None
 
         # get start date and end date based on the dateSelected value provided
         if dateSelected == 'yesterday':
@@ -182,4 +186,10 @@ class ServiceReportView(APIView):
             'show_retainers': show_retainers,
             }
             , status=status.HTTP_200_OK)
+    
+    def can_view_dashboard(self, user, is_customer):
+        if user.is_superuser or user.is_staff or is_customer:
+            return True
+        
+        return False
                                 
