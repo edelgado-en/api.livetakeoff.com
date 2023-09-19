@@ -46,7 +46,7 @@ class RetainerServiceActivityListView(ListAPIView):
         elif dateSelected == 'last7Days':
             today = date.today()
             start_date = today - timedelta(days=7)
-            end_date = today
+            end_date = datetime.now()
 
         elif dateSelected == 'lastWeek':
             today = date.today()
@@ -105,6 +105,9 @@ class RetainerServiceActivityListView(ListAPIView):
             today = date.today()
             start_date = date(today.year - 1, 1, 1)
             end_date = date(today.year - 1, 12, 31)
+
+
+        # account for only activities associated with a job that is invoiced and not cancelled. DO the same in the service actitivites endpoint
 
         qs = RetainerServiceActivity.objects.filter(status='C',
                                                     timestamp__gte=start_date, timestamp__lte=end_date)

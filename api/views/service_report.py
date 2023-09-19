@@ -37,7 +37,7 @@ class ServiceReportView(APIView):
         elif dateSelected == 'last7Days':
             today = date.today()
             start_date = today - timedelta(days=7)
-            end_date = today
+            end_date = datetime.now()
 
         elif dateSelected == 'lastWeek':
             today = date.today()
@@ -98,7 +98,6 @@ class ServiceReportView(APIView):
             end_date = date(today.year - 1, 12, 31)
 
         qs = ServiceActivity.objects.filter(status='C',
-                                            price__gt=0,
                                             timestamp__gte=start_date, timestamp__lte=end_date)
         
         if service_id:

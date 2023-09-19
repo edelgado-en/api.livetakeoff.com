@@ -35,7 +35,7 @@ class TeamProductivityView(APIView):
         elif dateSelected == 'last7Days':
             today = date.today()
             start_date = today - timedelta(days=7)
-            end_date = today
+            end_date = datetime.now()
 
         elif dateSelected == 'lastWeek':
             today = date.today()
