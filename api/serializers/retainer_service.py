@@ -6,4 +6,4 @@ class RetainerServiceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RetainerService
-        fields = ['id', 'name', 'description']
+        fields = ['id', 'name', 'description', 'category']
