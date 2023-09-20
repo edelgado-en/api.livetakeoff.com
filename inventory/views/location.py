@@ -14,6 +14,8 @@ class LocationView(APIView):
     def post(self, request):
         name = request.data.get('name')
         description = request.data.get('description', None)
+        active = request.data.get('active', True)
+        enable_notifications = request.data.get('enable_notifications', False)
 
         # check that the name does not exist ignore case
         location = Location.objects.filter(name__iexact=name).first()
@@ -21,7 +23,10 @@ class LocationView(APIView):
         if location:
             return Response({'error': 'A location with that name already exists'}, status=status.HTTP_400_BAD_REQUEST)
 
-        location = Location.objects.create(name=name, description=description)
+        location = Location.objects.create(name=name,
+                                           description=description,
+                                           active=active,
+                                           enable_notifications=enable_notifications)
 
         return Response({'id': location.id, 'name': location.name}, status=status.HTTP_200_OK)
     
