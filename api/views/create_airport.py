@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from api.models import (
         Airport,
         AirportAvailableFbo,
+        FBO
     )
 
 class CreateAirportView(APIView):
@@ -19,9 +20,17 @@ class CreateAirportView(APIView):
         name = request.data.get('name')
         public = request.data.get('public', False)
         active = request.data.get('active', True)
-        available_fbo_ids = request.data.get('available_fbo_ids', [])
+        available_fbos = request.data.get('available_fbos', [])
 
-        # create airport
+        # validate fbos first
+        for fbo in available_fbos:
+            name = fbo.get('name')
+
+            # check fbo does not exists. If it does, return error
+            if FBO.objects.filter(name__iexact=name).exists():
+                return Response({'error': 'FBO with name {} already exists'.format(name)}, status=status.HTTP_400_BAD_REQUEST)
+
+
         airport = Airport.objects.create(
             initials=initials,
             name=name,
@@ -30,10 +39,18 @@ class CreateAirportView(APIView):
         )
 
         # create available fbos
-        for fbo_id in available_fbo_ids:
+        for fbo in available_fbos:
+            name = fbo.get('name')
+            public = fbo.get('public', False) 
+
+            created_fbo = FBO.objects.create(
+                name=name,
+                public=public
+            )
+
             AirportAvailableFbo.objects.create(
                 airport=airport,
-                fbo_id=fbo_id
+                fbo=created_fbo
             )
         
         return Response({'id': airport.id}, status=status.HTTP_200_OK)
