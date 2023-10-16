@@ -63,6 +63,10 @@ class CompletedJobsListView(ListAPIView):
             else:
                 qs = qs.filter(Q(status='C') | Q(status='I') | Q(status='T'))
 
+
+            # sort by status C first, then status I, and then status T
+            qs = qs.order_by('status')
+
         else:
             qs = qs.filter(status=status)
 
