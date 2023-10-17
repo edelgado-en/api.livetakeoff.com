@@ -63,10 +63,6 @@ class CompletedJobsListView(ListAPIView):
             else:
                 qs = qs.filter(Q(status='C') | Q(status='I') | Q(status='T'))
 
-
-            # sort by status C first, then status I, and then status T
-            qs = qs.order_by('status')
-
         else:
             qs = qs.filter(status=status)
 
@@ -109,6 +105,11 @@ class CompletedJobsListView(ListAPIView):
         
         if completionDateTo:
             qs = qs.filter(completion_date__lte=completionDateTo)
+
+        # sort by status C first, then status I, and then status T, THEN sort by completion_date newest first
+        # sort by status and  completion_date descending
+        qs = qs.order_by('status', '-completion_date')
+        
 
         return qs
 
