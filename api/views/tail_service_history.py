@@ -22,7 +22,7 @@ class TailServiceHistoryListView(ListAPIView):
     def get_queryset(self):
         tail_number = self.request.data.get('tail_number', None)
 
-        jobs = Job.objects.filter(tailNumber=tail_number, status__in=['C', 'I']).order_by('-completion_date')[:50]
+        jobs = Job.objects.filter(tailNumber=tail_number, status__in=['C', 'I']).order_by('-completion_date')[:10]
 
         jobs_with_service_activities = []
 
