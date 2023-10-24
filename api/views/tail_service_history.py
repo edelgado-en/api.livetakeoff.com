@@ -22,13 +22,15 @@ class TailServiceHistoryListView(ListAPIView):
     def get_queryset(self):
         tail_number = self.request.data.get('tail_number', None)
 
-        # Fetch the latest 2 jobs for the tail number that have at least on service activity
-        jobs = Job.objects.filter(tailNumber=tail_number, status__in=['C', 'I'],
-                                  service_activities__isnull=False) \
-                          .order_by('-completion_date')[:2]
+        jobs = Job.objects.filter(tailNumber=tail_number, status__in=['C', 'I']).order_by('-completion_date')[:50]
 
-        # Get the service activities for the latest 2 jobs
-        qs = ServiceActivity.objects.filter(job__in=jobs).order_by('-timestamp')
+        jobs_with_service_activities = []
+
+        for job in jobs:
+            if ServiceActivity.objects.filter(job=job).exists():
+                jobs_with_service_activities.append(job)
+
+        qs = ServiceActivity.objects.filter(job__in=jobs_with_service_activities).order_by('-timestamp')
 
         return qs
 
