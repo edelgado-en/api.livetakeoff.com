@@ -22,15 +22,9 @@ class TailServiceHistoryListView(ListAPIView):
     def get_queryset(self):
         tail_number = self.request.data.get('tail_number', None)
 
-        jobs = Job.objects.filter(tailNumber=tail_number, status__in=['C', 'I']).order_by('-completion_date')[:5]
-
-        jobs_with_service_activities = []
-
-        for job in jobs:
-            if ServiceActivity.objects.filter(job=job).exists():
-                jobs_with_service_activities.append(job)
-
-        qs = ServiceActivity.objects.filter(job__in=jobs_with_service_activities).order_by('-timestamp')
+        qs = ServiceActivity.objects \
+                            .filter(job__tailNumber=tail_number, status='C') \
+                            .order_by('-timestamp')[:10]
 
         return qs
 
