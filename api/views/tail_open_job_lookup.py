@@ -19,6 +19,7 @@ class TailOpenJobLookupView(APIView):
                 # return a data object with the job id and the tail number
                 data = {
                     'jobId': job.id,
+                    'purchaseOrder': job.purchase_order,
                     'tailNumber': job.tailNumber
                 }
                 return Response(data, status=status.HTTP_200_OK)
