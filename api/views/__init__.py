@@ -72,3 +72,4 @@ from .retainer_services_activities import RetainerServiceActivityListView
 from .retainer_service_report import RetainerServiceReportView
 from .create_airport import CreateAirportView
 from .tail_service_history import TailServiceHistoryListView
+from .tail_open_job_lookup import TailOpenJobLookupView

@@ -71,7 +71,8 @@ from .views import (
         RetainerServiceActivityListView,
         RetainerServiceReportView,
         CreateAirportView,
-        TailServiceHistoryListView
+        TailServiceHistoryListView,
+        TailOpenJobLookupView
     )
 
 urlpatterns = [
@@ -110,6 +111,7 @@ urlpatterns = [
     path('tail-service-history', TailServiceHistoryListView.as_view()),
     path('tail-aircraft-lookup/<str:tailnumber>/', TailAircraftLookupView.as_view()),
     path('tail-alert-lookup/<str:tailnumber>/', TailAlertLookupView.as_view()),
+    path('tail-open-job-lookup/<str:tailnumber>/', TailOpenJobLookupView.as_view()),
 
     path('fbos', FBOsView.as_view()),
     path('fbo-search', FboSearchView.as_view()),
