@@ -17,34 +17,34 @@ class CreateAirportView(APIView):
 
     def post(self, request):
         initials = request.data.get('initials')
-        name = request.data.get('name')
+        airport_name = request.data.get('name')
         public = request.data.get('public', False)
         active = request.data.get('active', True)
         available_fbos = request.data.get('available_fbos', [])
 
         # validate fbos first
         for fbo in available_fbos:
-            name = fbo.get('name')
+            fbo_name = fbo.get('name')
 
             # check fbo does not exists. If it does, return error
-            if FBO.objects.filter(name__iexact=name).exists():
-                return Response({'error': 'FBO with name {} already exists'.format(name)}, status=status.HTTP_400_BAD_REQUEST)
+            if FBO.objects.filter(name__iexact=fbo_name).exists():
+                return Response({'error': 'FBO with name {} already exists'.format(fbo_name)}, status=status.HTTP_400_BAD_REQUEST)
 
 
         airport = Airport.objects.create(
             initials=initials,
-            name=name,
+            name=airport_name,
             public=public,
             active=active
         )
 
         # create available fbos
         for fbo in available_fbos:
-            name = fbo.get('name')
+            fbo_name = fbo.get('name')
             public = fbo.get('public', False) 
 
             created_fbo = FBO.objects.create(
-                name=name,
+                name=fbo_name,
                 public=public
             )
 
