@@ -161,11 +161,13 @@ class JobCommentView(ListCreateAPIView):
                 notification_util.send(message, phone_number.as_e164)
 
         
-        if send_email and is_customer_user:
-            # get the customer associated with the job
-            email_address = job.created_by.email
+        if send_email:
+            # check if the job.created_by is a customer
+            is_customer = job.created_by.profile.customer is not None
 
-            if email_address:
+            if is_customer:
+                email_address = job.created_by.email
+
                 title = f'[{job.tailNumber}] Job Comment Added'
                 link = f'http://livetakeoff.com/jobs/{job.id}/comments'
 
@@ -187,7 +189,9 @@ class JobCommentView(ListCreateAPIView):
                 '''
 
                 email_util = EmailUtil()
-                email_util.send_email(email_address, title, body)
+                
+                if email_address:
+                    email_util.send_email(email_address, title, body)
 
                 #fetch entries of UserEmail for the customer user and send an email to each email address
                 user_emails = UserEmail.objects.filter(user=job.created_by)

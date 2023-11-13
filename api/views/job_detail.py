@@ -275,8 +275,7 @@ class JobDetail(APIView):
 
                 # send an email notification to the customer user if the job was created by a customer user
                 if job.created_by.profile.customer \
-                        and job.created_by.profile.email_notifications \
-                        and job.created_by.email:
+                        and job.created_by.profile.email_notifications:
                     
                     title = f'[{job.tailNumber}] Job COMPLETED'
                     link = f'http://livetakeoff.com/jobs/{job.id}/details'
@@ -297,7 +296,9 @@ class JobDetail(APIView):
                     '''
 
                     email_util = EmailUtil()
-                    email_util.send_email(job.created_by.email, title, body)
+
+                    if job.created_by.email:
+                        email_util.send_email(job.created_by.email, title, body)
 
                     #fetch entries of UserEmail for the customer user and send an email to each email address
                     user_emails = UserEmail.objects.filter(user=job.created_by)
