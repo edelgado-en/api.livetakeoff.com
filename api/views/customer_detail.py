@@ -15,14 +15,6 @@ from ..models import (
         UserProfile
     )
 
-
-import os
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
-
-from api.email_util import EmailUtil
-
-
 class CustomerDetail(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 

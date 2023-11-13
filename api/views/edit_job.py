@@ -15,13 +15,12 @@ from ..models import (
     Job,
     JobStatusActivity,
     JobCommentCheck,
-    JobServiceAssignment,
-    JobRetainerServiceAssignment,
     ServiceActivity,
     RetainerServiceActivity,
     Tag,
     JobTag,
-    PriceListEntries
+    PriceListEntries,
+    UserEmail
     )
 
 
@@ -143,6 +142,13 @@ class EditJobView(APIView):
 
                             email_util = EmailUtil()
                             email_util.send_email(job.created_by.email, title, body)
+
+                            #fetch entries of UserEmail for the customer user and send an email to each email address
+                            user_emails = UserEmail.objects.filter(user=job.created_by)
+
+                            for user_email in user_emails:
+                                if user_email.email:
+                                    email_util.send_email(user_email.email, title, body)
 
 
                         #unassign all services and retainer services

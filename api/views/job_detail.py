@@ -21,10 +21,9 @@ from ..models import (
         JobPhotos,
         JobStatusActivity,
         JobCommentCheck,
-        CustomerSettings,
-        UserProfile,
         ServiceActivity,
-        RetainerServiceActivity
+        RetainerServiceActivity,
+        UserEmail
     )
 
 
@@ -299,6 +298,13 @@ class JobDetail(APIView):
 
                     email_util = EmailUtil()
                     email_util.send_email(job.created_by.email, title, body)
+
+                    #fetch entries of UserEmail for the customer user and send an email to each email address
+                    user_emails = UserEmail.objects.filter(user=job.created_by)
+
+                    for user_email in user_emails:
+                        if user_email.email:
+                            email_util.send_email(user_email.email, title, body)
 
                 # set the actual_completion_date to today
                 job.completion_date = datetime.now()

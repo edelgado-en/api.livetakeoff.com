@@ -35,7 +35,8 @@ from api.models import (
     Tag,
     JobEstimate,
     JobServiceEstimate,
-    ServiceActivity
+    ServiceActivity,
+    UserEmail
 )
 
 class UserProfileInline(admin.StackedInline):
@@ -60,6 +61,14 @@ class ServiceAdmin(admin.ModelAdmin):
         # Disable delete because when you want to stop using a service, just set it to inactive
         return False
 
+@admin.register(UserEmail)
+class UserEmailAdmin(admin.ModelAdmin):
+    list_display = ['id', 'user', 'email']
+    list_per_page = 100
+
+    def has_delete_permission(self, request, obj=None):
+        # Disable delete because when you want to stop using a service, just set it to inactive
+        return False
 
 @admin.register(ServiceType)
 class ServicTypeeAdmin(admin.ModelAdmin):

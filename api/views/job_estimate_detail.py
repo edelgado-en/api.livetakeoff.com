@@ -12,8 +12,6 @@ from api.models import (JobEstimate, JobEstimateDiscount, JobEstimateAdditionalF
 
 from api.serializers import (JobEstimateDetailSerializer,)
 
-from api.notification_util import NotificationUtil
-from api.email_util import EmailUtil
 
 class JobEstimateDetailView(APIView):
     permission_classes = (permissions.AllowAny,)

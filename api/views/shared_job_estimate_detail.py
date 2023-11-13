@@ -100,9 +100,6 @@ class SharedJobEstimateDetailView(APIView):
             
             notification_util.send(message, phone_number.as_e164)
 
-        
-        # TODO: send an email
-        # email_util = EmailUtil()
 
 
         return Response(status=status.HTTP_200_OK)

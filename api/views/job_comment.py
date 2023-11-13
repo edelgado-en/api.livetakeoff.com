@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from ..serializers import (JobCommentSerializer)
 from rest_framework.generics import ListCreateAPIView
 from ..pagination import CustomPageNumberPagination
-from ..models import (JobComments, Job, JobCommentCheck, JobServiceAssignment, JobRetainerServiceAssignment)
+from ..models import (JobComments, Job, JobCommentCheck, JobServiceAssignment, JobRetainerServiceAssignment, UserEmail)
 
 from api.notification_util import NotificationUtil
 
@@ -188,6 +188,13 @@ class JobCommentView(ListCreateAPIView):
 
                 email_util = EmailUtil()
                 email_util.send_email(email_address, title, body)
+
+                #fetch entries of UserEmail for the customer user and send an email to each email address
+                user_emails = UserEmail.objects.filter(user=job.created_by)
+
+                for user_email in user_emails:
+                    if user_email.email:
+                        email_util.send_email(user_email.email, title, body)
 
 
         serializer = JobCommentSerializer(job_comment)
