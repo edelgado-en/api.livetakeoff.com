@@ -72,7 +72,8 @@ from .views import (
         RetainerServiceReportView,
         CreateAirportView,
         TailServiceHistoryListView,
-        TailOpenJobLookupView
+        TailOpenJobLookupView,
+        UserEmailView
     )
 
 urlpatterns = [
@@ -137,6 +138,9 @@ urlpatterns = [
     path('users/available-airports', UserAvailableAirportsView.as_view()),
     path('users/available-airports/<int:id>/', UserAvailableAirportsView.as_view()),
     
+    path('user-email', UserEmailView.as_view()),
+    path('user-email/<int:user_email_id>/', UserEmailView.as_view()),
+
     path('airports/available-fbos', AirportAvailableFbosView.as_view()),
     path('airports/available-fbos/<int:id>/', AirportAvailableFbosView.as_view()),
     path('airports/create', CreateAirportView.as_view()),

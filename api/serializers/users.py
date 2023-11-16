@@ -4,6 +4,7 @@ from rest_framework import serializers
 class UsersSerializer(serializers.Serializer):
     id = serializers.ReadOnlyField()
     email = serializers.EmailField()
+    additional_emails = serializers.ListField(child=serializers.DictField())
     username = serializers.CharField()
     first_name = serializers.CharField()
     last_name = serializers.CharField()
@@ -64,6 +65,8 @@ class UsersSerializer(serializers.Serializer):
             'username',
             'first_name',
             'last_name',
+            'email',
+            'additional_emails'
             'is_active',
             'is_staff',
             'is_superuser',

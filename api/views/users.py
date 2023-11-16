@@ -52,6 +52,9 @@ class UsersView(ListAPIView):
             elif role == 'Internal Coordinators':
                 users = users.filter(groups__name=role)
 
+        # add additional emails to the users
+        for user in users:
+            user.additional_emails = []
 
         return users
 
