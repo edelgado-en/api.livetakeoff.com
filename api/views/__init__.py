@@ -74,3 +74,5 @@ from .create_airport import CreateAirportView
 from .tail_service_history import TailServiceHistoryListView
 from .tail_open_job_lookup import TailOpenJobLookupView
 from .user_email import UserEmailView
+from .job_file_upload import JobFileUploadView
+from .job_file import JobFileView

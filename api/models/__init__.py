@@ -43,3 +43,4 @@ from .job_tag import JobTag
 from .tail_alert import TailAlert
 from .airport_available_fbo import AirportAvailableFbo
 from .user_email import UserEmail
+from .job_file import JobFiles

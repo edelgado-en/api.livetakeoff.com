@@ -23,7 +23,8 @@ from ..models import (
         JobCommentCheck,
         ServiceActivity,
         RetainerServiceActivity,
-        UserEmail
+        UserEmail,
+        JobFiles
     )
 
 

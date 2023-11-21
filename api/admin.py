@@ -36,7 +36,8 @@ from api.models import (
     JobEstimate,
     JobServiceEstimate,
     ServiceActivity,
-    UserEmail
+    UserEmail,
+    JobFiles
 )
 
 class UserProfileInline(admin.StackedInline):
@@ -259,6 +260,11 @@ class JobPhotosAdmin(admin.ModelAdmin):
 
     image_preview.short_description = 'Photo Preview'
     image_preview.allow_tags = True
+
+@admin.register(JobFiles)
+class JobFileAdmin(admin.ModelAdmin):
+    list_display = ['id', 'created_at', 'uploaded_by', 'job', 'name', 'file', 'size', 'customer_uploaded']
+    list_per_page = 100
 
 
 @admin.register(JobComments)

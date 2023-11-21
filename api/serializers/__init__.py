@@ -36,3 +36,4 @@ from .tail_alert import TailAlertSerializer
 from .tag import TagSerializer
 from .service_activity import ServiceActivitySerializer
 from .retainer_service_activity import RetainerServiceActivitySerializer
+from .job_file import JobFileSerializer

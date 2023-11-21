@@ -73,7 +73,9 @@ from .views import (
         CreateAirportView,
         TailServiceHistoryListView,
         TailOpenJobLookupView,
-        UserEmailView
+        UserEmailView,
+        JobFileUploadView,
+        JobFileView
     )
 
 urlpatterns = [
@@ -97,6 +99,10 @@ urlpatterns = [
     path('job-photos/<int:jobid>/', JobPhotosView.as_view()),
     path('job-photos/delete/<int:jobid>/', JobPhotosView.as_view()),
     path('job-photos/upload/<int:jobid>/', JobPhotosUploadView.as_view()),
+    path('job-files/upload/<int:jobid>/', JobFileUploadView.as_view()),
+
+    path('job-files/<int:id>/', JobFileView.as_view()),
+
     path('job-comments/<int:jobid>/', JobCommentView.as_view()),
     path('services', ServicesView.as_view()),
     path('retainer-services', RetainerServicesView.as_view()),
