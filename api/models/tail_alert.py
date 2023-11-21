@@ -2,7 +2,8 @@ from django.db import models
 
 class TailAlert(models.Model):
     tailNumber = models.CharField(max_length=50, unique=True)
-    message = models.TextField()
+    message = models.TextField(blank=True, null=True)
+    notes = models.TextField(blank=True, null=True)
     author = models.ForeignKey('auth.User', on_delete=models.PROTECT)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

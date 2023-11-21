@@ -20,7 +20,8 @@ class TailAlertsView(ListAPIView):
         searchText = self.request.data.get('searchText','')
 
         queryset = TailAlert.objects.filter(Q(message__icontains=searchText)
-                                             | Q(tailNumber__icontains=searchText)) \
+                                             | Q(tailNumber__icontains=searchText)
+                                             | Q(notes__icontains=searchText)) \
                                     .order_by('-created_at')
 
         return queryset
@@ -48,7 +49,9 @@ class TailAlertsView(ListAPIView):
             return Response({'error': 'You do not have permission to view tail alerts'}, status=status.HTTP_403_FORBIDDEN)
 
         tail_alert = get_object_or_404(TailAlert, pk=kwargs.get('id'))
-        tail_alert.message = request.data.get('message')
+        tail_alert.message = request.data.get('message', tail_alert.message)
+        tail_alert.notes = request.data.get('notes', tail_alert.notes)
+        
         tail_alert.updated_at = datetime.now()
 
         tail_alert.save()

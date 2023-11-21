@@ -16,6 +16,7 @@ class CreateTailAlertView(APIView):
 
         tail_number = request.data.get('tailNumber')
         message = request.data.get('message')
+        notes = request.data.get('notes')
 
         if not tail_number or not message:
             return Response({'error': 'You must provide a tail number and a message'}, status=status.HTTP_400_BAD_REQUEST)
@@ -23,7 +24,10 @@ class CreateTailAlertView(APIView):
         if TailAlert.objects.filter(tailNumber=tail_number).exists():
             return Response({'error': 'A tail alert already exists for this tail number'}, status=status.HTTP_400_BAD_REQUEST)
 
-        tail_alert = TailAlert.objects.create(tailNumber=tail_number, message=message, author=request.user)
+        tail_alert = TailAlert.objects.create(tailNumber=tail_number,
+                                              message=message,
+                                              notes=notes,
+                                              author=request.user)
 
         serializer = TailAlertSerializer(tail_alert)
 

@@ -12,6 +12,7 @@ class TailAlertSerializer(serializers.ModelSerializer):
             'id',
             'tailNumber',
             'message',
+            'notes',
             'author',
             'created_at',
             'updated_at'
