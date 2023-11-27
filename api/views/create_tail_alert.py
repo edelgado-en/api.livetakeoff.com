@@ -18,7 +18,7 @@ class CreateTailAlertView(APIView):
         message = request.data.get('message')
         notes = request.data.get('notes')
 
-        if not tail_number or not message:
+        if not tail_number or (not message and not notes):
             return Response({'error': 'You must provide a tail number and a message'}, status=status.HTTP_400_BAD_REQUEST)
 
         if TailAlert.objects.filter(tailNumber=tail_number).exists():
