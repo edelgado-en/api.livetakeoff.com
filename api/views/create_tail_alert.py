@@ -29,6 +29,9 @@ class CreateTailAlertView(APIView):
 
         if TailAlert.objects.filter(tailNumber=tail_number).exists():
             return Response({'error': 'A tail details already exists for this tail number'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if file and file == 'null':
+            file = None
 
         tail_alert = TailAlert.objects.create(tailNumber=tail_number,
                                               message=message,
