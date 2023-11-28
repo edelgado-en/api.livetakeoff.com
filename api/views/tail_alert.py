@@ -7,7 +7,7 @@ from datetime import datetime
 from api.serializers import (TailAlertSerializer)
 from rest_framework.generics import ListAPIView
 from ..pagination import CustomPageNumberPagination
-from api.models import (TailAlert)
+from api.models import (TailAlert, Job)
 
 
 class TailAlertsView(ListAPIView):
@@ -25,6 +25,15 @@ class TailAlertsView(ListAPIView):
                                     .order_by('-created_at')
 
         return queryset
+
+    def get(self, request, *args, **kwargs):
+        job = get_object_or_404(Job, pk=kwargs.get('id'))
+
+        tail_alert = get_object_or_404(TailAlert, tailNumber__iexact=job.tailNumber)
+
+        serializer = TailAlertSerializer(tail_alert)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
     def post(self, request, *args, **kwargs):
