@@ -188,7 +188,11 @@ class ServiceReportView(APIView):
             , status=status.HTTP_200_OK)
     
     def can_view_dashboard(self, user, is_customer):
-        if user.is_superuser or user.is_staff or is_customer:
+        if user.is_superuser \
+            or user.is_staff \
+            or is_customer \
+            or user.groups.filter(name='Internal Coordinators').exists():
+            
             return True
         
         return False
