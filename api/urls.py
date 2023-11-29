@@ -75,7 +75,8 @@ from .views import (
         TailOpenJobLookupView,
         UserEmailView,
         JobFileUploadView,
-        JobFileView
+        JobFileView,
+        UserCustomersView
     )
 
 urlpatterns = [
@@ -143,7 +144,9 @@ urlpatterns = [
     path('users/signup', UserSignupView.as_view()),
     path('users/available-airports', UserAvailableAirportsView.as_view()),
     path('users/available-airports/<int:id>/', UserAvailableAirportsView.as_view()),
-    
+    path('users/customers', UserCustomersView.as_view()),
+    path('users/customers/<int:id>/', UserCustomersView.as_view()),
+
     path('user-email', UserEmailView.as_view()),
     path('user-email/<int:user_email_id>/', UserEmailView.as_view()),
 

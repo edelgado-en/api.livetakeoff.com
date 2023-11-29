@@ -76,3 +76,4 @@ from .tail_open_job_lookup import TailOpenJobLookupView
 from .user_email import UserEmailView
 from .job_file_upload import JobFileUploadView
 from .job_file import JobFileView
+from .user_customers import UserCustomersView
