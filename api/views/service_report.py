@@ -120,7 +120,12 @@ class ServiceReportView(APIView):
         if is_customer:
             qs = qs.filter(job__customer_id=user_profile.customer.id)
 
+        show_spending_info = True
+
         if self.request.user.groups.filter(name='Internal Coordinators').exists():
+            # Do not show spending info for internal coordinators
+            show_spending_info = False
+
             user_customers = UserCustomer.objects.filter(user=self.request.user).all()
 
             if user_customers:
@@ -143,7 +148,7 @@ class ServiceReportView(APIView):
         number_of_unique_locations = qs.values('job__airport__name').distinct().count()
 
         show_retainers = True
-        show_spending_info = True
+        
 
         if is_customer and user_profile.customer.customer_settings:
             if user_profile.customer.customer_settings.show_job_price and user_profile.show_job_price:
