@@ -10,6 +10,7 @@ from datetime import (date, datetime, timedelta)
 from api.models import (
     RetainerServiceActivity,
     UserProfile,
+    UserCustomer
 )
 
 class RetainerServiceReportView(APIView):
@@ -118,6 +119,16 @@ class RetainerServiceReportView(APIView):
 
         if is_customer:
             qs = qs.filter(job__customer_id=user_profile.customer.id)
+
+        if self.request.user.groups.filter(name='Internal Coordinators').exists():
+            user_customers = UserCustomer.objects.filter(user=self.request.user).all()
+
+            if user_customers:
+                customer_ids = []
+                for user_customer in user_customers:
+                    customer_ids.append(user_customer.customer.id)
+
+                qs = qs.filter(job__customer_id__in=customer_ids)
 
         if customer_id:
             qs = qs.filter(job__customer_id=customer_id)

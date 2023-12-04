@@ -11,7 +11,8 @@ from api.serializers import (
 from ..pagination import CustomPageNumberPagination
 from api.models import (
         RetainerServiceActivity,
-        UserProfile
+        UserProfile,
+        UserCustomer
     )
 
 class RetainerServiceActivityListView(ListAPIView):
@@ -126,6 +127,16 @@ class RetainerServiceActivityListView(ListAPIView):
 
         if is_customer:
             qs = qs.filter(job__customer=user_profile.customer)
+
+        if self.request.user.groups.filter(name='Internal Coordinators').exists():
+            user_customers = UserCustomer.objects.filter(user=self.request.user).all()
+
+            if user_customers:
+                customer_ids = []
+                for user_customer in user_customers:
+                    customer_ids.append(user_customer.customer.id)
+
+                qs = qs.filter(job__customer_id__in=customer_ids)
 
         if customer_id:
             qs = qs.filter(job__customer_id=customer_id)

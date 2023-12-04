@@ -10,7 +10,8 @@ from datetime import (date, datetime, timedelta)
 from api.models import (
     ServiceActivity,
     UserProfile,
-    JobStatusActivity
+    JobStatusActivity,
+    UserCustomer
 )
 
 class ServiceReportView(APIView):
@@ -119,6 +120,16 @@ class ServiceReportView(APIView):
         if is_customer:
             qs = qs.filter(job__customer_id=user_profile.customer.id)
 
+        if self.request.user.groups.filter(name='Internal Coordinators').exists():
+            user_customers = UserCustomer.objects.filter(user=self.request.user).all()
+
+            if user_customers:
+                customer_ids = []
+                for user_customer in user_customers:
+                    customer_ids.append(user_customer.customer.id)
+
+                qs = qs.filter(job__customer_id__in=customer_ids)
+
         if customer_id:
             qs = qs.filter(job__customer_id=customer_id)
 
@@ -178,12 +189,12 @@ class ServiceReportView(APIView):
                 total_jobs_revenue = 0
 
         return Response({
-            'number_of_services_completed': number_of_services_completed,
-            'number_of_unique_tail_numbers': number_of_unique_tail_numbers,
-            'number_of_unique_locations': number_of_unique_locations,
-            'total_jobs_revenue': total_jobs_revenue,
-            'show_spending_info': show_spending_info,
-            'show_retainers': show_retainers,
+                'number_of_services_completed': number_of_services_completed,
+                'number_of_unique_tail_numbers': number_of_unique_tail_numbers,
+                'number_of_unique_locations': number_of_unique_locations,
+                'total_jobs_revenue': total_jobs_revenue,
+                'show_spending_info': show_spending_info,
+                'show_retainers': show_retainers,
             }
             , status=status.HTTP_200_OK)
     
