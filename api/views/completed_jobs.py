@@ -5,7 +5,7 @@ from rest_framework .response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from ..pagination import CustomPageNumberPagination
-from api.models import (Job, JobStatusActivity, PriceListEntries, ServiceActivity)
+from api.models import (Job, JobStatusActivity, PriceListEntries, ServiceActivity, UserCustomer)
 from ..serializers import (
         JobCompletedSerializer,
         JobAdminSerializer
@@ -49,6 +49,15 @@ class CompletedJobsListView(ListAPIView):
         if self.request.user.profile.customer:
             qs = qs.filter(customer=self.request.user.profile.customer)
 
+        if self.request.user.groups.filter(name='Internal Coordinators').exists():
+            user_customers = UserCustomer.objects.filter(user=self.request.user).all()
+
+            if user_customers:
+                customer_ids = []
+                for user_customer in user_customers:
+                    customer_ids.append(user_customer.customer.id)
+
+                qs = qs.filter(customer_id__in=customer_ids)
 
         if searchText:
                 qs = qs.filter(Q(tailNumber__icontains=searchText)

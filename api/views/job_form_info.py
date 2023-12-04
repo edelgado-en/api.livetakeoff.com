@@ -10,7 +10,8 @@ from ..models import (
         Service,
         RetainerService,
         UserProfile,
-        Tag   
+        Tag,
+        UserCustomer   
 )
 
 class JobFormInfoView(APIView):
@@ -27,6 +28,18 @@ class JobFormInfoView(APIView):
             return Response({'error': 'You do not have permission to create a job'}, status=status.HTTP_403_FORBIDDEN)
 
         customers = Customer.objects.all().order_by('name')
+
+        if self.request.user.groups.filter(name='Internal Coordinators').exists():
+            user_customers = UserCustomer.objects.filter(user=self.request.user).all()
+
+            if user_customers:
+                customer_ids = []
+                for user_customer in user_customers:
+                    customer_ids.append(user_customer.customer.id)
+
+                customers = customers.filter(id__in=customer_ids)
+
+
         aircraft_types = AircraftType.objects.all().order_by('name')
         tags = Tag.objects.all().order_by('name')
         
