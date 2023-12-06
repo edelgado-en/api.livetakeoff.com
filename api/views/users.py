@@ -8,6 +8,10 @@ from ..pagination import CustomPageNumberPagination
 
 from api.serializers import UsersSerializer
 
+from api.models import (
+    UserCustomer
+)
+
 
 class UsersView(ListAPIView):
     permission_classes = (permissions.IsAuthenticated,)
@@ -32,11 +36,37 @@ class UsersView(ListAPIView):
                                     | Q(username__icontains=name))
 
         if open_jobs_only:
-            users = users.filter(Q(job_service_assignments__status__in=['A', 'W']) 
-                                | Q(job_retainer_service_assignments__status__in=['A', 'W'])).distinct()
-            
-            users = users.filter(Q(job_service_assignments__job__status__in=['A', 'S', 'U', 'W'])
-                                  | Q(job_retainer_service_assignments__job__status__in=['A', 'S', 'U', 'W'])).distinct()
+            if self.request.user.groups.filter(name='Internal Coordinators').exists():
+                # Check if the user had any entries in the UserCustomer table. If so, then only include users that are associated with those customers via job_service_assignments.job.customer
+                user_customers = UserCustomer.objects.filter(user=self.request.user).all()
+
+                if user_customers:
+                    customer_ids = []
+                    for user_customer in user_customers:
+                        customer_ids.append(user_customer.customer.id)
+
+                    users = users.filter(Q(job_service_assignments__job__customer_id__in=customer_ids)
+                                            | Q(job_retainer_service_assignments__job__customer_id__in=customer_ids)).distinct()
+                    
+                    users = users.filter(Q(job_service_assignments__status__in=['A', 'W'])
+                                            | Q(job_retainer_service_assignments__status__in=['A', 'W'])).distinct()
+                    
+                    users = users.filter(Q(job_service_assignments__job__status__in=['A', 'S', 'U', 'W'])
+                                            | Q(job_retainer_service_assignments__job__status__in=['A', 'S', 'U', 'W'])).distinct()
+                    
+                else:
+                    users = users.filter(Q(job_service_assignments__status__in=['A', 'W']) 
+                                        | Q(job_retainer_service_assignments__status__in=['A', 'W'])).distinct()
+                    
+                    users = users.filter(Q(job_service_assignments__job__status__in=['A', 'S', 'U', 'W'])
+                                        | Q(job_retainer_service_assignments__job__status__in=['A', 'S', 'U', 'W'])).distinct()
+                    
+            else:
+                users = users.filter(Q(job_service_assignments__status__in=['A', 'W']) 
+                                        | Q(job_retainer_service_assignments__status__in=['A', 'W'])).distinct()
+                    
+                users = users.filter(Q(job_service_assignments__job__status__in=['A', 'S', 'U', 'W'])
+                                    | Q(job_retainer_service_assignments__job__status__in=['A', 'S', 'U', 'W'])).distinct()
 
 
         if role != 'All':
