@@ -20,7 +20,7 @@ class LocationsView(ListAPIView):
                        .filter(name__icontains=name, active=active) \
                        .order_by('name')
         
-        if user.groups.filter(name='Project Managers').exists():
+        if user.groups.filter(name='Project Managers').exists() or user.groups.filter(name='Internal Coordinators').exists():
             # only get the locations specify in LocationUser
             qs = qs.filter(location_user__user=user)
 
