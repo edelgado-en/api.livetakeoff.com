@@ -139,7 +139,7 @@ class InventoryCurrentStatsView(APIView):
         location_accuracy_stats = sorted(location_accuracy_stats, key=lambda k: k['percentage'])
 
         # only get the top 5 location_accuracy_stats
-        location_accuracy_stats = location_accuracy_stats[:5]
+        #location_accuracy_stats = location_accuracy_stats[:5]
 
         return Response({'total_value_in_stock': total_value_in_stock,
                          'total_quantity_in_stock': total_quantity_in_stock,
