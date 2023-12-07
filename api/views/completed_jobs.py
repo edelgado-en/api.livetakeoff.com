@@ -68,7 +68,7 @@ class CompletedJobsListView(ListAPIView):
         if status == 'All':
             # if customer user, do not include T status
             if self.request.user.profile.customer:
-                qs = qs.filter(Q(status='C') | Q(status='I'))
+                qs = qs.filter(Q(status='C') | Q(status='I') | Q(status='A') | Q(status='S') | Q(status='U') | Q(status='W'))
             else:
                 qs = qs.filter(Q(status='C') | Q(status='I') | Q(status='T'))
 
