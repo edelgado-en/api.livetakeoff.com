@@ -11,7 +11,8 @@ from api.models import (
     ServiceActivity,
     UserProfile,
     JobStatusActivity,
-    UserCustomer
+    UserCustomer,
+    UserAvailableAirport
 )
 
 class ServiceReportView(APIView):
@@ -134,6 +135,15 @@ class ServiceReportView(APIView):
                     customer_ids.append(user_customer.customer.id)
 
                 qs = qs.filter(job__customer_id__in=customer_ids)
+
+            user_available_airports = UserAvailableAirport.objects.filter(user=self.request.user).all()
+
+            if user_available_airports:
+                airport_ids = []
+                for user_available_airport in user_available_airports:
+                    airport_ids.append(user_available_airport.airport.id)
+
+                qs = qs.filter(job__airport_id__in=airport_ids)
 
         if customer_id:
             qs = qs.filter(job__customer_id=customer_id)

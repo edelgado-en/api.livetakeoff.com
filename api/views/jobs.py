@@ -12,7 +12,8 @@ from ..models import (
         Job,
         JobServiceAssignment,
         JobRetainerServiceAssignment,
-        UserCustomer
+        UserCustomer,
+        UserAvailableAirport
     )
 
 
@@ -196,6 +197,15 @@ class JobListView(ListAPIView):
                     customer_ids.append(user_customer.customer.id)
 
                 qs = qs.filter(customer_id__in=customer_ids)
+
+            user_available_airports = UserAvailableAirport.objects.filter(user=self.request.user).all()
+
+            if user_available_airports:
+                airport_ids = []
+                for user_available_airport in user_available_airports:
+                    airport_ids.append(user_available_airport.airport.id)
+
+                qs = qs.filter(airport_id__in=airport_ids)
 
             # if project_manager then only include the jobs where the project_manager is assigned. You can find the project manager in the job_service_assignments
             if project_manager != 'All':

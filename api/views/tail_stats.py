@@ -11,7 +11,8 @@ from ..serializers import TailStatsSerializer
 from api.models import (
         Job,
         CustomerSettings,
-        UserCustomer
+        UserCustomer,
+        UserAvailableAirport
     )
 
 
@@ -37,6 +38,16 @@ class TailStatsView(ListAPIView):
                     customer_ids.append(user_customer.customer.id)
 
                 qs = qs.filter(customer_id__in=customer_ids)
+
+            user_available_airports = UserAvailableAirport.objects.filter(user=self.request.user).all()
+
+            if user_available_airports:
+                airport_ids = []
+                for user_available_airport in user_available_airports:
+                    airport_ids.append(user_available_airport.airport.id)
+
+                qs = qs.filter(airport_id__in=airport_ids)
+
 
         # if the current user is a customer and customerSettings.show_spending_info is true OR current user is admin or account manager, then include total_price
         # otherwise, don't include total_price

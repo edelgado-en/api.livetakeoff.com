@@ -3,7 +3,7 @@ from rest_framework import (permissions, status)
 
 from ..serializers import (AirportSerializer)
 from rest_framework.generics import ListAPIView
-from ..models import (Airport)
+from ..models import (Airport, UserAvailableAirport)
 
 
 class AirportsView(ListAPIView):
@@ -36,6 +36,16 @@ class AirportsView(ListAPIView):
                 qs = qs.filter(jobs__status__in=['C', 'I'], jobs__customer=self.request.user.profile.customer).distinct()
             else:
                 qs = qs.filter(jobs__status__in=['C', 'I', 'T']).distinct()
+
+        if self.request.user.groups.filter(name='Internal Coordinators').exists():
+            user_airports = UserAvailableAirport.objects.filter(user=self.request.user).all()
+
+            if user_airports:
+                airport_ids = []
+                for user_airport in user_airports:
+                    airport_ids.append(user_airport.airport.id)
+
+                qs = qs.filter(id__in=airport_ids)
 
         return qs
 

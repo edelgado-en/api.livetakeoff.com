@@ -11,7 +11,8 @@ from ..models import (
         RetainerService,
         UserProfile,
         Tag,
-        UserCustomer   
+        UserCustomer,
+        UserAvailableAirport   
 )
 
 class JobFormInfoView(APIView):
@@ -50,6 +51,18 @@ class JobFormInfoView(APIView):
             services = Service.objects.filter(public=True).order_by('name')
         else:
             airports = Airport.objects.all().order_by('name')
+            
+            if self.request.user.groups.filter(name='Internal Coordinators').exists():
+                user_airports = UserAvailableAirport.objects.filter(user=self.request.user).all()
+
+                if user_airports:
+                    airport_ids = []
+                    for user_airport in user_airports:
+                        airport_ids.append(user_airport.airport.id)
+
+                    airports = airports.filter(id__in=airport_ids)
+            
+            
             fbos = FBO.objects.all().order_by('name')
             services = Service.objects.all().order_by('name')
         
