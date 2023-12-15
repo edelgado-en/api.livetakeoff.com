@@ -76,7 +76,8 @@ from .views import (
         UserEmailView,
         JobFileUploadView,
         JobFileView,
-        UserCustomersView
+        UserCustomersView,
+        TailNoteLookupView
     )
 
 urlpatterns = [
@@ -120,6 +121,8 @@ urlpatterns = [
     path('tail-aircraft-lookup/<str:tailnumber>/', TailAircraftLookupView.as_view()),
     path('tail-alert-lookup/<str:tailnumber>/', TailAlertLookupView.as_view()),
     path('tail-open-job-lookup/<str:tailnumber>/', TailOpenJobLookupView.as_view()),
+
+    path('tail-note-lookup', TailNoteLookupView.as_view()),
 
     path('fbos', FBOsView.as_view()),
     path('fbo-search', FboSearchView.as_view()),
