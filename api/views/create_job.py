@@ -295,6 +295,16 @@ class CreateJobView(APIView):
             email_util = EmailUtil()
             email_util.send_email('rob@cleantakeoff.com', subject, body)
         
+            # Fetch a Tag with the name VIP and create a JobTag for this job
+            try:
+                vip_tag = Tag.objects.get(name='VIP')
+            except:
+                vip_tag = None
+            
+            if vip_tag:
+                job_tag = JobTag(job=job, tag=vip_tag)
+                job_tag.save()
+
         
         # if there is an estimate for this job, then you need to update the estimate status to accepted if it is in pending
         try:
