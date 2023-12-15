@@ -156,6 +156,8 @@ class JobListView(ListAPIView):
             if airport != 'All':
                 qs = qs.filter(airport_id=airport)
 
+            if customer != 'All':
+                qs = qs.filter(customer_id=customer)
 
             sortField = self.request.data.get('sortField')
             if sortField == 'requestDate':
