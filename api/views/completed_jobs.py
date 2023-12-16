@@ -135,16 +135,16 @@ class CompletedJobsListView(ListAPIView):
 
 
     def post(self, request, *args, **kwargs):
-        if not self.can_see_completed_list(request.user):
-            return Response({'error': 'You do not have permission to view completed jobs'}, status=status.HTTP_403_FORBIDDEN)
+        """ if not self.can_see_completed_list(request.user):
+            return Response({'error': 'You do not have permission to view completed jobs'}, status=status.HTTP_403_FORBIDDEN) """
 
 
         return self.list(request, *args, **kwargs)
 
 
     def patch(self, request, *args, **kwargs):
-        if not self.can_see_completed_list(request.user):
-            return Response({'error': 'You do not have permission to edit completed jobs'}, status=status.HTTP_403_FORBIDDEN)
+        """ if not self.can_see_completed_list(request.user):
+            return Response({'error': 'You do not have permission to edit completed jobs'}, status=status.HTTP_403_FORBIDDEN) """
 
         job = get_object_or_404(Job, pk=kwargs['id'])
 
@@ -184,5 +184,5 @@ class CompletedJobsListView(ListAPIView):
         return Response({'error': 'Missing Required Fields'}, status.HTTP_400_BAD_REQUEST)
 
 
-    def can_see_completed_list(self, user):
-        return not user.groups.filter(name='Project Managers').exists()
+    """ def can_see_completed_list(self, user):
+        return not user.groups.filter(name='Project Managers').exists() """
