@@ -13,7 +13,8 @@ from ..models import (
     EstimatedServiceTime,
     Service,
     RetainerService,
-    ServiceActivity
+    ServiceActivity,
+    UserAvailableAirport
     )
 
 from ..pricebreakdown_service import PriceBreakdownService
@@ -48,11 +49,26 @@ class JobServiceAssignmentView(APIView):
         service_assignments = JobServiceAssignmentSerializer(assignments, many=True)
         retainer_service_assignments = JobRetainerServiceAssignmentSerializer(retainer_assignments, many=True)
 
+        airport = job.airport
 
         # get project managers and their availability
         project_managers = User.objects.filter(groups__name='Project Managers', is_active=True)
 
         for project_manager in project_managers:
+            # Check if this project_manager has any entries in UserAvailableAirport table. If there are entries, then check if the airport for this job is in the list of available airports for this project manager
+            # if not, then remove the project manager from the list of project managers
+            # if there are no entries at all, then the project manager is available for all airports
+            user_available_airports = UserAvailableAirport.objects.filter(user=project_manager).all()
+
+            if user_available_airports:
+                airport_ids = []
+                for user_available_airport in user_available_airports:
+                    airport_ids.append(user_available_airport.airport.id)
+
+                if airport.id not in airport_ids:
+                    project_managers = project_managers.exclude(id=project_manager.id)
+
+
             # Get the in-process assignments for this user for other jobs
             assignments_in_process = project_manager \
                                        .job_service_assignments \
