@@ -42,6 +42,10 @@ class EditJobView(APIView):
         current_estimatedETA = job.estimatedETA
         current_completeBy = job.completeBy
 
+        # if request.data['price'] is null or empty, set it to job.price
+        if not request.data['price']:
+            request.data['price'] = job.price
+
         serializer = JobEditSerializer(job, data=request.data, partial=True)
 
         if serializer.is_valid():
