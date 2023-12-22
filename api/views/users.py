@@ -9,7 +9,8 @@ from ..pagination import CustomPageNumberPagination
 from api.serializers import UsersSerializer
 
 from api.models import (
-    UserCustomer
+    UserCustomer,
+    UserAvailableAirport
 )
 
 
@@ -61,6 +62,32 @@ class UsersView(ListAPIView):
                     users = users.filter(Q(job_service_assignments__job__status__in=['A', 'S', 'U', 'W'])
                                         | Q(job_retainer_service_assignments__job__status__in=['A', 'S', 'U', 'W'])).distinct()
                     
+                    
+                user_available_airports = UserAvailableAirport.objects.filter(user=self.request.user).all()
+
+                if user_available_airports:
+                    airport_ids = []
+                    for user_available_airport in user_available_airports:
+                        airport_ids.append(user_available_airport.airport.id)
+
+                    # filter users by using the list of airports ids in job_service_assignments.job.airport_id or job_retainer_service_assignments.job.airport_id
+                    users = users.filter(Q(job_service_assignments__job__airport_id__in=airport_ids)
+                                             | Q(job_retainer_service_assignments__job__airport_id__in=airport_ids)).distinct()
+
+                    users = users.filter(Q(job_service_assignments__status__in=['A', 'W'])
+                                             | Q(job_retainer_service_assignments__status__in=['A', 'W'])).distinct()
+
+                    users = users.filter(Q(job_service_assignments__job__status__in=['A', 'S', 'U', 'W'])
+                                             | Q(job_retainer_service_assignments__job__status__in=['A', 'S', 'U', 'W'])).distinct()
+
+                else:
+                    users = users.filter(Q(job_service_assignments__status__in=['A', 'W']) 
+                                        | Q(job_retainer_service_assignments__status__in=['A', 'W'])).distinct()
+                    
+                    users = users.filter(Q(job_service_assignments__job__status__in=['A', 'S', 'U', 'W'])
+                                        | Q(job_retainer_service_assignments__job__status__in=['A', 'S', 'U', 'W'])).distinct()            
+
+
             else:
                 users = users.filter(Q(job_service_assignments__status__in=['A', 'W']) 
                                         | Q(job_retainer_service_assignments__status__in=['A', 'W'])).distinct()
