@@ -27,5 +27,8 @@ class JobEditSerializer(serializers.ModelSerializer):
             'completeBy',
             'price',
             'on_site',
-            'requested_by'
+            'requested_by',
+            'hours_worked',
+            'minutes_worked',
+            'number_of_workers'
             )

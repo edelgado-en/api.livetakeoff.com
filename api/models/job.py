@@ -55,5 +55,11 @@ class Job(models.Model):
 
     on_site = models.BooleanField(default=False)
 
+    number_of_workers = models.PositiveIntegerField(blank=True, null=True)
+
+    hours_worked = models.PositiveIntegerField(blank=True, null=True)
+
+    minutes_worked = models.PositiveIntegerField(blank=True, null=True)
+
     def __str__(self) -> str:
         return str(self.id) + ' - ' + self.tailNumber + ' - ' + self.airport.initials + ' - ' + self.aircraftType.name

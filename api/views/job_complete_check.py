@@ -4,11 +4,14 @@ from rest_framework import (permissions, status)
 from rest_framework .response import Response
 from rest_framework.views import APIView
 
+from datetime import datetime, timezone
+
 from ..models import (
         Job,
         JobServiceAssignment,
         JobRetainerServiceAssignment,
         JobPhotos,
+        JobStatusActivity
     )
 
 
@@ -47,10 +50,39 @@ class JobCompleteCheck(APIView):
                  or request.user.groups.filter(name='Account Managers').exists():
             is_admin = True
 
+        # Get the JobStatusActivity for this job where the activity is 'S' and the status is 'W'
+        job_status_activity = JobStatusActivity.objects.filter(job=job, activity_type='S', status='W').first()
+
+        start_date = job_status_activity.timestamp
+
+        # Calculate the difference between the start_date and now in seconds
+        # Then return and object with hours and minutes
+        # use the same timezone
+        now = datetime.now(timezone.utc)
+        # the start_date needs to be in UTC as well
+        start_date = start_date.astimezone(timezone.utc)
+
+        difference = now - start_date
+
+        # breakdown the difference into hours and minutes. Minutes can only go up to 60, if it is higher, it should be an hour
+        minutes = difference.seconds / 60
+        hours = 0
+
+        if minutes > 60:
+            hours = minutes / 60
+            minutes = minutes % 60
+
+        # hours should be rounded down to an integer
+        hours = int(hours)
+
+        # minutes should be rounded down to an integer
+        minutes = int(minutes)
 
         return Response({
                          'photos_count': photos_count,
                          'other_pms_working_on_it': other_pms_working_on_it,
-                         'is_admin': is_admin
+                         'is_admin': is_admin,
+                         'minutes': minutes,
+                         'hours': hours
                         },
                          status=status.HTTP_200_OK)

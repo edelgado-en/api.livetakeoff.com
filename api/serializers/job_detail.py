@@ -60,7 +60,10 @@ class JobDetailSerializer(serializers.ModelSerializer):
             'completion_date',
             'encoded_id',
             'tags',
-            'files'
+            'files',
+            'hours_worked',
+            'minutes_worked',
+            'number_of_workers'
         )
 
 
