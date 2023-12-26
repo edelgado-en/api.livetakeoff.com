@@ -78,3 +78,4 @@ from .job_file_upload import JobFileUploadView
 from .job_file import JobFileView
 from .user_customers import UserCustomersView
 from .tail_note_lookup import TailNoteLookupView
+from .job_total_labor_time import JobTotalLaborTimeDetail

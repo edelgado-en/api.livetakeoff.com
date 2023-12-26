@@ -77,7 +77,8 @@ from .views import (
         JobFileUploadView,
         JobFileView,
         UserCustomersView,
-        TailNoteLookupView
+        TailNoteLookupView,
+        JobTotalLaborTimeDetail
     )
 
 urlpatterns = [
@@ -184,4 +185,5 @@ urlpatterns = [
 
     path('tags', TagListView.as_view()),
     
+    path('jobs/total-labor-time', JobTotalLaborTimeDetail.as_view()),
 ]
