@@ -61,5 +61,7 @@ class Job(models.Model):
 
     minutes_worked = models.PositiveIntegerField(blank=True, null=True)
 
+    labor_time = models.FloatField(blank=True, null=True)
+
     def __str__(self) -> str:
         return str(self.id) + ' - ' + self.tailNumber + ' - ' + self.airport.initials + ' - ' + self.aircraftType.name

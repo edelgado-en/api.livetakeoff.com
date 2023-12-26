@@ -30,5 +30,6 @@ class JobEditSerializer(serializers.ModelSerializer):
             'requested_by',
             'hours_worked',
             'minutes_worked',
-            'number_of_workers'
+            'number_of_workers',
+            'labor_time'
             )
