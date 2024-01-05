@@ -25,6 +25,7 @@ class TeamProductivityView(APIView):
         
 
         dateSelected = request.data.get('dateSelected')
+        customer_id = request.data.get('customer_id', None)
 
         # get start date and end date based on the dateSelected value provided
         if dateSelected == 'yesterday':
@@ -104,6 +105,9 @@ class TeamProductivityView(APIView):
             total=Count('job__id')
         ).values('total')
 
+        if customer_id:
+            qs = qs.filter(job__customer_id=customer_id)
+
         total_jobs = 0
         for item in qs:
             total_jobs += item['total']
@@ -116,6 +120,9 @@ class TeamProductivityView(APIView):
         ).values('service__name').annotate(
             total=Count('service__id')
         ).values('service__name', 'total')
+
+        if customer_id:
+            qs = qs.filter(job__customer_id=customer_id)
 
         grand_total_services = 0
         for item in qs:
@@ -130,6 +137,9 @@ class TeamProductivityView(APIView):
             total=Count('retainer_service__id')
         ).values('retainer_service__name', 'total')
 
+        if customer_id:
+            qs = qs.filter(job__customer_id=customer_id)
+
         grand_total_retainer_services = 0
         for item in qs:
             grand_total_retainer_services += item['total']
@@ -139,7 +149,12 @@ class TeamProductivityView(APIView):
         total_jobs_revenue = JobStatusActivity.objects.filter(
              Q(status__in=['I']) &
              Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date)
-        ).aggregate(Sum('job__price'))['job__price__sum']          
+        )
+
+        if customer_id:
+            total_jobs_revenue = total_jobs_revenue.filter(job__customer_id=customer_id)          
+
+        total_jobs_revenue = total_jobs_revenue.aggregate(Sum('job__price'))['job__price__sum']
 
 
         # Get the top 5 services in the last 30 days by querying the ServiceActivity table and join to Services Table to get the service name. The resulset should be service name with its corresponding times the service was completed in the last 30 days
@@ -148,7 +163,12 @@ class TeamProductivityView(APIView):
             Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date)
         ).values('service__name').annotate(
             total=Count('service__id')
-        ).values('service__name', 'total').order_by('-total')[:5]
+        ).values('service__name', 'total')
+
+        if customer_id:
+            qs = qs.filter(job__customer_id=customer_id)
+
+        qs = qs.order_by('-total')[:5]
 
         top_services = []
         # add a percentage value to each service which is calculated based on the top 5 services provided
@@ -166,7 +186,12 @@ class TeamProductivityView(APIView):
             Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date)
         ).values('retainer_service__name').annotate(
             total=Count('retainer_service__id')
-        ).values('retainer_service__name', 'total').order_by('-total')[:5]
+        ).values('retainer_service__name', 'total')
+
+        if customer_id:
+            qs = qs.filter(job__customer_id=customer_id)
+
+        qs = qs.order_by('-total')[:5]
 
         top_retainer_services = []
         # add a percentage value to each retainer service which is calculated based on the top 5 retainer services provided
@@ -186,6 +211,9 @@ class TeamProductivityView(APIView):
             total=Count('service__id')
         ).values('project_manager__id', 'total')
 
+        if customer_id:
+            qs = qs.filter(job__customer_id=customer_id)
+
         users = []
         for item in qs:
             try:
@@ -202,6 +230,9 @@ class TeamProductivityView(APIView):
                 total=Count('service__id')
             ).values('total')
 
+            if customer_id:
+                qs = qs.filter(job__customer_id=customer_id)
+
             total_services = 0
             for service in qs:
                 total_services += service['total']
@@ -215,14 +246,21 @@ class TeamProductivityView(APIView):
                 total=Count('retainer_service__id')
             ).values('total')
 
+            if customer_id:
+                qs_retainer = qs_retainer.filter(job__customer_id=customer_id)
+
 
             # Sum the price of each service completed by this user in the last 30 days
             total_revenue = ServiceActivity.objects.filter(
                 Q(status='C') &
                 Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date) &
                 Q(project_manager_id=item['project_manager__id'])
-            ).aggregate(Sum('price'))['price__sum']
+            )
 
+            if customer_id:
+                total_revenue = total_revenue.filter(job__customer_id=customer_id)
+
+            total_revenue = total_revenue.aggregate(Sum('price'))['price__sum']
 
             total_retainer_services = 0
             for item in qs_retainer:

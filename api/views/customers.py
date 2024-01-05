@@ -14,7 +14,7 @@ class CustomersView(ListAPIView):
     pagination_class = CustomPageNumberPagination
 
     def get_queryset(self):
-        name = self.request.data['name']
+        name = self.request.data.get('name', '')
         open_jobs = self.request.data.get('open_jobs', False)
         closed_jobs = self.request.data.get('closed_jobs', False)
 
