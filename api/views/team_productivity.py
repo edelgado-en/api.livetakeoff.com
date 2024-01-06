@@ -113,7 +113,7 @@ class TeamProductivityView(APIView):
             total_jobs += item['total']
 
         
-        total_labor_time = 0
+        grand_total_labor_time = 0
         # Sum the Job.labor_time from JobStatusActivity where the status = 'I'
         qs = JobStatusActivity.objects.filter(
             Q(status__in=['I']) &
@@ -124,7 +124,7 @@ class TeamProductivityView(APIView):
             qs = qs.filter(job__customer_id=customer_id)
 
         if qs:
-            total_labor_time = qs 
+            grand_total_labor_time = qs 
         
         # Get the total number of services with statuc C in the last 30 days by querying at the serviceActivity table
         qs = ServiceActivity.objects.filter(
@@ -290,14 +290,14 @@ class TeamProductivityView(APIView):
                 total_revenue = 0
 
             # Sum the Job.labor_time from JobStatusActivity where the status = 'C' for this project_manager_id
-            total_labor_time = JobStatusActivity.objects.filter(
+            s_total_labor_time = JobStatusActivity.objects.filter(
                 Q(status='C') &
                 Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date) &
                 Q(user_id=user_id)
             ).aggregate(Sum('job__labor_time'))['job__labor_time__sum']
 
-            if total_labor_time is None:
-                total_labor_time = 0
+            if s_total_labor_time is None:
+                s_total_labor_time = 0
 
             users.append({
                 'id': user_profile.user.id,
@@ -307,7 +307,7 @@ class TeamProductivityView(APIView):
                 'total_services': total_services,
                 'total_retainer_services': total_retainer_services,
                 'total_revenue': total_revenue,
-                'total_labor_time': total_labor_time
+                'total_labor_time': s_total_labor_time
             })
 
 
@@ -383,14 +383,14 @@ class TeamProductivityView(APIView):
                     total_revenue = 0
 
                 # Sum the Job.labor_time from JobStatusActivity where the status = 'C' for this project_manager_id
-                total_labor_time = JobStatusActivity.objects.filter(
+                r_total_labor_time = JobStatusActivity.objects.filter(
                     Q(status='C') &
                     Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date) &
                     Q(user_id=user_id)
                 ).aggregate(Sum('job__labor_time'))['job__labor_time__sum']
 
-                if total_labor_time is None:
-                    total_labor_time = 0
+                if r_total_labor_time is None:
+                    r_total_labor_time = 0
 
                 users.append({
                     'id': user_profile.user.id,
@@ -400,7 +400,7 @@ class TeamProductivityView(APIView):
                     'total_services': total_services,
                     'total_retainer_services': total_retainer_services,
                     'total_revenue': total_revenue,
-                    'total_labor_time': total_labor_time
+                    'total_labor_time': r_total_labor_time
                 })
 
         # sort users by highest total_revenue
@@ -412,7 +412,7 @@ class TeamProductivityView(APIView):
             'total_services': grand_total_services,
             'total_retainer_services': grand_total_retainer_services,
             'total_jobs_price': total_jobs_revenue,
-            'total_labor_time': total_labor_time,
+            'total_labor_time': grand_total_labor_time,
             'top_services': top_services,
             'top_retainer_services': top_retainer_services,
             'users': users
