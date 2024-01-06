@@ -118,10 +118,12 @@ class TeamProductivityView(APIView):
         qs = JobStatusActivity.objects.filter(
             Q(status__in=['I']) &
             Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date)
-        ).aggregate(Sum('job__labor_time'))['job__labor_time__sum']
+        )
 
         if customer_id:
             qs = qs.filter(job__customer_id=customer_id)
+
+        qs = qs.aggregate(Sum('job__labor_time'))['job__labor_time__sum']
 
         if qs:
             grand_total_labor_time = qs 
@@ -294,7 +296,12 @@ class TeamProductivityView(APIView):
                 Q(status='C') &
                 Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date) &
                 Q(user_id=user_id)
-            ).aggregate(Sum('job__labor_time'))['job__labor_time__sum']
+            )
+
+            if customer_id:
+                s_total_labor_time = s_total_labor_time.filter(job__customer_id=customer_id)
+
+            s_total_labor_time = s_total_labor_time.aggregate(Sum('job__labor_time'))['job__labor_time__sum']
 
             if s_total_labor_time is None:
                 s_total_labor_time = 0
@@ -387,7 +394,12 @@ class TeamProductivityView(APIView):
                     Q(status='C') &
                     Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date) &
                     Q(user_id=user_id)
-                ).aggregate(Sum('job__labor_time'))['job__labor_time__sum']
+                )
+
+                if customer_id:
+                    r_total_labor_time = r_total_labor_time.filter(job__customer_id=customer_id)
+
+                r_total_labor_time = r_total_labor_time.aggregate(Sum('job__labor_time'))['job__labor_time__sum']
 
                 if r_total_labor_time is None:
                     r_total_labor_time = 0
