@@ -111,7 +111,20 @@ class TeamProductivityView(APIView):
         total_jobs = 0
         for item in qs:
             total_jobs += item['total']
+
         
+        total_labor_time = 0
+        # Sum the Job.labor_time from JobStatusActivity where the status = 'I'
+        qs = JobStatusActivity.objects.filter(
+            Q(status__in=['I']) &
+            Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date)
+        ).aggregate(Sum('job__labor_time'))['job__labor_time__sum']
+
+        if customer_id:
+            qs = qs.filter(job__customer_id=customer_id)
+
+        if qs:
+            total_labor_time = qs 
         
         # Get the total number of services with statuc C in the last 30 days by querying at the serviceActivity table
         qs = ServiceActivity.objects.filter(
@@ -218,6 +231,7 @@ class TeamProductivityView(APIView):
 
         users = []
         for item in qs:
+            user_id = item['project_manager__id']
             processed_user_ids.append(item['project_manager__id'])
 
             try:
@@ -275,6 +289,16 @@ class TeamProductivityView(APIView):
             if total_revenue is None:
                 total_revenue = 0
 
+            # Sum the Job.labor_time from JobStatusActivity where the status = 'C' for this project_manager_id
+            total_labor_time = JobStatusActivity.objects.filter(
+                Q(status='C') &
+                Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date) &
+                Q(user_id=user_id)
+            ).aggregate(Sum('job__labor_time'))['job__labor_time__sum']
+
+            if total_labor_time is None:
+                total_labor_time = 0
+
             users.append({
                 'id': user_profile.user.id,
                 'first_name': user_profile.user.first_name,
@@ -282,7 +306,8 @@ class TeamProductivityView(APIView):
                 'avatar': avatar_url,
                 'total_services': total_services,
                 'total_retainer_services': total_retainer_services,
-                'total_revenue': total_revenue
+                'total_revenue': total_revenue,
+                'total_labor_time': total_labor_time
             })
 
 
@@ -298,6 +323,7 @@ class TeamProductivityView(APIView):
             qs = qs.filter(job__customer_id=customer_id)
 
         for item in qs:
+            user_id = item['project_manager__id']
             if item['project_manager__id'] not in processed_user_ids:
                 processed_user_ids.append(item['project_manager__id'])
 
@@ -356,6 +382,16 @@ class TeamProductivityView(APIView):
                 if total_revenue is None:
                     total_revenue = 0
 
+                # Sum the Job.labor_time from JobStatusActivity where the status = 'C' for this project_manager_id
+                total_labor_time = JobStatusActivity.objects.filter(
+                    Q(status='C') &
+                    Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date) &
+                    Q(user_id=user_id)
+                ).aggregate(Sum('job__labor_time'))['job__labor_time__sum']
+
+                if total_labor_time is None:
+                    total_labor_time = 0
+
                 users.append({
                     'id': user_profile.user.id,
                     'first_name': user_profile.user.first_name,
@@ -363,7 +399,8 @@ class TeamProductivityView(APIView):
                     'avatar': avatar_url,
                     'total_services': total_services,
                     'total_retainer_services': total_retainer_services,
-                    'total_revenue': total_revenue
+                    'total_revenue': total_revenue,
+                    'total_labor_time': total_labor_time
                 })
 
         # sort users by highest total_revenue
@@ -375,6 +412,7 @@ class TeamProductivityView(APIView):
             'total_services': grand_total_services,
             'total_retainer_services': grand_total_retainer_services,
             'total_jobs_price': total_jobs_revenue,
+            'total_labor_time': total_labor_time,
             'top_services': top_services,
             'top_retainer_services': top_retainer_services,
             'users': users
