@@ -43,8 +43,9 @@ class EditJobView(APIView):
         current_completeBy = job.completeBy
 
         # if request.data['price'] is null or empty, set it to job.price
-        if not request.data['price']:
+        if not request.data.get('price'):
             request.data['price'] = job.price
+
 
         serializer = JobEditSerializer(job, data=request.data, partial=True)
 
