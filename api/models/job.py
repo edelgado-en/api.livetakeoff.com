@@ -5,6 +5,7 @@ from .airport import Airport
 from .fbo import FBO
 from .service import Service
 from .retainer_service import RetainerService
+from .job_schedule import JobSchedule
 
 class Job(models.Model):
     STATUS_CHOICES = [
@@ -62,6 +63,8 @@ class Job(models.Model):
     minutes_worked = models.PositiveIntegerField(blank=True, null=True)
 
     labor_time = models.FloatField(blank=True, null=True)
+
+    job_schedule = models.ForeignKey(JobSchedule, on_delete=models.PROTECT, blank=True, null=True)
 
     def __str__(self) -> str:
         return str(self.id) + ' - ' + self.tailNumber + ' - ' + self.airport.initials + ' - ' + self.aircraftType.name

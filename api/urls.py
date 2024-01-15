@@ -78,7 +78,9 @@ from .views import (
         JobFileView,
         UserCustomersView,
         TailNoteLookupView,
-        JobTotalLaborTimeDetail
+        JobTotalLaborTimeDetail,
+        JobScheduleListView,
+        CreateJobScheduleView
     )
 
 urlpatterns = [
@@ -105,6 +107,10 @@ urlpatterns = [
     path('job-files/upload/<int:jobid>/', JobFileUploadView.as_view()),
 
     path('job-files/<int:id>/', JobFileView.as_view()),
+
+    path('jobs/schedules', JobScheduleListView.as_view()),
+
+    path('jobs/schedules/create', CreateJobScheduleView.as_view()),
 
     path('job-comments/<int:jobid>/', JobCommentView.as_view()),
     path('services', ServicesView.as_view()),

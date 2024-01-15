@@ -8,6 +8,8 @@ from datetime import datetime
 import json
 from datetime import date
 
+from django.contrib.auth.models import User
+
 from inventory.models import (
     DailyGeneralStats,
     DailyLocationStats,
@@ -17,6 +19,20 @@ from inventory.models import (
     Location,
     DailyStatsAudit
 )
+
+from api.models import (
+    JobSchedule,
+    Job,
+    JobScheduleService,
+    JobScheduleRetainerService,
+    JobComments,
+    JobServiceAssignment,
+    JobRetainerServiceAssignment,
+    JobTag,
+    Tag
+)
+
+from api.email_util import EmailUtil
 
 scheduler = BackgroundScheduler()
 
@@ -283,14 +299,136 @@ def deleteRepeatedDailyGeneralStats():
 
     print('JOB COMPLETED: deleteRepeatedDailyGeneralStats')
 
+def createJobSchedules():
+    print('JOB SCHEDULE STARTED: createJobSchedules')
+    # Fetcha all JobSchedules where is_deleted is False
+    job_schedules = JobSchedule.objects.filter(is_deleted=False)
+
+    # iterate through job_schedules and create a job for each one
+    for job_schedule in job_schedules:
+        # get today's date ignoring the time
+        today = date.today()
+
+        # get job_schedule's start_date ignoring the time
+        job_schedule_start_date = job_schedule.start_date.date()
+
+        # check if job_Schedule_start_date is bigger or euqal to today
+        if job_schedule_start_date >= today:
+            if job_schedule.is_recurrent:
+                # get the repeat_every value
+                repeat_every = job_schedule.repeat_every
+
+                # get the last_job_created_at value
+                last_job_created_at = job_schedule.last_job_created_at
+
+                # check if it has been repeat_every days since the last job was created
+                if (last_job_created_at is None or ((today - last_job_created_at.date()).days >= repeat_every)):
+                    handleCreateJob(job_schedule, today)
+
+            else:
+                # Update job_schedule.is_deleted to True
+                job_schedule.is_deleted = True
+                job_schedule.save()
+
+                handleCreateJob(job_schedule, today)
+
+
+    print('JOB SCHEDULE COMPLETED: createJobSchedules')
+
+
+def handleCreateJob(job_schedule, today):
+    # create a job
+    job = Job.objects.create(
+        customer=job_schedule.customer,
+        tailNumber=job_schedule.tailNumber,
+        aircraftType=job_schedule.aircraftType,
+        airport=job_schedule.airport,
+        fbo=job_schedule.fbo,
+        created_by=job_schedule.created_by,
+        job_schedule=job_schedule,
+    )
+
+    # check if job_schedule.comment is not None and it is not empty
+    if job_schedule.comment is not None and job_schedule.comment != '':
+        # create job comments
+        JobComments.objects.create(
+            job=job,
+            comment=job_schedule.comment,
+            author=job_schedule.created_by,
+        )
+
+    # create job service assignments
+    job_schedule_services = JobScheduleService.objects.filter(job_schedule=job_schedule)
+
+    for job_schedule_service in job_schedule_services:
+        JobServiceAssignment.objects.create(
+            job=job,
+            service=job_schedule_service.service,
+        )
+
+    # create job retainer service assignments
+    job_schedule_retainer_services = JobScheduleRetainerService.objects.filter(job_schedule=job_schedule)
+
+    for job_schedule_retainer_service in job_schedule_retainer_services:
+        JobRetainerServiceAssignment.objects.create(
+            job=job,
+            retainer_service=job_schedule_retainer_service.retainer_service,
+        )
+
+    #Fetch a Tag with name 'Scheduled', if it does not exist, create it
+    scheduled_tag = Tag.objects.filter(name='Scheduled').first()
+
+    if scheduled_tag is None:
+        scheduled_tag = Tag.objects.create(name='Scheduled', short_name='Scheduled')
+
+    # create job tag
+    JobTag.objects.create(
+        job=job,
+        tag=scheduled_tag,
+    )
+
+    # update job_schedule.last_job_created_at
+    job_schedule.last_job_created_at = today
+    job_schedule.save()
+
+    #Notify all admins
+    email_util = EmailUtil()
+
+    admins = User.objects.filter(Q(is_superuser=True) | Q(is_staff=True) | Q(groups__name='Account Managers'))
+
+    for admin in admins:
+        if admin.email is not None:
+            subject = f'Scheduled Job Created - {job_schedule.customer.name} - {job_schedule.tailNumber}'
+
+            body = f'''
+                    <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">Scheduled Job</div>
+                    <table style="border-collapse: collapse">
+                        <tr>
+                            <td style="padding:15px">Customer</td>
+                            <td style="padding:15px">{job_schedule.customer.name}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:15px">Tail</td>
+                            <td style="padding:15px">{job_schedule.tailNumber}</td>
+                        </tr>
+                    </table>
+                    <div style="margin-top:20px;padding:5px;font-weight: 700;">Check it out at</div>
+                    <div style="padding:5px">http://livetakeoff.com/jobs/{job.id}/details</div>
+                    '''
+
+            email_util.send_email(admin.email, subject, body)
+
+
+
 # run job every day at 8pm
 scheduler.add_job(collect_daily_inventory_stats, 'cron', hour=20, minute=0, second=0)
-
-# run job every 2 minutes
-#scheduler.add_job(collect_daily_inventory_stats, 'interval', minutes=2)
 
 # run job every 6 hours
 scheduler.add_job(deleteRepeatedDailyGeneralStats, 'interval', hours=6)
 
+# run job every day at 10pm
+scheduler.add_job(createJobSchedules, 'cron', hour=20, minute=0, second=0)
+
+#scheduler.add_job(createJobSchedules, 'interval', minutes=2)
 
 scheduler.start()

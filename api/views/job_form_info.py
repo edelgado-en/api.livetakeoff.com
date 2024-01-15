@@ -43,6 +43,8 @@ class JobFormInfoView(APIView):
 
         aircraft_types = AircraftType.objects.all().order_by('name')
         tags = Tag.objects.all().order_by('name')
+
+        tags = tags.exclude(name='Scheduled')
         
         airports = Airport.objects.all().order_by('name')
         

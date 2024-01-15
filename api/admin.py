@@ -37,7 +37,8 @@ from api.models import (
     JobServiceEstimate,
     ServiceActivity,
     UserEmail,
-    JobFiles
+    JobFiles,
+    JobSchedule
 )
 
 class UserProfileInline(admin.StackedInline):
@@ -238,6 +239,11 @@ class JobAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+@admin.register(JobSchedule)
+class JobScheduleAdmin(admin.ModelAdmin):
+    list_display = ['id', 'customer', 'tailNumber', 'aircraftType', 'airport', 'fbo', 'start_date', 'repeat_every', 'is_recurrent', 'last_job_created_at', 'comment', 'created_by', 'created_at']
+    list_per_page = 100
 
 
 @admin.register(JobStatusActivity)
