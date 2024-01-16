@@ -435,8 +435,8 @@ scheduler.add_job(collect_daily_inventory_stats, 'cron', hour=20, minute=0, seco
 # run job every 6 hours
 scheduler.add_job(deleteRepeatedDailyGeneralStats, 'interval', hours=6)
 
-# run job every day at 10pm
-scheduler.add_job(createJobSchedules, 'cron', hour=22, minute=0, second=0)
+# run job every day at 4am
+scheduler.add_job(createJobSchedules, 'cron', hour=4, minute=0, second=0)
 
 #scheduler.add_job(createJobSchedules, 'interval', minutes=2)
 
