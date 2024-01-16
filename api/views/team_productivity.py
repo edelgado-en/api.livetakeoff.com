@@ -26,6 +26,7 @@ class TeamProductivityView(APIView):
 
         dateSelected = request.data.get('dateSelected')
         customer_id = request.data.get('customer_id', None)
+        tailNumber = request.data.get('tailNumber', None)
 
         # get start date and end date based on the dateSelected value provided
         if dateSelected == 'yesterday':
@@ -108,6 +109,10 @@ class TeamProductivityView(APIView):
         if customer_id:
             qs = qs.filter(job__customer_id=customer_id)
 
+        if tailNumber:
+            qs = qs.filter(Q(job__tailNumber__icontains=tailNumber))
+            
+
         total_jobs = 0
         for item in qs:
             total_jobs += item['total']
@@ -122,6 +127,9 @@ class TeamProductivityView(APIView):
 
         if customer_id:
             qs = qs.filter(job__customer_id=customer_id)
+
+        if tailNumber:
+            qs = qs.filter(Q(job__tailNumber__icontains=tailNumber))
 
         qs = qs.aggregate(Sum('job__labor_time'))['job__labor_time__sum']
 
@@ -139,6 +147,9 @@ class TeamProductivityView(APIView):
         if customer_id:
             qs = qs.filter(job__customer_id=customer_id)
 
+        if tailNumber:
+            qs = qs.filter(Q(job__tailNumber__icontains=tailNumber))
+
         grand_total_services = 0
         for item in qs:
             grand_total_services += item['total']
@@ -155,6 +166,9 @@ class TeamProductivityView(APIView):
         if customer_id:
             qs = qs.filter(job__customer_id=customer_id)
 
+        if tailNumber:
+            qs = qs.filter(Q(job__tailNumber__icontains=tailNumber))
+
         grand_total_retainer_services = 0
         for item in qs:
             grand_total_retainer_services += item['total']
@@ -169,6 +183,9 @@ class TeamProductivityView(APIView):
         if customer_id:
             total_jobs_revenue = total_jobs_revenue.filter(job__customer_id=customer_id)          
 
+        if tailNumber:
+            total_jobs_revenue = total_jobs_revenue.filter(Q(job__tailNumber__icontains=tailNumber))
+
         total_jobs_revenue = total_jobs_revenue.aggregate(Sum('job__price'))['job__price__sum']
 
 
@@ -182,6 +199,9 @@ class TeamProductivityView(APIView):
 
         if customer_id:
             qs = qs.filter(job__customer_id=customer_id)
+
+        if tailNumber:
+            qs = qs.filter(Q(job__tailNumber__icontains=tailNumber))
 
         qs = qs.order_by('-total')[:5]
 
@@ -206,6 +226,9 @@ class TeamProductivityView(APIView):
         if customer_id:
             qs = qs.filter(job__customer_id=customer_id)
 
+        if tailNumber:
+            qs = qs.filter(Q(job__tailNumber__icontains=tailNumber))
+
         qs = qs.order_by('-total')[:5]
 
         top_retainer_services = []
@@ -228,6 +251,9 @@ class TeamProductivityView(APIView):
 
         if customer_id:
             qs = qs.filter(job__customer_id=customer_id)
+
+        if tailNumber:
+            qs = qs.filter(Q(job__tailNumber__icontains=tailNumber))
 
         processed_user_ids = []
 
@@ -253,6 +279,9 @@ class TeamProductivityView(APIView):
             if customer_id:
                 qs = qs.filter(job__customer_id=customer_id)
 
+            if tailNumber:
+                qs = qs.filter(Q(job__tailNumber__icontains=tailNumber))
+
             total_services = 0
             for service in qs:
                 total_services += service['total']
@@ -269,6 +298,9 @@ class TeamProductivityView(APIView):
             if customer_id:
                 qs_retainer = qs_retainer.filter(job__customer_id=customer_id)
 
+            if tailNumber:
+                qs_retainer = qs_retainer.filter(Q(job__tailNumber__icontains=tailNumber))
+
 
             # Sum the price of each service completed by this user in the last 30 days
             total_revenue = ServiceActivity.objects.filter(
@@ -279,6 +311,9 @@ class TeamProductivityView(APIView):
 
             if customer_id:
                 total_revenue = total_revenue.filter(job__customer_id=customer_id)
+
+            if tailNumber:
+                total_revenue = total_revenue.filter(Q(job__tailNumber__icontains=tailNumber))
 
             total_revenue = total_revenue.aggregate(Sum('price'))['price__sum']
 
@@ -300,6 +335,9 @@ class TeamProductivityView(APIView):
 
             if customer_id:
                 s_total_labor_time = s_total_labor_time.filter(job__customer_id=customer_id)
+
+            if tailNumber:
+                s_total_labor_time = s_total_labor_time.filter(Q(job__tailNumber__icontains=tailNumber))
 
             s_total_labor_time = s_total_labor_time.aggregate(Sum('job__labor_time'))['job__labor_time__sum']
 
@@ -329,6 +367,9 @@ class TeamProductivityView(APIView):
         if customer_id:
             qs = qs.filter(job__customer_id=customer_id)
 
+        if tailNumber:
+            qs = qs.filter(Q(job__tailNumber__icontains=tailNumber))
+
         for item in qs:
             user_id = item['project_manager__id']
             if item['project_manager__id'] not in processed_user_ids:
@@ -351,6 +392,9 @@ class TeamProductivityView(APIView):
                 if customer_id:
                     qs = qs.filter(job__customer_id=customer_id)
 
+                if tailNumber:
+                    qs = qs.filter(Q(job__tailNumber__icontains=tailNumber))
+
                 total_services = 0
                 for service in qs:
                     total_services += service['total']
@@ -367,6 +411,8 @@ class TeamProductivityView(APIView):
                 if customer_id:
                     qs_retainer = qs_retainer.filter(job__customer_id=customer_id)
 
+                if tailNumber:
+                    qs_retainer = qs_retainer.filter(Q(job__tailNumber__icontains=tailNumber))
 
                 # Sum the price of each service completed by this user in the last 30 days
                 total_revenue = ServiceActivity.objects.filter(
@@ -377,6 +423,9 @@ class TeamProductivityView(APIView):
 
                 if customer_id:
                     total_revenue = total_revenue.filter(job__customer_id=customer_id)
+
+                if tailNumber:
+                    total_revenue = total_revenue.filter(Q(job__tailNumber__icontains=tailNumber))
 
                 total_revenue = total_revenue.aggregate(Sum('price'))['price__sum']
 
@@ -398,6 +447,9 @@ class TeamProductivityView(APIView):
 
                 if customer_id:
                     r_total_labor_time = r_total_labor_time.filter(job__customer_id=customer_id)
+
+                if tailNumber:
+                    r_total_labor_time = r_total_labor_time.filter(Q(job__tailNumber__icontains=tailNumber))
 
                 r_total_labor_time = r_total_labor_time.aggregate(Sum('job__labor_time'))['job__labor_time__sum']
 
