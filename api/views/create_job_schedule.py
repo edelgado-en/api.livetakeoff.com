@@ -10,7 +10,9 @@ from api.models import (
         JobScheduleService,
         JobScheduleRetainerService,
         Service,
-        RetainerService
+        RetainerService,
+        Tag,
+        JobScheduleTag
     )
 
 class CreateJobScheduleView(APIView):
@@ -26,6 +28,7 @@ class CreateJobScheduleView(APIView):
         is_recurrent = request.data.get('is_recurrent', False)
         repeat_every = request.data.get('repeat_every', None)
         comment = request.data.get('comment', None)
+        tag_ids = request.data.get('tags')
 
         s = request.data.get('services')
         services = []
@@ -38,6 +41,11 @@ class CreateJobScheduleView(APIView):
 
         if r:
             retainer_services = RetainerService.objects.filter(id__in=r)
+
+        tags = []
+
+        if tag_ids:
+            tags = Tag.objects.filter(id__in=tag_ids)
 
         # Create JobSchedule
         job_schedule = JobSchedule.objects.create(
@@ -63,6 +71,12 @@ class CreateJobScheduleView(APIView):
             JobScheduleRetainerService.objects.create(
                 job_schedule=job_schedule,
                 retainer_service=retainer_service,
+            )
+
+        for tag in tags:
+            JobScheduleTag.objects.create(
+                job_schedule=job_schedule,
+                tag=tag,
             )
 
         return Response({'id': job_schedule.id}, status=status.HTTP_201_CREATED)

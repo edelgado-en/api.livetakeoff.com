@@ -29,7 +29,8 @@ from api.models import (
     JobServiceAssignment,
     JobRetainerServiceAssignment,
     JobTag,
-    Tag
+    Tag,
+    JobScheduleTag
 )
 
 from api.email_util import EmailUtil
@@ -375,6 +376,14 @@ def handleCreateJob(job_schedule, today):
             retainer_service=job_schedule_retainer_service.retainer_service,
         )
 
+    job_schedule_tags = JobScheduleTag.objects.filter(job_schedule=job_schedule)
+
+    for job_schedule_tag in job_schedule_tags:
+        JobTag.objects.create(
+            job=job,
+            tag=job_schedule_tag.tag,
+        )
+
     #Fetch a Tag with name 'Scheduled', if it does not exist, create it
     scheduled_tag = Tag.objects.filter(name='Scheduled').first()
 
@@ -427,7 +436,7 @@ scheduler.add_job(collect_daily_inventory_stats, 'cron', hour=20, minute=0, seco
 scheduler.add_job(deleteRepeatedDailyGeneralStats, 'interval', hours=6)
 
 # run job every day at 10pm
-scheduler.add_job(createJobSchedules, 'cron', hour=20, minute=0, second=0)
+scheduler.add_job(createJobSchedules, 'cron', hour=22, minute=0, second=0)
 
 #scheduler.add_job(createJobSchedules, 'interval', minutes=2)
 
