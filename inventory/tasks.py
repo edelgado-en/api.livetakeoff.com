@@ -38,8 +38,8 @@ from api.email_util import EmailUtil
 import threading
 import time
 
-# Use a flag to track whether the task is already running
-already_run_flag = threading.Event()
+# Use a lock to synchronize access to the task
+task_lock = threading.Lock()
 
 scheduler = BackgroundScheduler()
 
@@ -307,14 +307,11 @@ def deleteRepeatedDailyGeneralStats():
     print('JOB COMPLETED: deleteRepeatedDailyGeneralStats')
 
 def createJobSchedules():
-    if already_run_flag.is_set():
+    if not task_lock.acquire(blocking=False):
         print("Task is already running. Skipping.")
         return
     
     try:
-        # Set the flag to indicate that the task is running
-        already_run_flag.set()
-
         print('JOB SCHEDULE STARTED: createJobSchedules')
 
         # Fetcha all JobSchedules where is_deleted is False
@@ -349,13 +346,12 @@ def createJobSchedules():
                     handleCreateJob(job_schedule, today)
         
         # Simulate a delay within the task (adjust as needed)
-        time.sleep(10)
+        time.sleep(20)
 
         print('JOB SCHEDULE COMPLETED: createJobSchedules')
 
     finally:
-        # Clear the flag to allow the task to run again
-        already_run_flag.clear()
+        task_lock.release()
 
 
 def handleCreateJob(job_schedule, today):
