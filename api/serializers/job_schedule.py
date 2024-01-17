@@ -13,8 +13,8 @@ class JobScheduleSerializer(serializers.ModelSerializer):
     airport = AirportSerializer()
     fbo = FBOSerializer()
     customer = CustomerSerializer()
-    start_date = serializers.DateTimeField(format="%m/%d/%y %H:%M")
-    last_job_created_at = serializers.DateTimeField(format="%m/%d/%y %H:%M")
+    start_date = serializers.DateTimeField(format="%m/%d/%y")
+    last_job_created_at = serializers.DateTimeField(format="%m/%d/%y")
     created_by = BasicUserSerializer(read_only=True)
 
     class Meta:
@@ -30,4 +30,5 @@ class JobScheduleSerializer(serializers.ModelSerializer):
             'repeat_every',
             'start_date',
             'created_by',
+            'last_job_created_at'
             )

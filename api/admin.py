@@ -242,7 +242,7 @@ class JobAdmin(admin.ModelAdmin):
 
 @admin.register(JobSchedule)
 class JobScheduleAdmin(admin.ModelAdmin):
-    list_display = ['id', 'customer', 'tailNumber', 'aircraftType', 'airport', 'fbo', 'start_date', 'repeat_every', 'is_recurrent', 'last_job_created_at', 'comment', 'created_by', 'created_at']
+    list_display = ['id', 'customer', 'tailNumber', 'aircraftType', 'airport', 'fbo', 'start_date', 'repeat_every', 'is_recurrent', 'last_job_created_at', 'comment', 'created_by', 'created_at', 'is_deleted']
     list_per_page = 100
 
 

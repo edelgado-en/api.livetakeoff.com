@@ -18,7 +18,12 @@ class JobScheduleListView(ListAPIView):
     pagination_class = CustomPageNumberPagination
 
     def get_queryset(self):
+        tailNumber = self.request.data.get('tailNumber', None)
+
         qs = JobSchedule.objects.filter(is_deleted=False).order_by('-created_at')
+
+        if tailNumber:
+            qs = qs.filter(tailNumber__icontains=tailNumber)
 
         return qs
 
