@@ -35,6 +35,12 @@ from api.models import (
 
 from api.email_util import EmailUtil
 
+import threading
+import time
+
+# Use a flag to track whether the task is already running
+already_run_flag = threading.Event()
+
 scheduler = BackgroundScheduler()
 
 def collect_daily_inventory_stats():
@@ -301,40 +307,55 @@ def deleteRepeatedDailyGeneralStats():
     print('JOB COMPLETED: deleteRepeatedDailyGeneralStats')
 
 def createJobSchedules():
-    print('JOB SCHEDULE STARTED: createJobSchedules')
-    # Fetcha all JobSchedules where is_deleted is False
-    job_schedules = JobSchedule.objects.filter(is_deleted=False)
+    if already_run_flag.is_set():
+        print("Task is already running. Skipping.")
+        return
+    
+    try:
+        # Set the flag to indicate that the task is running
+        already_run_flag.set()
 
-    # iterate through job_schedules and create a job for each one
-    for job_schedule in job_schedules:
-        # get today's date ignoring the time
-        today = date.today()
+        print('JOB SCHEDULE STARTED: createJobSchedules')
 
-        # get job_schedule's start_date ignoring the time
-        job_schedule_start_date = job_schedule.start_date.date()
+        # Fetcha all JobSchedules where is_deleted is False
+        job_schedules = JobSchedule.objects.filter(is_deleted=False)
 
-        # check if job_Schedule_start_date is bigger or euqal to today
-        if job_schedule_start_date <= today:
-            if job_schedule.is_recurrent:
-                # get the repeat_every value
-                repeat_every = job_schedule.repeat_every
+        # iterate through job_schedules and create a job for each one
+        for job_schedule in job_schedules:
+            # get today's date ignoring the time
+            today = date.today()
 
-                # get the last_job_created_at value
-                last_job_created_at = job_schedule.last_job_created_at
+            # get job_schedule's start_date ignoring the time
+            job_schedule_start_date = job_schedule.start_date.date()
 
-                # check if it has been repeat_every days since the last job was created
-                if (last_job_created_at is None or ((today - last_job_created_at.date()).days >= repeat_every)):
+            # check if job_Schedule_start_date is bigger or euqal to today
+            if job_schedule_start_date <= today:
+                if job_schedule.is_recurrent:
+                    # get the repeat_every value
+                    repeat_every = job_schedule.repeat_every
+
+                    # get the last_job_created_at value
+                    last_job_created_at = job_schedule.last_job_created_at
+
+                    # check if it has been repeat_every days since the last job was created
+                    if (last_job_created_at is None or ((today - last_job_created_at.date()).days >= repeat_every)):
+                        handleCreateJob(job_schedule, today)
+
+                else:
+                    # Update job_schedule.is_deleted to True
+                    job_schedule.is_deleted = True
+                    job_schedule.save()
+
                     handleCreateJob(job_schedule, today)
+        
+        # Simulate a delay within the task (adjust as needed)
+        time.sleep(10)
 
-            else:
-                # Update job_schedule.is_deleted to True
-                job_schedule.is_deleted = True
-                job_schedule.save()
+        print('JOB SCHEDULE COMPLETED: createJobSchedules')
 
-                handleCreateJob(job_schedule, today)
-
-
-    print('JOB SCHEDULE COMPLETED: createJobSchedules')
+    finally:
+        # Clear the flag to allow the task to run again
+        already_run_flag.clear()
 
 
 def handleCreateJob(job_schedule, today):
@@ -436,8 +457,8 @@ scheduler.add_job(collect_daily_inventory_stats, 'cron', hour=20, minute=0, seco
 scheduler.add_job(deleteRepeatedDailyGeneralStats, 'interval', hours=6)
 
 # run job every day at 4am
-scheduler.add_job(createJobSchedules, 'cron', hour=4, minute=0, second=0)
+#scheduler.add_job(createJobSchedules, 'cron', hour=4, minute=0, second=0)
 
-#scheduler.add_job(createJobSchedules, 'interval', minutes=10)
+scheduler.add_job(createJobSchedules, 'interval', minutes=5)
 
 scheduler.start()
