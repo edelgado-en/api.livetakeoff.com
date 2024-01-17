@@ -314,7 +314,7 @@ def createJobSchedules():
         job_schedule_start_date = job_schedule.start_date.date()
 
         # check if job_Schedule_start_date is bigger or euqal to today
-        if job_schedule_start_date >= today:
+        if job_schedule_start_date <= today:
             if job_schedule.is_recurrent:
                 # get the repeat_every value
                 repeat_every = job_schedule.repeat_every
@@ -436,8 +436,8 @@ scheduler.add_job(collect_daily_inventory_stats, 'cron', hour=20, minute=0, seco
 scheduler.add_job(deleteRepeatedDailyGeneralStats, 'interval', hours=6)
 
 # run job every day at 4am
-scheduler.add_job(createJobSchedules, 'cron', hour=4, minute=0, second=0)
+#scheduler.add_job(createJobSchedules, 'cron', hour=4, minute=0, second=0)
 
-#scheduler.add_job(createJobSchedules, 'interval', minutes=2)
+scheduler.add_job(createJobSchedules, 'interval', minutes=10)
 
 scheduler.start()
