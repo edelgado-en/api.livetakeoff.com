@@ -361,6 +361,7 @@ def createJobSchedules():
 def handleCreateJob(job_schedule, today):
     # create a job
     job = Job.objects.create(
+        status='U',
         customer=job_schedule.customer,
         tailNumber=job_schedule.tailNumber,
         aircraftType=job_schedule.aircraftType,
