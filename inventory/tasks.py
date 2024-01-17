@@ -38,12 +38,16 @@ from api.email_util import EmailUtil
 import threading
 import time
 
-# Use a lock to synchronize access to the task
+ # Use a lock to synchronize access to the task
 task_lock = threading.Lock()
 
 scheduler = BackgroundScheduler()
 
 def collect_daily_inventory_stats():
+    if not task_lock.acquire(blocking=False):
+        print("Task is already running. Skipping.")
+        return
+
     print('JOB STARTED: collect_daily_inventory_stats')
 
     today = datetime.now()
@@ -277,9 +281,15 @@ def collect_daily_inventory_stats():
         last_updated=today.date(),
     )
 
+    task_lock.release()
+
     print('JOB COMPLETED: collect_daily_inventory_stats')
 
 def deleteRepeatedDailyGeneralStats():
+    if not task_lock.acquire(blocking=False):
+        print("Task is already running. Skipping.")
+        return
+
     print('JOB STARTED: deleteRepeatedDailyGeneralStats')
 
     # get all DailyGeneralStats
@@ -304,9 +314,12 @@ def deleteRepeatedDailyGeneralStats():
         if daily_location_stats_with_same_date.count() > 1:
             daily_location_stats_with_same_date.exclude(id=dls.id).delete()
 
+    task_lock.release()
+
     print('JOB COMPLETED: deleteRepeatedDailyGeneralStats')
 
 def createJobSchedules():
+   
     if not task_lock.acquire(blocking=False):
         print("Task is already running. Skipping.")
         return
