@@ -367,6 +367,28 @@ def createJobSchedules():
         task_lock.release()
 
 
+def deleteRepeatedScheduledJobs():
+
+    # Fetch jobs with job_schedule specified created today with the same customer, tailNumber, aircraftType, airport, fbo, comment and job.schedule within 5 minutes of each other and update the second one with status = 'T'
+    # This is to prevent the job from being created twice
+    jobs = Job.objects.filter(job_schedule__isnull=False, created_at__date=date.today()).order_by('created_at')
+
+    for i in range(len(jobs) - 1):
+        if jobs[i].customer == jobs[i+1].customer and \
+            (jobs[i].status == 'U' and jobs[i+1].status == 'U') and \
+            jobs[i].tailNumber == jobs[i+1].tailNumber and \
+            jobs[i].aircraftType == jobs[i+1].aircraftType and \
+            jobs[i].airport == jobs[i+1].airport and \
+            jobs[i].fbo == jobs[i+1].fbo and \
+            jobs[i].comment == jobs[i+1].comment and \
+            (jobs[i].job_schedule == jobs[i+1].job_schedule) and \
+            (jobs[i+1].created_at - jobs[i].created_at).seconds <= 300:
+            jobs[i+1].status = 'T'
+            jobs[i+1].save()
+    
+
+
+
 def handleCreateJob(job_schedule, today):
     # create a job
     job = Job.objects.create(
@@ -469,6 +491,7 @@ scheduler.add_job(deleteRepeatedDailyGeneralStats, 'interval', hours=6)
 # run job every day at 4am
 scheduler.add_job(createJobSchedules, 'cron', hour=4, minute=0, second=0)
 
-#scheduler.add_job(createJobSchedules, 'interval', minutes=5)
+# run job every day at 4:10am
+scheduler.add_job(deleteRepeatedScheduledJobs, 'cron', hour=4, minute=10, second=0)
 
 scheduler.start()
