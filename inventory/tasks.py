@@ -489,10 +489,7 @@ scheduler.add_job(deleteRepeatedDailyGeneralStats, 'interval', hours=6)
 # run job every day at 4am
 scheduler.add_job(createJobSchedules, 'cron', hour=4, minute=0, second=0)
 
-# run job every hour
-#scheduler.add_job(deleteRepeatedScheduledJobs, 'interval', hours=1)
-
-#run job every 10 mins
-scheduler.add_job(deleteRepeatedScheduledJobs, 'interval', minutes=10)
+#run job every day at 4:10 am
+scheduler.add_job(deleteRepeatedScheduledJobs, 'cron', hour=4, minute=10, second=0)
 
 scheduler.start()
