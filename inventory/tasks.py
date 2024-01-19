@@ -379,7 +379,6 @@ def deleteRepeatedScheduledJobs():
             jobs[i].aircraftType == jobs[i+1].aircraftType and \
             jobs[i].airport == jobs[i+1].airport and \
             jobs[i].fbo == jobs[i+1].fbo and \
-            jobs[i].comment == jobs[i+1].comment and \
             (jobs[i].job_schedule == jobs[i+1].job_schedule) and \
             (jobs[i+1].created_at - jobs[i].created_at).seconds <= 300:
             jobs[i+1].status = 'T'
@@ -491,6 +490,9 @@ scheduler.add_job(deleteRepeatedDailyGeneralStats, 'interval', hours=6)
 scheduler.add_job(createJobSchedules, 'cron', hour=4, minute=0, second=0)
 
 # run job every hour
-scheduler.add_job(deleteRepeatedScheduledJobs, 'interval', hours=1)
+#scheduler.add_job(deleteRepeatedScheduledJobs, 'interval', hours=1)
+
+#run job every 10 mins
+scheduler.add_job(deleteRepeatedScheduledJobs, 'interval', minutes=10)
 
 scheduler.start()
