@@ -373,7 +373,7 @@ def createJobSchedules():
 
 def deleteRepeatedScheduledJobs():
 
-    # Fetch jobs with job_schedule specified created today with the same customer, tailNumber, aircraftType, airport, fbo, comment and job.schedule within 5 minutes of each other and update the second one with status = 'T'
+    # Fetch jobs with job_schedule specified created today with the same customer, tailNumber, aircraftType, airport, fbo, comment and job.schedule within 20 seconds of each other and update the second one with status = 'T'
     # This is to prevent the job from being created twice
     jobs = Job.objects.filter(job_schedule__isnull=False, status='U').order_by('created_at')
 
@@ -384,7 +384,7 @@ def deleteRepeatedScheduledJobs():
             jobs[i].airport == jobs[i+1].airport and \
             jobs[i].fbo == jobs[i+1].fbo and \
             (jobs[i].job_schedule == jobs[i+1].job_schedule) and \
-            (jobs[i+1].created_at - jobs[i].created_at).seconds <= 300:
+            (jobs[i+1].created_at - jobs[i].created_at).seconds <= 20:
             jobs[i+1].status = 'T'
             jobs[i+1].save()
     
