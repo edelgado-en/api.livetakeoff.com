@@ -7,6 +7,7 @@ from django.db.models import Count, Sum, Func
 from datetime import datetime
 import json
 from datetime import date
+import pytz
 
 from django.contrib.auth.models import User
 
@@ -30,10 +31,13 @@ from api.models import (
     JobRetainerServiceAssignment,
     JobTag,
     Tag,
-    JobScheduleTag
+    JobScheduleTag,
+    JobStatusActivity
 )
 
 from api.email_util import EmailUtil
+
+from api.pricebreakdown_service import PriceBreakdownService
 
 import threading
 import time
@@ -388,9 +392,23 @@ def deleteRepeatedScheduledJobs():
 
 
 def handleCreateJob(job_schedule, today):
+    newYorkTz = pytz.timezone("UTC") 
+
+    # get today in newYorkTz
+    n_today = datetime.now(newYorkTz).date()
+    today_label = n_today.strftime("%Y%m%d")
+
+
+    # Generate purchase order: current day + number of job received that day.
+    #  So if today is 2019-01-01 and we have received 3 jobs today already, the purchase order will be 20190101-4
+    jobs_created_today = Job.objects.filter(created_at__contains=n_today).count()
+
+    purchase_order = today_label + '-' + str(jobs_created_today + 1)
+
     # create a job
     job = Job.objects.create(
         status='U',
+        purchase_order=purchase_order,
         customer=job_schedule.customer,
         tailNumber=job_schedule.tailNumber,
         aircraftType=job_schedule.aircraftType,
@@ -426,6 +444,12 @@ def handleCreateJob(job_schedule, today):
             job=job,
             retainer_service=job_schedule_retainer_service.retainer_service,
         )
+
+    price_breakdown = PriceBreakdownService().get_price_breakdown(job)
+    job.price = price_breakdown.get('totalPrice')
+    job.save()
+    
+    JobStatusActivity.objects.create(job=job, user=job_schedule.created_by, status='U')
 
     job_schedule_tags = JobScheduleTag.objects.filter(job_schedule=job_schedule)
 
@@ -472,8 +496,7 @@ def handleCreateJob(job_schedule, today):
                             <td style="padding:15px">{job_schedule.tailNumber}</td>
                         </tr>
                     </table>
-                    <div style="margin-top:20px;padding:5px;font-weight: 700;">Check it out at</div>
-                    <div style="padding:5px">http://livetakeoff.com/jobs/{job.id}/details</div>
+                    
                     '''
 
             email_util.send_email(admin.email, subject, body)
