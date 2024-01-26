@@ -54,6 +54,7 @@ class CreateJobView(APIView):
         user_profile = UserProfile.objects.get(user=request.user)
         is_customer = user_profile and user_profile.customer is not None
         estimate_id = data.get('estimate_id')
+        customer_purchase_order = data.get('customer_purchase_order')
 
         job_status = 'A'
 
@@ -62,7 +63,6 @@ class CreateJobView(APIView):
             job_status = 'U'
         else:
             customer = Customer.objects.get(id=data['customer_id'])
-
 
         aircraft_type = get_object_or_404(AircraftType, pk=data['aircraft_type_id'])
         airport = get_object_or_404(Airport, pk=data['airport_id'])
@@ -165,6 +165,7 @@ class CreateJobView(APIView):
                   created_by=user,
                   status=job_status,
                   requested_by=requested_by,
+                  customer_purchase_order=customer_purchase_order,
                   on_site=on_site)
 
         job.save()
