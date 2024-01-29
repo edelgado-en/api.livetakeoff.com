@@ -113,16 +113,45 @@ class JobListView(ListAPIView):
                                 .select_related('fbo') \
                                 .all()
 
+            customer_ids = []
+
             # Fetch UserCustomer objects for the current user. if it is empty, user can see all jobs.
             # If not, then they can only see the jobs for the provided customers
             user_customers = UserCustomer.objects.filter(user=self.request.user).all()
 
             if user_customers:
-                customer_ids = []
                 for user_customer in user_customers:
                     customer_ids.append(user_customer.customer.id)
 
+
+            if self.request.user.groups.filter(name='Project Managers').exists():
+                job_ids = set()
+                # Get job ids from pending services/retainer_services assigned to the current user
+                # If you have at least one pending service assigned to you, you can see the job
+                assignments = JobServiceAssignment.objects \
+                                                .select_related('job') \
+                                                .filter(project_manager=self.request.user.id) \
+                                                .all()
+
+                for assignment in assignments:
+                    if assignment.status != 'C':
+                        job_ids.add(assignment.job.id)
+                
+                retainer_assignment = JobRetainerServiceAssignment.objects \
+                                                                .select_related('job') \
+                                                                .filter(project_manager=self.request.user.id) \
+                                                                .all()
+
+                for assignment in retainer_assignment:
+                    if assignment.status != 'C':
+                        job_ids.add(assignment.job.id)
+
+                # filter by customer ids if the user has any or job ids if the user is a project manager
+                qs = qs.filter(Q(customer_id__in=customer_ids) | Q(id__in=job_ids))
+                
+            else:
                 qs = qs.filter(customer_id__in=customer_ids)
+                
 
             user_available_airports = UserAvailableAirport.objects.filter(user=self.request.user).all()
 
