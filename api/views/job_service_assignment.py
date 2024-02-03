@@ -336,6 +336,9 @@ class JobServiceAssignmentView(APIView):
         # get job before deleting service
         job_id = job_service_assignment.job.id
 
+        # delete the service activities associated with this service
+        ServiceActivity.objects.filter(job=job_id, service=job_service_assignment.service).delete()
+
         job_service_assignment.delete()
 
         # fetch job and update price after deleting service
