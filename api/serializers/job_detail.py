@@ -29,7 +29,20 @@ class JobDetailSerializer(serializers.ModelSerializer):
     encoded_id = serializers.CharField(max_length=100, read_only=True, required=False)
     tags = JobTagSerializer(many=True)
 
-    files = JobFileSerializer(many=True, read_only=True)
+    files = serializers.SerializerMethodField()
+
+    def get_files(self, obj):
+        # if the current user is_admin or is_staff, or belong to the group Account Managers then return all the files for this job
+        user = self.context['request'].user
+        
+        if user.is_staff or user.is_superuser or user.groups.filter(name='Account Managers').exists():
+            return JobFileSerializer(obj.files.all(), many=True, read_only=True).data
+        elif user.profile.customer and user.profile.customer == obj.customer:   
+            # if the current user is a customer user then only return the files that are public
+            return JobFileSerializer(obj.files.filter(is_public=True), many=True, read_only=True).data
+        else:
+            # return empty array
+            return []
 
     class Meta:
         model = Job

@@ -197,7 +197,7 @@ class JobDetail(APIView):
 
         job.encoded_id = base64_message
 
-        serializer = JobDetailSerializer(job)
+        serializer = JobDetailSerializer(job, context={'request': request})
 
         return Response(serializer.data)
 
@@ -208,7 +208,7 @@ class JobDetail(APIView):
         if not self.can_view_job(request.user, job):
             return Response({'error': 'You do not have permission to view this job'}, status=status.HTTP_403_FORBIDDEN)
 
-        serializer = JobDetailSerializer(job, data=request.data, partial=True)
+        serializer = JobDetailSerializer(job, data=request.data, partial=True, context={'request': request})
 
         if serializer.is_valid():
             serializer.save()
