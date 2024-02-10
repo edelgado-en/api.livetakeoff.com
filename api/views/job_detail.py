@@ -77,7 +77,7 @@ class JobDetail(APIView):
                 for service_assignment in service_assignments:
                     p_manager = service_assignment.project_manager
                     if (p_manager is None):
-                        p_manager = 'Not Assigned'
+                        p_manager = None
                     else:
                         p_manager = p_manager.username
 
@@ -100,7 +100,7 @@ class JobDetail(APIView):
                 for retainer_service_assignment in retainer_service_assignments:
                     p_manager = retainer_service_assignment.project_manager
                     if (p_manager is None):
-                        p_manager = 'Not Assigned'
+                        p_manager = None
                     else:
                         p_manager = p_manager.username
 
