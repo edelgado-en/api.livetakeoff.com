@@ -203,10 +203,41 @@ class ServiceReportView(APIView):
             if total_jobs_revenue is None:
                 total_jobs_revenue = 0
 
+        total_labor_time_only_services = 0
+        # Sum the Job.labor_time from JobStatusActivity where the status = 'I' where the job has at least one job_service_assignments entry
+        qs = JobStatusActivity.objects.filter(
+            Q(status__in=['I']) &
+            Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date)
+        )
+
+        if customer_id:
+            qs = qs.filter(job__customer_id=customer_id)
+
+        if tail_number:
+            qs = qs.filter(Q(job__tailNumber__icontains=tail_number))
+
+        if airport_id:
+                qs = qs.filter(job__airport_id=airport_id)
+            
+        if fbo_id:
+            qs = qs.filter(job__fbo_id=fbo_id)
+
+        if is_customer:
+            qs = qs.filter(job__customer_id=user_profile.customer.id)
+        
+        #Ensure that the JobStatusActivity included does not have jobs with retainer service assignments entries
+        qs = qs.exclude(job__job_retainer_service_assignments__isnull=False)
+
+        qs = qs.aggregate(Sum('job__labor_time'))['job__labor_time__sum']
+
+        if qs:
+            total_labor_time_only_services = qs
+
         return Response({
                 'number_of_services_completed': number_of_services_completed,
                 'number_of_unique_tail_numbers': number_of_unique_tail_numbers,
                 'number_of_unique_locations': number_of_unique_locations,
+                'total_labor_time_only_services': total_labor_time_only_services,
                 'total_jobs_revenue': total_jobs_revenue,
                 'show_spending_info': show_spending_info,
                 'show_retainers': show_retainers,

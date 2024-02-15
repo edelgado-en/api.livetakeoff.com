@@ -11,7 +11,8 @@ from api.models import (
     RetainerServiceActivity,
     UserProfile,
     UserCustomer,
-    UserAvailableAirport
+    UserAvailableAirport,
+    JobStatusActivity
 )
 
 class RetainerServiceReportView(APIView):
@@ -152,10 +153,41 @@ class RetainerServiceReportView(APIView):
         # Number of unique locations
         number_of_unique_locations = qs.values('job__airport__name').distinct().count()
 
+        total_labor_time_only_retainer_services = 0
+        # Sum the Job.labor_time from JobStatusActivity where the status = 'I' where the job has at least one job_retainer_service_assignments entry
+        qs = JobStatusActivity.objects.filter(
+            Q(status__in=['I']) &
+            Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date)
+        )
+
+        if customer_id:
+            qs = qs.filter(job__customer_id=customer_id)
+
+        if tail_number:
+            qs = qs.filter(Q(job__tailNumber__icontains=tail_number))
+
+        if airport_id:
+                qs = qs.filter(job__airport_id=airport_id)
+            
+        if fbo_id:
+            qs = qs.filter(job__fbo_id=fbo_id)
+
+        if is_customer:
+            qs = qs.filter(job__customer_id=user_profile.customer.id)
+
+        #Ensure that the JobStatusActivity included does not have jobs with job_service_assignments entries
+        qs = qs.exclude(job__job_service_assignments__isnull=False)
+
+        qs = qs.aggregate(Sum('job__labor_time'))['job__labor_time__sum']
+
+        if qs:
+            total_labor_time_only_retainer_services = qs
+
         return Response({
             'number_of_services_completed': number_of_services_completed,
             'number_of_unique_tail_numbers': number_of_unique_tail_numbers,
             'number_of_unique_locations': number_of_unique_locations,
+            'total_labor_time_only_retainer_services': total_labor_time_only_retainer_services,
             }
             , status=status.HTTP_200_OK)
     
