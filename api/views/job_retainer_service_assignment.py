@@ -98,6 +98,12 @@ class JobRetainerServiceAssignmentView(APIView):
     def delete(self, request, id):
         job_retainer_service_assignment = get_object_or_404(JobRetainerServiceAssignment, pk=id)
 
+        # get job before deleting service
+        job_id = job_retainer_service_assignment.job.id
+
+        # delete the service activities associated with this service
+        RetainerServiceActivity.objects.filter(job=job_id, retainer_service=job_retainer_service_assignment.retainer_service).delete()
+
         job_retainer_service_assignment.delete()
 
         return Response({'message': 'Delete successfully'}, status.HTTP_200_OK)
