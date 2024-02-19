@@ -17,7 +17,8 @@ class TailNoteLookupView(APIView):
         job = get_object_or_404(Job, pk=job_id)
 
         # Fetcha tail alert for the tail number on the job that must have a notes specified. Notes cannot be empty
-        tail_alert = TailAlert.objects.filter(tailNumber=job.tailNumber, notes__isnull=False).first()
+        #IGNORE CASE
+        tail_alert = TailAlert.objects.filter(tailNumber__iexact=job.tailNumber, notes__isnull=False).first()
 
         if not tail_alert:
             # notes cannot be empty
