@@ -76,18 +76,6 @@ class JobEstimateFormInfoView(APIView):
 
             fbo_dtos.append(f)
         
-        
-        service_dtos = []
-        for service in services:
-            s = {
-                'id': service.id,
-                'name': service.name,
-                'category': service.category,
-            }
-
-            service_dtos.append(s)
-        
-
         if not aircraft_type_dtos:
             return Response({'error': 'No aircraft types found'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -97,15 +85,11 @@ class JobEstimateFormInfoView(APIView):
         if not fbo_dtos:
             return Response({'error': 'No fbos found'}, status=status.HTTP_404_NOT_FOUND)
         
-        if not service_dtos:
-            return Response({'error': 'No services found'}, status=status.HTTP_404_NOT_FOUND)
-
         response = {
             'customers': customer_dtos,
             'aircraft_types': aircraft_type_dtos,
             'airports': airport_dtos,
             'fbos': fbo_dtos,
-            'services': service_dtos,
         }
 
         return Response(response, status.HTTP_200_OK)

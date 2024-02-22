@@ -12,7 +12,7 @@ from ..models import (
         UserProfile,
         Tag,
         UserCustomer,
-        UserAvailableAirport   
+        UserAvailableAirport,
 )
 
 class JobFormInfoView(APIView):
@@ -60,10 +60,6 @@ class JobFormInfoView(APIView):
         
         
         fbos = FBO.objects.all().order_by('name')
-        services = Service.objects.all().order_by('name')
-        
-        
-        retainer_services = RetainerService.objects.all().order_by('name')
 
         customer_dtos = []
         for customer in customers:
@@ -101,26 +97,6 @@ class JobFormInfoView(APIView):
 
             fbo_dtos.append(f)
         
-        service_dtos = []
-        for service in services:
-            s = {
-                'id': service.id,
-                'name': service.name,
-                'category': service.category
-            }
-
-            service_dtos.append(s)
-        
-        retainer_service_dtos = []
-        for retainer_service in retainer_services:
-            r = {
-                'id': retainer_service.id,
-                'name': retainer_service.name,
-                'category': retainer_service.category
-            }
-
-            retainer_service_dtos.append(r)
-
         tag_dtos = []
         for tag in tags:
             t = {
@@ -143,16 +119,11 @@ class JobFormInfoView(APIView):
         if not fbo_dtos:
             return Response({'error': 'No fbos found'}, status=status.HTTP_404_NOT_FOUND)
         
-        if not service_dtos:
-            return Response({'error': 'No services found'}, status=status.HTTP_404_NOT_FOUND)
-
         response = {
             'customers': customer_dtos,
             'aircraft_types': aircraft_type_dtos,
             'airports': airport_dtos,
             'fbos': fbo_dtos,
-            'services': service_dtos,
-            'retainer_services': retainer_service_dtos,
             'tags': tag_dtos,
         }
 

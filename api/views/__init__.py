@@ -82,3 +82,4 @@ from .job_total_labor_time import JobTotalLaborTimeDetail
 from .job_schedules import JobScheduleListView
 from .create_job_schedule import CreateJobScheduleView
 from .job_schedule_detail import JobScheduleDetailView
+from .customer_retainers_services import CustomerRetainersServicesView

@@ -26,6 +26,7 @@ from api.models import (
     CustomerAdditionalFeeAirport,
     CustomerAdditionalFeeFBO,
     CustomerRetainerService,
+    CustomerService,
     PriceList,
     PriceListEntries,
     EstimatedServiceTime,
@@ -175,8 +176,11 @@ class CustomerAdditionalFeeAirportAdmin(admin.ModelAdmin):
 
 @admin.register(CustomerRetainerService)
 class CustomerRetainerServiceAdmin(admin.ModelAdmin):
-    list_display = ['customer_setting', 'retainer_service', 'count']
+    list_display = ['id', 'customer', 'retainer_service']
 
+@admin.register(CustomerService)
+class CustomerServiceAdmin(admin.ModelAdmin):
+    list_display = ['id', 'customer', 'service']
 
 @admin.register(PriceList)
 class PriceListAdmin(admin.ModelAdmin):
