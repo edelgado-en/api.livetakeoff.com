@@ -83,3 +83,5 @@ from .job_schedules import JobScheduleListView
 from .create_job_schedule import CreateJobScheduleView
 from .job_schedule_detail import JobScheduleDetailView
 from .customer_retainers_services import CustomerRetainersServicesView
+from .customer_available_service import CustomerAvailableServiceView
+from .customer_available_retainer import CustomerAvailableRetainerView
