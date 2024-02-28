@@ -20,6 +20,7 @@ class SharedJobDetailSerializer(serializers.ModelSerializer):
     estimatedETA = serializers.DateTimeField(format="%m/%d/%Y %I:%M %p")
     estimatedETD = serializers.DateTimeField(format="%m/%d/%Y %I:%M %p")
     requestDate = serializers.DateTimeField(format="%m/%d/%Y %I:%M %p", read_only=True)
+    completion_date = serializers.DateTimeField(format="%m/%d/%y %H:%M", read_only=True)
     special_instructions = serializers.CharField(required=False, allow_blank=True)
     service_assignments = GenericServiceAssignmentSerializer(many=True, read_only=True)
     retainer_service_assignments = GenericServiceAssignmentSerializer(many=True, read_only=True)
@@ -49,5 +50,6 @@ class SharedJobDetailSerializer(serializers.ModelSerializer):
             'job_comments',
             'on_site',
             'created_by',
-            'requested_by'
+            'requested_by',
+            'completion_date'
         )
