@@ -100,13 +100,35 @@ class PriceBreakdownService():
         
         # calculate total price discounts first, then additional fees
         total_price = services_price
-        
+
+        # iterate through discounts and calculate the actual amount for each discount that is a percentage using the total_price.
+        # For example: if a discount is 10% and the total_price is 100, then the discount_dollar_amount is 10.
+        # add a new field called discount_dollar_amount to the discount dictionary if the entry is a percentage
+        # Do not change total_price in this loop. We just want to calculate the discount_dollar_amount for each discount that is a percentage
+        if total_price > 0:
+            for discount in discounts:
+                if discount['isPercentage']:
+                    discount['discount_dollar_amount'] = total_price * discount['discount'] / 100
+                else:
+                    discount['discount_dollar_amount'] = discount['discount']
+            
+
         if total_price > 0:
             for discount in discounts:
                 if discount['isPercentage']:
                     total_price -= total_price * discount['discount'] / 100
                 else:
                     total_price -= discount['discount']
+
+            # iterate through additional_fees and calculate the actual amount for each additional_fee that is a percentage using the total_price.
+            # For example: if an additional_fee is 10% and the total_price is 100, then the additional_fee_dollar_amount is 10.
+            # add a new field called additional_fee_dollar_amount to the additional_fee dictionary if the entry is a percentage
+            # Do not change total_price in this loop. We just want to calculate the additional_fee_dollar_amount for each additional_fee that is a percentage
+            for additional_fee in additional_fees:
+                if additional_fee['isPercentage']:
+                    additional_fee['additional_fee_dollar_amount'] = total_price * additional_fee['fee'] / 100
+                else:
+                    additional_fee['additional_fee_dollar_amount'] = additional_fee['fee']
 
         discounted_price = total_price
 
