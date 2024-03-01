@@ -25,6 +25,7 @@ class LocationItemActivityListView(ListAPIView):
         item_name = self.request.data.get('item_name', '')
         activity_type = self.request.data.get('activity_type', None)
         dateSelected = self.request.data.get('dateSelected', None)
+        location_id = self.request.data.get('location_id', None)
 
         # get start date and end date based on the dateSelected value provided
         if dateSelected == 'today':
@@ -117,6 +118,8 @@ class LocationItemActivityListView(ListAPIView):
         if activity_type:
             qs = qs.filter(activity_type=activity_type)
 
+        if location_id:
+            qs = qs.filter(location_item__location_id=location_id)
 
         qs = qs.order_by('-timestamp')
 
