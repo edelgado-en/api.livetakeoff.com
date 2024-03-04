@@ -84,7 +84,8 @@ from .views import (
         JobScheduleDetailView,
         CustomerRetainersServicesView,
         CustomerAvailableServiceView,
-        CustomerAvailableRetainerView
+        CustomerAvailableRetainerView,
+        UserJobEmailView
     )
 
 urlpatterns = [
@@ -169,6 +170,8 @@ urlpatterns = [
 
     path('user-email', UserEmailView.as_view()),
     path('user-email/<int:user_email_id>/', UserEmailView.as_view()),
+
+    path('user-job-email/<int:job_id>/', UserJobEmailView.as_view()),
 
     path('airports/available-fbos', AirportAvailableFbosView.as_view()),
     path('airports/available-fbos/<int:id>/', AirportAvailableFbosView.as_view()),

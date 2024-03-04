@@ -88,9 +88,10 @@ class JobCommentView(ListCreateAPIView):
 
 
         comment = self.request.data['comment']
-        send_sms = self.request.data['sendSMS']
-        is_public = self.request.data['isPublic']
-        send_email = self.request.data['sendEmail']
+        send_sms = self.request.data.get('sendSMS', False)
+        is_public = self.request.data.get('isPublic', False)
+        send_email = self.request.data.get('sendEmail', False)
+        emails = self.request.data.get('emails', [])
 
         is_customer_user = False
 
@@ -166,8 +167,6 @@ class JobCommentView(ListCreateAPIView):
             is_customer = job.created_by.profile.customer is not None
 
             if is_customer:
-                email_address = job.created_by.email
-
                 title = f'[{job.tailNumber}] Job Comment Added'
                 link = f'http://livetakeoff.com/jobs/{job.id}/comments'
 
@@ -189,16 +188,10 @@ class JobCommentView(ListCreateAPIView):
                 '''
 
                 email_util = EmailUtil()
-                
-                if email_address:
+
+                # iterate through emails and send an email to each email address
+                for email_address in emails:
                     email_util.send_email(email_address, title, body)
-
-                #fetch entries of UserEmail for the customer user and send an email to each email address
-                user_emails = UserEmail.objects.filter(user=job.created_by)
-
-                for user_email in user_emails:
-                    if user_email.email:
-                        email_util.send_email(user_email.email, title, body)
 
 
         serializer = JobCommentSerializer(job_comment)
