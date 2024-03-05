@@ -21,6 +21,7 @@ class CompletedJobsListView(ListAPIView):
         searchText = self.request.data['searchText']
         status = self.request.data['status']
         airport = self.request.data.get('airport')
+        fbo = self.request.data.get('fbo')
         customer = self.request.data.get('customer')
 
         requestedDateFrom = self.request.data.get('requestedDateFrom')
@@ -89,6 +90,8 @@ class CompletedJobsListView(ListAPIView):
         if airport and airport != 'All':
             qs = qs.filter(airport_id=airport)
 
+        if fbo and fbo != 'All':
+            qs = qs.filter(fbo_id=fbo)
 
         if customer and customer != 'All':
             qs = qs.filter(customer_id=customer)
