@@ -255,7 +255,34 @@ class CreateJobView(APIView):
 
             # the link is throwing a 30007 error in Twilio
             #message = f'Customer {job.customer.name} has submitted job {job.purchase_order} for Tail number {job.tailNumber}. Check it out at  http://livetakeoff.com/jobs/{job.id}/details'
-            message = f'Customer {job.customer.name} has submitted job {job.purchase_order} for Tail number {job.tailNumber}'
+
+            # the message needs to look like this:
+            #JOB SUBMITTED
+            #•⁠  ⁠Fly Alliance
+            #•⁠  ⁠MIA
+            #•⁠  ⁠N1122AA
+            #ETA: On Site
+            #ETD: 2/4/24 13:00
+            
+            # where Fly Alliance is the job.customer.name
+            # MIA is the job.airport.initials
+            # N1122AA is the job.tailNumber
+            # ETA: On Site is the job.on_site
+            # ETD: 2/4/24 13:00 is the job.estimatedETD
+
+            # format job.estimatedETD to look like 2/4/24 13:00 and if it is none, then just put 'Not Specified'
+            etd = 'Not Specified'
+            if job.estimatedETD:
+                etd = job.estimatedETD.strftime('%m/%d/%y %H:%M')
+
+            eta = 'Not Specified'
+            if job.estimatedETA:
+                eta = job.estimatedETA.strftime('%m/%d/%y %H:%M')
+            
+            if job.on_site:
+                eta = 'On Site'
+
+            message = f'JOB SUBMITTED\n•⁠  ⁠{job.customer.name}\n•⁠  ⁠{job.airport.initials}\n•⁠  ⁠{job.tailNumber}\nETA: {eta}\nETD: {etd}'
 
             admins = User.objects.filter(Q(is_superuser=True) | Q(is_staff=True) | Q(groups__name='Account Managers'))
 
