@@ -498,6 +498,8 @@ def handleCreateJob(job_schedule, today):
                     </table>
                     
                     '''
+            
+            body += email_util.getEmailSignature()
 
             email_util.send_email(admin.email, subject, body)
 

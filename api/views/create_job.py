@@ -294,6 +294,9 @@ class CreateJobView(APIView):
                     '''
 
             email_util = EmailUtil()
+
+            body += email_util.getEmailSignature()
+
             email_util.send_email('rob@cleantakeoff.com', subject, body)
         
             # Fetch a Tag with the name VIP and create a JobTag for this job

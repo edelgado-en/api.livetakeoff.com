@@ -146,6 +146,8 @@ class EditJobView(APIView):
 
                             email_util = EmailUtil()
 
+                            body += email_util.getEmailSignature()
+
                             if job.created_by.email:
                                 email_util.send_email(job.created_by.email, title, body)
 

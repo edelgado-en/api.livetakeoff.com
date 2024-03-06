@@ -63,8 +63,10 @@ class UserSignupView(APIView):
         </table>
         '''
 
-
         email_util = EmailUtil()
+
+        body += email_util.getEmailSignature()
+
         email_util.send_email('rob@cleantakeoff.com', subject, body)
 
         return Response({'success': 'Email sent successfully'}, status=status.HTTP_200_OK)

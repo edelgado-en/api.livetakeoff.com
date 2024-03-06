@@ -29,6 +29,9 @@ class ForgotPasswordView(APIView):
         '''
 
         email_util = EmailUtil()
+
+        body += email_util.getEmailSignature()
+
         email_util.send_email('rob@cleantakeoff.com', title, body)
 
         return Response({'success': 'Email sent successfully'}, status=status.HTTP_200_OK)

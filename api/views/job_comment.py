@@ -189,6 +189,8 @@ class JobCommentView(ListCreateAPIView):
 
                 email_util = EmailUtil()
 
+                body += email_util.getEmailSignature()
+
                 # iterate through emails and send an email to each email address
                 for email_address in emails:
                     email_util.send_email(email_address, title, body)

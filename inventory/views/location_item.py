@@ -104,6 +104,8 @@ class LocationItemView(APIView):
 
                     email_util = EmailUtil()
 
+                    body += email_util.getEmailSignature()
+
                     for admin in admins:
                         if admin.email and admin.profile.inventory_email_notifications:
                             email_util.send_email(admin.email, title, body)
@@ -127,6 +129,8 @@ class LocationItemView(APIView):
                     '''
 
                     email_util = EmailUtil()
+
+                    body += email_util.getEmailSignature()
 
                     for admin in admins:
                         if admin.email and admin.profile.inventory_email_notifications:
@@ -204,6 +208,8 @@ class LocationItemView(APIView):
 
                     email_util = EmailUtil()
 
+                    body += email_util.getEmailSignature()
+
                     for admin in admins:
                         if admin.email and admin.profile.inventory_email_notifications:
                             email_util.send_email(admin.email, title, body)
@@ -227,6 +233,8 @@ class LocationItemView(APIView):
                     '''
 
                     email_util = EmailUtil()
+
+                    body += email_util.getEmailSignature()
 
                     for admin in admins:
                         if admin.email and admin.profile.inventory_email_notifications:
