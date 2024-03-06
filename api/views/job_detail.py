@@ -270,8 +270,25 @@ class JobDetail(APIView):
                         #Adding a link is throwing a 30007 error in Twilio
                         #message = f'Job {job.purchase_order} for tail number {job.tailNumber} has been COMPLETED. Please review the job and close it out https://livetakeoff.com/completed/review/{job.id}'
 
-                        message = f'Job {job.purchase_order} for tail number {job.tailNumber} has been COMPLETED.'
-                        
+                        # message this to have the following format:
+                        #Job COMPLETED by RICARDO
+                        #• Fly Alliance
+                        #• MIA
+                        #• N1122AA
+                        #Completion: 2/4/24 12:00
+                        # where RICARDO is the user.first_name
+                        # Fly Alliance is the customer name
+                        # MIA is the airport initials
+                        # N1122AA is the tail number
+                        # 2/4/24 12:00 is the job.completion_date date
+                        completion_date = datetime.now().strftime('%m/%d/%y %H:%M')
+                        first_name = ''
+
+                        if request.user.first_name:
+                            first_name = request.user.first_name.upper()
+
+                        message = f'Job COMPLETED by {first_name}\n• {job.customer.name}\n• {job.airport.initials}\n• {job.tailNumber}\nCompletion: {completion_date}'
+
                         notification_util.send(message, phone_number.as_e164)
 
                 # send an email notification to the customer user if the job was created by a customer user
