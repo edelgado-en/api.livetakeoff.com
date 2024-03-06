@@ -119,7 +119,23 @@ class JobCommentView(ListCreateAPIView):
             # Adding a link is throwing a 30007 error in Twilio
             #message = f'An important message has been added to job {job.purchase_order} for Tail number {job.tailNumber}. Check it out at  http://livetakeoff.com/jobs/{job.id}/comments'
 
-            message = f'An important message has been added to job {job.purchase_order} for Tail number {job.tailNumber}.'
+            #message = f'An important message has been added to job {job.purchase_order} for Tail number {job.tailNumber}.'
+
+            # message has to be in the following format:
+            #Important note was added to this job
+            #• MIA
+            #• N1122AA
+            #• Signature MIA
+            #Complete before: 2/4/24 13:00
+            # where MIA is the airport initials, N1122AA is the tailNumber and Signature MIA is the FBO name
+            complete_before = 'Not specified'
+
+            if job.completeBy:
+                complete_before = job.completeBy.strftime('%m/%d/%y %H:%M')
+            
+            message = 'Important note was added to this job'
+            message += f'\n• {job.airport.initials}\n• {job.tailNumber}\n• {job.fbo.name}\nComplete before: {complete_before}'
+
 
             # get all phone numbers for all project managers assigned to this job
             # iterate through jobServiceAssignments and JobRetainerServiceAssignments and get all the unique phone numbers
