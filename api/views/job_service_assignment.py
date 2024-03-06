@@ -271,7 +271,22 @@ class JobServiceAssignmentView(APIView):
         # Adding the link is throwing a 30007 error in Twilio
         #message = f'Job {job.purchase_order} has been ASSIGNED to you for tail number {job.tailNumber} to be completed before {complete_by}. Please go to you Livetakeoff App and check it out http://livetakeoff.com/jobs/{job.id}/details'
 
-        message = f'Job {job.purchase_order} has been ASSIGNED to you for tail number {job.tailNumber} to be completed before {complete_by}'
+        # message needs to have the following format:
+        #Job ASSIGNED to you
+        #• MIA
+        #• N1122AA
+        #• Signature MIA
+        #Complete before: 2/4/24 13:00
+        # Where MIA is the airport initials
+        # N1122AA is the tail number
+        # Signature MIA is the job.fbo.name
+        # 2/4/24 13:00 is the job.completeBy
+
+        complete_before = 'Not specified'
+        if job.completeBy:
+            complete_before = job.completeBy.strftime("%b-%d %I:%M %p")
+
+        message = f'Job ASSIGNED to you\n• {job.airport.initials}\n• {job.tailNumber}\n• {job.fbo.name}\nComplete before: {complete_before}'
 
         for phone_number in unique_phone_numbers:
             notification_util.send(message, phone_number.as_e164)
