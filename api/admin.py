@@ -39,7 +39,8 @@ from api.models import (
     ServiceActivity,
     UserEmail,
     JobFiles,
-    JobSchedule
+    JobSchedule,
+    TailAlert
 )
 
 class UserProfileInline(admin.StackedInline):
@@ -322,5 +323,12 @@ class JobEstimateAdmin(admin.ModelAdmin):
 class JobServiceEstimateAdmin(admin.ModelAdmin):
     list_display = ['id', 'job_estimate', 'service', 'price']
     list_per_page = 100
+
+@admin.register(TailAlert)
+class TailAlertAdmin(admin.ModelAdmin):
+    list_display = ['id', 'tailNumber', 'message', 'notes', 'author']
+    list_per_page = 100
+    search_fields = ['tailNumber']
+
 
 
