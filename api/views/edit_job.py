@@ -46,6 +46,8 @@ class EditJobView(APIView):
         if not request.data.get('price'):
             request.data['price'] = job.price
 
+        # ensure the tailNumber does not have trailing spaces or leading spaces
+        request.data['tailNumber'] = request.data['tailNumber'].strip()
 
         serializer = JobEditSerializer(job, data=request.data, partial=True)
 

@@ -50,6 +50,9 @@ class CreateJobView(APIView):
 
         tailNumber = data['tail_number']
 
+        # remove trail spaces from tailNumber from the front and back
+        tailNumber = tailNumber.strip()
+
         # if user is customer, get customer from user profile
         user_profile = UserProfile.objects.get(user=request.user)
         is_customer = user_profile and user_profile.customer is not None
