@@ -1,4 +1,4 @@
-from django.db.models import Q
+from django.db.models import Q, Case, When, Value, CharField
 from django.shortcuts import get_object_or_404
 from rest_framework import (permissions, status)
 from rest_framework .response import Response
@@ -128,10 +128,34 @@ class CompletedJobsListView(ListAPIView):
         if completionDateTo:
             qs = qs.filter(completion_date__lte=completionDateTo)
 
-        # sort by status C first, then status I, and then status T, THEN sort by completion_date newest first
-        # sort by status and  completion_date descending
-        qs = qs.order_by('status', '-completion_date')
+        # the sorting needs to be by status in the following order:
+        #('A', 'Accepted'),
+        #('S', 'Assigned'),
+        #('U', 'Submitted'),
+        #('W', 'WIP'),
+        #('C', 'Complete'),
+        #('T', 'Cancelled'),
+        #('R', 'Review'),
+        #('I', 'Invoiced'),
         
+        order = {
+            'U': 1,
+            'A': 2,
+            'S': 3,
+            'W': 4,
+            'C': 5,
+            'I': 6,
+            'T': 7
+        }
+
+        ordering_conditions = [When(status=status, then=Value(order.get(status))) for status in order.keys()]
+
+        secondary_ordering = '-completion_date'
+        
+        qs = qs.order_by(
+                Case(*ordering_conditions, default=Value(8), output_field=CharField()),
+                secondary_ordering
+            )
 
         return qs
 
