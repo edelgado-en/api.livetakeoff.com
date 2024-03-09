@@ -6,6 +6,7 @@ from .fbo import FBO
 from .service import Service
 from .retainer_service import RetainerService
 from .job_schedule import JobSchedule
+from .vendor import Vendor
 
 class Job(models.Model):
     STATUS_CHOICES = [
@@ -65,6 +66,14 @@ class Job(models.Model):
     labor_time = models.FloatField(blank=True, null=True)
 
     job_schedule = models.ForeignKey(JobSchedule, on_delete=models.PROTECT, blank=True, null=True)
+
+    vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT, blank=True, null=True)
+
+    vendor_charge = models.DecimalField(max_digits=9, decimal_places=2, null=True)
+
+    additional_cost = models.DecimalField(max_digits=9, decimal_places=2, null=True)
+
+    subcontractor_profit = models.DecimalField(max_digits=9, decimal_places=2, null=True, help_text='Calculated by subtracting the vendor charge and additional cost from the price')
 
     def __str__(self) -> str:
         return str(self.id) + ' - ' + self.tailNumber + ' - ' + self.airport.initials + ' - ' + self.aircraftType.name
