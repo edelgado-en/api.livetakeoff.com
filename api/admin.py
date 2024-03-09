@@ -237,7 +237,7 @@ class FBOAdmin(admin.ModelAdmin):
 
 @admin.register(Job)
 class JobAdmin(admin.ModelAdmin):
-    list_display = ['id', 'created_at', 'purchase_order', 'customer', 'requestDate', 'tailNumber', 'aircraftType', 'airport', 'fbo', 'estimatedETA', 'estimatedETD', 'completeBy', 'status', 'estimated_completion_time', 'actual_completion_time', 'price', 'hours_worked', 'minutes_worked', 'number_of_workers', 'vendor', 'vendor_charge', 'additional_cost', 'subcontractor_profit']
+    list_display = ['id', 'created_at', 'purchase_order', 'customer', 'requestDate', 'tailNumber', 'aircraftType', 'airport', 'fbo', 'estimatedETA', 'estimatedETD', 'completeBy', 'status', 'estimated_completion_time', 'actual_completion_time', 'price', 'hours_worked', 'minutes_worked', 'number_of_workers', 'vendor', 'vendor_charge', 'vendor_additional_cost', 'interval_additional_cost', 'subcontractor_profit']
     list_per_page = 100
     ordering = ['created_at', 'purchase_order', 'customer', 'aircraftType', 'tailNumber', 'airport', 'fbo', 'status', 'completeBy']
     search_fields = ['purchase_order', 'customer', 'tailNumber', ]

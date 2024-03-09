@@ -71,7 +71,9 @@ class Job(models.Model):
 
     vendor_charge = models.DecimalField(max_digits=9, decimal_places=2, null=True)
 
-    additional_cost = models.DecimalField(max_digits=9, decimal_places=2, null=True)
+    vendor_additional_cost = models.DecimalField(max_digits=9, decimal_places=2, null=True)
+
+    interval_additional_cost = models.DecimalField(max_digits=9, decimal_places=2, null=True)
 
     subcontractor_profit = models.DecimalField(max_digits=9, decimal_places=2, null=True, help_text='Calculated by subtracting the vendor charge and additional cost from the price')
 
