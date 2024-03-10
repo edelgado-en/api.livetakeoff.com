@@ -1,6 +1,7 @@
 from django.db import models
 from .job import Job
 from .service import Service
+from .vendor import Vendor
 
 class JobServiceAssignment(models.Model):
     STATUS_CHOICES = [
@@ -16,6 +17,7 @@ class JobServiceAssignment(models.Model):
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='U')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
         db_table = 'api_job_service_assignment'

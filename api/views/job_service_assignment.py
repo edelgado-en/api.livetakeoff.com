@@ -145,8 +145,6 @@ class JobServiceAssignmentView(APIView):
         return Response(response, status.HTTP_200_OK)
 
 
-
-
     def post(self, request, id):
 
         job = get_object_or_404(Job, pk=id)
@@ -185,12 +183,11 @@ class JobServiceAssignmentView(APIView):
         return Response(serializer.data)
 
 
-
-
     def put(self, request, id):
         job = get_object_or_404(Job, pk=id)
 
         at_least_one_service_assigned = False
+        external_vendor = None
 
         unique_phone_numbers = []
 
@@ -210,11 +207,18 @@ class JobServiceAssignmentView(APIView):
                     if user.profile.phone_number not in unique_phone_numbers:
                         unique_phone_numbers.append(user.profile.phone_number)
 
+                # Check if this user.profile.vendor is external vendor and set it external_vendor
+                if user.profile.vendor:
+                    if user.profile.vendor.is_external:
+                        external_vendor = user.profile.vendor
+                        assignment.vendor = external_vendor
+
                 at_least_one_service_assigned = True
 
             else :
                 assignment.status = 'U'
                 assignment.project_manager = None
+                assignment.vendor = None
 
             assignment.save()
 
@@ -233,11 +237,18 @@ class JobServiceAssignmentView(APIView):
                     if user.profile.phone_number not in unique_phone_numbers:
                         unique_phone_numbers.append(user.profile.phone_number)
 
+                # Check if this user.profile.vendor is external vendor and set it external_vendor
+                if user.profile.vendor:
+                    if user.profile.vendor.is_external:
+                        external_vendor = user.profile.vendor
+                        retainer_assignment.vendor = external_vendor
+
                 at_least_one_service_assigned = True
 
             else :
                 retainer_assignment.status = 'U'
                 retainer_assignment.project_manager = None
+                retainer_assignment.vendor = None
 
             retainer_assignment.save()
 
@@ -247,6 +258,10 @@ class JobServiceAssignmentView(APIView):
 
         if at_least_one_service_assigned and (current_status == 'A' or current_status == 'U'):
             job.status = 'S' # assigned
+
+            if external_vendor:
+                job.vendor = external_vendor
+
             job.save()
 
             JobStatusActivity.objects.create(job=job, status='S', user=request.user)
@@ -254,6 +269,7 @@ class JobServiceAssignmentView(APIView):
         # if none of the services are assigned and the job status is S or W, then set the job status to A
         if not at_least_one_service_assigned and (current_status == 'S' or current_status == 'W'):
             job.status = 'A'
+            job.vendor = None
             job.save()
 
             #record JobStatusActivity X PM Unassigned
@@ -262,11 +278,6 @@ class JobServiceAssignmentView(APIView):
         # get the list of unique project managers and their phone numbers and send the job information with the app link as body
 
         notification_util = NotificationUtil()
-
-        if job.completeBy:
-            complete_by = job.completeBy.strftime("%b-%d %I:%M %p")
-        else:
-            complete_by = 'N/A'
 
         # Adding the link is throwing a 30007 error in Twilio
         #message = f'Job {job.purchase_order} has been ASSIGNED to you for tail number {job.tailNumber} to be completed before {complete_by}. Please go to you Livetakeoff App and check it out http://livetakeoff.com/jobs/{job.id}/details'
@@ -359,8 +370,15 @@ class JobServiceAssignmentView(APIView):
         # fetch job and update price after deleting service
         job = Job.objects.get(pk=job_id)
 
+        external_vendor = None
+
+        for service_assignment in job.job_service_assignments.all():
+            if service_assignment.vendor:
+                external_vendor = service_assignment.vendor
+
         price_breakdown = PriceBreakdownService().get_price_breakdown(job)
         job.price = price_breakdown.get('totalPrice')
+        job.vendor = external_vendor
         job.save()
 
 

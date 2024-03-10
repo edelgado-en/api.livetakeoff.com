@@ -1,6 +1,7 @@
 from django.db import models
 from .job import Job
 from .retainer_service import RetainerService
+from .vendor import Vendor
 
 class JobRetainerServiceAssignment(models.Model):
     STATUS_CHOICES = [
@@ -16,6 +17,7 @@ class JobRetainerServiceAssignment(models.Model):
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='U')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
         verbose_name_plural = 'Job Retainer Service Assignments'

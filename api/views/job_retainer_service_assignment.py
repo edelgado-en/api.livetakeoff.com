@@ -106,6 +106,18 @@ class JobRetainerServiceAssignmentView(APIView):
 
         job_retainer_service_assignment.delete()
 
+        # fetch job and update price after deleting service
+        job = Job.objects.get(pk=job_id)
+
+        external_vendor = None
+
+        for service_assignment in job.job_retainer_service_assignments.all():
+            if service_assignment.vendor:
+                external_vendor = service_assignment.vendor
+
+        job.vendor = external_vendor
+        job.save()
+
         return Response({'message': 'Delete successfully'}, status.HTTP_200_OK)
 
 
