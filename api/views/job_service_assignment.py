@@ -256,15 +256,15 @@ class JobServiceAssignmentView(APIView):
         # if there is at least one service assigned, then set the status to assigned
         current_status = job.status
 
-        if at_least_one_service_assigned and (current_status == 'A' or current_status == 'U'):
-            job.status = 'S' # assigned
+        if at_least_one_service_assigned:
+            job.vendor = external_vendor
 
-            if external_vendor:
-                job.vendor = external_vendor
+            if current_status == 'A' or current_status == 'U':
+                job.status = 'S' # assigned
 
+                JobStatusActivity.objects.create(job=job, status='S', user=request.user)
+            
             job.save()
-
-            JobStatusActivity.objects.create(job=job, status='S', user=request.user)
 
         # if none of the services are assigned and the job status is S or W, then set the job status to A
         if not at_least_one_service_assigned and (current_status == 'S' or current_status == 'W'):

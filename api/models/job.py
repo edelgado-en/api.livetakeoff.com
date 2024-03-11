@@ -67,7 +67,7 @@ class Job(models.Model):
 
     job_schedule = models.ForeignKey(JobSchedule, on_delete=models.PROTECT, blank=True, null=True)
 
-    vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT, blank=True, null=True)
+    vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT, blank=True, null=True, related_name='jobs')
 
     vendor_charge = models.DecimalField(max_digits=9, decimal_places=2, null=True)
 

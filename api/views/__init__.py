@@ -86,3 +86,4 @@ from .customer_retainers_services import CustomerRetainersServicesView
 from .customer_available_service import CustomerAvailableServiceView
 from .customer_available_retainer import CustomerAvailableRetainerView
 from .user_job_email import UserJobEmailView
+from .vendors import VendorsView
