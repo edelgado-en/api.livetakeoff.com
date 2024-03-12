@@ -295,7 +295,7 @@ class JobServiceAssignmentView(APIView):
 
         complete_before = 'Not specified'
         if job.completeBy:
-            complete_before = job.completeBy.strftime("%b-%d %I:%M %p")
+            complete_before = job.completeBy.strftime("%m/%d/%y %H:%M")
 
         message = f'Job ASSIGNED to you\n• {job.airport.initials}\n• {job.tailNumber}\n• {job.fbo.name}\nComplete before: {complete_before}'
 
