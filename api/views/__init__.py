@@ -87,3 +87,4 @@ from .customer_available_service import CustomerAvailableServiceView
 from .customer_available_retainer import CustomerAvailableRetainerView
 from .user_job_email import UserJobEmailView
 from .vendors import VendorsView
+from .job_invoice_details import JobInvoiceDetailsView
