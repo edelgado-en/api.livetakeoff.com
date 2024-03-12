@@ -87,7 +87,8 @@ from .views import (
         CustomerAvailableRetainerView,
         UserJobEmailView,
         VendorsView,
-        JobInvoiceDetailsView
+        JobInvoiceDetailsView,
+        AirportAvailableUsersView
     )
 
 urlpatterns = [
@@ -126,6 +127,8 @@ urlpatterns = [
     path('airports', AirportsView.as_view()),
     path('airports/<int:id>/', AirportDetailView.as_view()),
     path('aircraft-types', AircraftTypesView.as_view()),
+
+    path('airports/available-users/<int:id>/', AirportAvailableUsersView.as_view()),
 
     path('vendors', VendorsView.as_view()),
 
