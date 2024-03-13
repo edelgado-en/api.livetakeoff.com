@@ -126,15 +126,10 @@ class JobCommentView(ListCreateAPIView):
             #• MIA
             #• N1122AA
             #• Signature MIA
-            #Complete before: 2/4/24 13:00
             # where MIA is the airport initials, N1122AA is the tailNumber and Signature MIA is the FBO name
-            complete_before = 'Not specified'
-
-            if job.completeBy:
-                complete_before = job.completeBy.strftime('%m/%d/%y %H:%M')
             
             message = 'Important note was added to this job'
-            message += f'\n• {job.airport.initials}\n• {job.tailNumber}\n• {job.fbo.name}\nComplete before: {complete_before}'
+            message += f'\n• {job.airport.initials}\n• {job.tailNumber}\n• {job.fbo.name}\n'
 
 
             # get all phone numbers for all project managers assigned to this job

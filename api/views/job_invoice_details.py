@@ -17,7 +17,7 @@ class JobInvoiceDetailsView(APIView):
         job = get_object_or_404(Job, pk=id)
 
         invoice_details = {
-            'id': job.id,
+            'job_id': job.id,
             'internal_additional_cost': job.internal_additional_cost if job.internal_additional_cost else 0,
             'subcontractor_profit': job.subcontractor_profit if job.subcontractor_profit else 0,
         }
@@ -26,6 +26,7 @@ class JobInvoiceDetailsView(APIView):
             invoice_details['vendor'] = {
                 'id': job.vendor.id,
                 'name': job.vendor.name,
+                'charge': job.vendor_charge if job.vendor_charge else 0,
                 'additional_cost': job.vendor_additional_cost if job.vendor_additional_cost else 0
             }
 

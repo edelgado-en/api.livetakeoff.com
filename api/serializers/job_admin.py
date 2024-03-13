@@ -55,5 +55,8 @@ class JobAdminSerializer(serializers.ModelSerializer):
             'is_auto_priced',
             'on_site',
             'created_by',
-            'completion_date'
+            'completion_date',
+            'internal_additional_cost',
+            'vendor_additional_cost',
+            'vendor_charge'
             )

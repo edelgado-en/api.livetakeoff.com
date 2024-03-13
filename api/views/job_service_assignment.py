@@ -175,6 +175,20 @@ class JobServiceAssignmentView(APIView):
             updated_job = Job.objects.get(pk=job.id)
             price_breakdown = PriceBreakdownService().get_price_breakdown(updated_job)
             updated_job.price = price_breakdown.get('totalPrice')
+
+            external_vendor = None
+            for service_assignment in updated_job.job_service_assignments.all():
+                if service_assignment.vendor:
+                    external_vendor = service_assignment.vendor
+            
+            updated_job.vendor = external_vendor
+
+            # adjust the subcontractor_profit if there is a external_vendor
+            if external_vendor:
+                vendor_charge = updated_job.vendor_charge if updated_job.vendor_charge else 0
+                vendor_additional_cost = updated_job.vendor_additional_cost if updated_job.vendor_additional_cost else 0
+                updated_job.subcontractor_profit = updated_job.price - (vendor_charge + vendor_additional_cost)
+
             updated_job.save()
 
 
@@ -287,28 +301,21 @@ class JobServiceAssignmentView(APIView):
         #• MIA
         #• N1122AA
         #• Signature MIA
-        #Complete before: 2/4/24 13:00
         # Where MIA is the airport initials
         # N1122AA is the tail number
         # Signature MIA is the job.fbo.name
         # 2/4/24 13:00 is the job.completeBy
 
-        complete_before = 'Not specified'
-        if job.completeBy:
-            complete_before = job.completeBy.strftime("%m/%d/%y %H:%M")
-
-        message = f'Job ASSIGNED to you\n• {job.airport.initials}\n• {job.tailNumber}\n• {job.fbo.name}\nComplete before: {complete_before}'
+        message = f'Job ASSIGNED to you\n• {job.airport.initials}\n• {job.tailNumber}\n• {job.fbo.name}\n'
 
         for phone_number in unique_phone_numbers:
             notification_util.send(message, phone_number.as_e164)
-
 
         response = {
             'message': 'assigned succesfully'
         }
 
         return Response(response, status.HTTP_200_OK)
-
 
 
     def patch(self, request, id):
@@ -370,17 +377,24 @@ class JobServiceAssignmentView(APIView):
         # fetch job and update price after deleting service
         job = Job.objects.get(pk=job_id)
 
-        external_vendor = None
+        if job.is_auto_priced and job.status != 'I':
+            price_breakdown = PriceBreakdownService().get_price_breakdown(job)
+            job.price = price_breakdown.get('totalPrice')
 
+        external_vendor = None
         for service_assignment in job.job_service_assignments.all():
             if service_assignment.vendor:
                 external_vendor = service_assignment.vendor
-
-        price_breakdown = PriceBreakdownService().get_price_breakdown(job)
-        job.price = price_breakdown.get('totalPrice')
+        
         job.vendor = external_vendor
-        job.save()
 
+        # adjust the subcontractor_profit if there is a external_vendor
+        if external_vendor:
+            vendor_charge = job.vendor_charge if job.vendor_charge else 0
+            vendor_additional_cost = job.vendor_additional_cost if job.vendor_additional_cost else 0
+            job.subcontractor_profit = job.price - (vendor_charge + vendor_additional_cost)
+
+        job.save()
 
         return Response({'message': 'Delete successfully'}, status.HTTP_200_OK)
 

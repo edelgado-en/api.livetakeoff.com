@@ -180,6 +180,13 @@ class CompletedJobsListView(ListAPIView):
         if serializer.is_valid():
             serializer.save()
 
+            if job.vendor:
+                vendor_charge = job.vendor_charge if job.vendor_charge else 0
+                vendor_additional_cost = job.vendor_additional_cost if job.vendor_additional_cost else 0
+                job.subcontractor_profit = job.price - (vendor_charge + vendor_additional_cost)
+
+                job.save(update_fields=['subcontractor_profit'])
+
             JobStatusActivity.objects.create(job=job, user=request.user, status='I')
 
             for service in job.job_service_assignments.all():
@@ -199,9 +206,10 @@ class CompletedJobsListView(ListAPIView):
                     # Update ServiceActivity for the corresponding service_price with the service_price
                     service_activity = ServiceActivity.objects.filter(job=job, service_id=service_id, status='C').first()
 
-                    service_activity.price = service_price
+                    if service_activity:
+                        service_activity.price = service_price
 
-                    service_activity.save(update_fields=['price'])
+                        service_activity.save(update_fields=['price'])
 
                 except PriceListEntries.DoesNotExist:
                     continue

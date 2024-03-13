@@ -372,23 +372,18 @@ class JobDetail(APIView):
                         #• Fly Alliance
                         #• MIA
                         #• N1122AA
-                        #Complete before: 2/4/24 13:00
                         # where RICARDO is the user.first_name
                         # Fly Alliance is the customer name
                         # MIA is the airport initials
                         # N1122AA is the tail number
                         # 2/4/24 13:00 is the completeBy date
 
-                        completed_before = 'Not specified'
-                        if job.completeBy:
-                            completed_before = job.completeBy.strftime('%m/%d/%y %H:%M')
-
                         first_name = ''
 
                         if request.user.first_name:
                             first_name = request.user.first_name.upper()
 
-                        message = f'Job ACCEPTED by {first_name}\n• {job.customer.name}\n• {job.airport.initials}\n• {job.tailNumber}\nComplete before: {completed_before}'
+                        message = f'Job ACCEPTED by {first_name}\n• {job.customer.name}\n• {job.airport.initials}\n• {job.tailNumber}\n'
 
                         notification_util.send(message, phone_number.as_e164)
 
