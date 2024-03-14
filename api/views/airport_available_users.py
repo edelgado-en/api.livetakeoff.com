@@ -40,7 +40,33 @@ class AirportAvailableUsersView(APIView):
 
             users.append(user)
 
-        serializer = UsersSerializer(users, many=True)
+        vendor_names = []
+        for user in users:
+            if user.profile.vendor:
+                vendor_names.append(user.profile.vendor.name)
+            else:
+                vendor_names.append('Livetakeoff')
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        vendor_names = list(set(vendor_names))
+
+        vendors = []
+        for vendor_name in vendor_names:
+            vendor = {
+                'name': vendor_name,
+                'users': []
+            }
+
+            for user in users:
+                if user.profile.vendor:
+                    if user.profile.vendor.name == vendor_name:
+                        serializer = UsersSerializer(user)
+                        vendor['users'].append(serializer.data)
+                else:
+                    if vendor_name == 'Livetakeoff':
+                        serializer = UsersSerializer(user)
+                        vendor['users'].append(serializer.data)
+
+            vendors.append(vendor)
+
+        return Response(vendors, status=status.HTTP_200_OK)
 
