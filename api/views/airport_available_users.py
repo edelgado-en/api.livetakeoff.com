@@ -15,7 +15,7 @@ class AirportAvailableUsersView(APIView):
     def get(self, request, id):
         airport = Airport.objects.get(pk=id)
 
-        available_users = airport.available_users.all()
+        available_users = airport.available_users.filter(user__is_active=True).all()
 
         users = []
 
