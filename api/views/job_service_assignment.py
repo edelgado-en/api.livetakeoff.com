@@ -171,11 +171,15 @@ class JobServiceAssignmentView(APIView):
 
         # re-fetch job and update price after deleting service only if the job is auto_priced  and not invoiced
         
+        updated_job = Job.objects.get(pk=job.id)
+        
         if job.is_auto_priced and job.status != 'I':
-            updated_job = Job.objects.get(pk=job.id)
             price_breakdown = PriceBreakdownService().get_price_breakdown(updated_job)
             updated_job.price = price_breakdown.get('totalPrice')
 
+            updated_job.save()
+
+        if job.status != 'I':
             external_vendor = None
             for service_assignment in updated_job.job_service_assignments.all():
                 if service_assignment.vendor:
@@ -190,7 +194,6 @@ class JobServiceAssignmentView(APIView):
                 updated_job.subcontractor_profit = updated_job.price - (vendor_charge + vendor_additional_cost)
 
             updated_job.save()
-
 
         serializer = JobServiceAssignmentSerializer(assignment)
 

@@ -90,6 +90,24 @@ class JobRetainerServiceAssignmentView(APIView):
                                                            status=status)
         retainer_assignment.save()
 
+        updated_job = Job.objects.get(pk=job.id)
+
+        if job.status != 'I':
+            external_vendor = None
+            for service_assignment in updated_job.job_retainer_service_assignments.all():
+                if service_assignment.vendor:
+                    external_vendor = service_assignment.vendor
+            
+            updated_job.vendor = external_vendor
+
+            # adjust the subcontractor_profit if there is a external_vendor
+            if external_vendor:
+                vendor_charge = updated_job.vendor_charge if updated_job.vendor_charge else 0
+                vendor_additional_cost = updated_job.vendor_additional_cost if updated_job.vendor_additional_cost else 0
+                updated_job.subcontractor_profit = updated_job.price - (vendor_charge + vendor_additional_cost)
+
+            updated_job.save()
+
         serializer = JobRetainerServiceAssignmentSerializer(retainer_assignment)
 
         return Response(serializer.data)   
