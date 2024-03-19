@@ -21,8 +21,10 @@ class ServiceReportView(APIView):
     def post(self, request):
         user_profile = UserProfile.objects.get(user=request.user)
         is_customer = user_profile and user_profile.customer is not None
+        is_project_manager = request.user.groups.filter(name='Project Managers').exists()
+        is_external_project_manager = is_project_manager and user_profile.vendor is not None and user_profile.vendor.is_external
 
-        if not self.can_view_dashboard(request.user, is_customer):
+        if not self.can_view_dashboard(request.user, is_customer, is_external_project_manager):
             return Response({'error': 'You do not have permission to view this page'}, status=status.HTTP_403_FORBIDDEN)
 
         service_id = self.request.data.get('service_id', None)
@@ -32,7 +34,6 @@ class ServiceReportView(APIView):
         customer_id = self.request.data.get('customer_id', None)
 
         dateSelected = request.data.get('dateSelected')
-
 
         # get start date and end date based on the dateSelected value provided
         if dateSelected == 'yesterday':
@@ -121,7 +122,15 @@ class ServiceReportView(APIView):
         if is_customer:
             qs = qs.filter(job__customer_id=user_profile.customer.id)
 
+        if is_external_project_manager and user_profile.show_all_services_report:
+            qs = qs.filter(job__vendor_id=user_profile.vendor.id)
+        elif is_external_project_manager:
+            qs = qs.filter(project_manager=request.user)
+
         show_spending_info = True
+
+        if is_project_manager or is_external_project_manager:
+            show_spending_info = False
 
         if self.request.user.groups.filter(name='Internal Coordinators').exists():
             # Do not show spending info for internal coordinators
@@ -158,7 +167,6 @@ class ServiceReportView(APIView):
         number_of_unique_locations = qs.values('job__airport__name').distinct().count()
 
         show_retainers = True
-        
 
         if is_customer and user_profile.customer.customer_settings:
             if user_profile.customer.customer_settings.show_job_price and user_profile.show_job_price:
@@ -204,34 +212,35 @@ class ServiceReportView(APIView):
                 total_jobs_revenue = 0
 
         total_labor_time_only_services = 0
-        # Sum the Job.labor_time from JobStatusActivity where the status = 'I' where the job has at least one job_service_assignments entry
-        qs = JobStatusActivity.objects.filter(
-            Q(status__in=['I']) &
-            Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date)
-        )
 
-        if customer_id:
-            qs = qs.filter(job__customer_id=customer_id)
+        if not is_project_manager and not is_external_project_manager:
+            qs = JobStatusActivity.objects.filter(
+                Q(status__in=['I']) &
+                Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date)
+            )
 
-        if tail_number:
-            qs = qs.filter(Q(job__tailNumber__icontains=tail_number))
+            if customer_id:
+                qs = qs.filter(job__customer_id=customer_id)
 
-        if airport_id:
-                qs = qs.filter(job__airport_id=airport_id)
+            if tail_number:
+                qs = qs.filter(Q(job__tailNumber__icontains=tail_number))
+
+            if airport_id:
+                    qs = qs.filter(job__airport_id=airport_id)
+                
+            if fbo_id:
+                qs = qs.filter(job__fbo_id=fbo_id)
+
+            if is_customer:
+                qs = qs.filter(job__customer_id=user_profile.customer.id)
             
-        if fbo_id:
-            qs = qs.filter(job__fbo_id=fbo_id)
+            #Ensure that the JobStatusActivity included does not have jobs with retainer service assignments entries
+            qs = qs.exclude(job__job_retainer_service_assignments__isnull=False)
 
-        if is_customer:
-            qs = qs.filter(job__customer_id=user_profile.customer.id)
-        
-        #Ensure that the JobStatusActivity included does not have jobs with retainer service assignments entries
-        qs = qs.exclude(job__job_retainer_service_assignments__isnull=False)
+            qs = qs.aggregate(Sum('job__labor_time'))['job__labor_time__sum']
 
-        qs = qs.aggregate(Sum('job__labor_time'))['job__labor_time__sum']
-
-        if qs:
-            total_labor_time_only_services = qs
+            if qs:
+                total_labor_time_only_services = qs
 
         return Response({
                 'number_of_services_completed': number_of_services_completed,
@@ -244,12 +253,12 @@ class ServiceReportView(APIView):
             }
             , status=status.HTTP_200_OK)
     
-    def can_view_dashboard(self, user, is_customer):
+    def can_view_dashboard(self, user, is_customer, is_external_project_manager):
         if user.is_superuser \
             or user.is_staff \
             or is_customer \
-            or user.groups.filter(name='Internal Coordinators').exists():
-            
+            or user.groups.filter(name='Internal Coordinators').exists() \
+            or is_external_project_manager:
             return True
         
         return False

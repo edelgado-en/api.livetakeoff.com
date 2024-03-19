@@ -37,6 +37,8 @@ class ServiceActivityListView(ListAPIView):
 
         user_profile = UserProfile.objects.get(user=self.request.user)
         is_customer = user_profile and user_profile.customer is not None
+        is_project_manager = self.request.user.groups.filter(name='Project Managers').exists()
+        is_external_project_manager = is_project_manager and user_profile.vendor is not None and user_profile.vendor.is_external
 
         # get start date and end date based on the dateSelected value provided
         if dateSelected == 'yesterday':
@@ -124,6 +126,11 @@ class ServiceActivityListView(ListAPIView):
 
         if is_customer:
             qs = qs.filter(job__customer=user_profile.customer)
+
+        if is_external_project_manager and user_profile.show_all_services_report:
+            qs = qs.filter(job__vendor_id=user_profile.vendor.id)
+        elif is_external_project_manager:
+            qs = qs.filter(project_manager=self.request.user)
 
 
         if self.request.user.groups.filter(name='Internal Coordinators').exists():

@@ -21,8 +21,10 @@ class RetainerServiceReportView(APIView):
     def post(self, request):
         user_profile = UserProfile.objects.get(user=request.user)
         is_customer = user_profile and user_profile.customer is not None
+        is_project_manager = request.user.groups.filter(name='Project Managers').exists()
+        is_external_project_manager = is_project_manager and user_profile.vendor is not None and user_profile.vendor.is_external
 
-        if not self.can_view_dashboard(request.user, is_customer):
+        if not self.can_view_dashboard(request.user, is_customer, is_external_project_manager):
             return Response({'error': 'You do not have permission to view this page'}, status=status.HTTP_403_FORBIDDEN)
 
         service_id = self.request.data.get('service_id', None)
@@ -122,6 +124,11 @@ class RetainerServiceReportView(APIView):
         if is_customer:
             qs = qs.filter(job__customer_id=user_profile.customer.id)
 
+        if is_external_project_manager and user_profile.show_all_services_report:
+            qs = qs.filter(job__vendor_id=user_profile.vendor.id)
+        elif is_external_project_manager:
+            qs = qs.filter(project_manager=request.user)
+
         if self.request.user.groups.filter(name='Internal Coordinators').exists():
             user_customers = UserCustomer.objects.filter(user=self.request.user).all()
 
@@ -191,11 +198,12 @@ class RetainerServiceReportView(APIView):
             }
             , status=status.HTTP_200_OK)
     
-    def can_view_dashboard(self, user, is_customer):
+    def can_view_dashboard(self, user, is_customer, is_external_project_manager):
         if user.is_superuser \
             or user.is_staff \
             or is_customer \
-            or user.groups.filter(name='Internal Coordinators').exists():
+            or user.groups.filter(name='Internal Coordinators').exists() \
+            or is_external_project_manager:
             return True
         
         return False

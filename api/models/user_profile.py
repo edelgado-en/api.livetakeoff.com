@@ -19,5 +19,7 @@ class UserProfile(models.Model):
     enable_estimates = models.BooleanField(default=False)
     enable_invoice = models.BooleanField(default=False)
     show_job_price = models.BooleanField(default=False)
+    show_all_services_report = models.BooleanField(default=False,
+                                                    help_text='If enabled, the external project manager will see all services completed by its vendor in the service report. If disabled, the external project manager will only see what its been completed by him/her')
     prompt_requested_by = models.BooleanField(default=False, help_text='For customers users that use generic profiles, this will prompt them to enter their name when creating a job.')
 
