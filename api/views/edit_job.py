@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from api.serializers import (JobEditSerializer)
 from django.contrib.auth.models import User
 from datetime import datetime
+from decimal import Decimal
 
 from api.notification_util import NotificationUtil
 from api.email_util import EmailUtil
@@ -55,6 +56,22 @@ class EditJobView(APIView):
             serializer.save()
 
             saved_job = Job.objects.get(pk=id)
+
+            if request.user.is_superuser \
+             or request.user.is_staff \
+             or request.user.groups.filter(name='Account Managers').exists():
+                saved_job.internal_additional_cost = request.data.get('internal_additional_cost', saved_job.internal_additional_cost)
+                
+                if saved_job.vendor:
+                    vendor_charge = request.data.get('vendor_charge', saved_job.vendor_charge)
+                    vendor_additional_cost = request.data.get('vendor_additional_cost', saved_job.vendor_additional_cost)
+
+                    saved_job.vendor_charge = vendor_charge
+                    saved_job.vendor_additional_cost = vendor_additional_cost
+                    saved_job.subcontractor_profit = saved_job.price - Decimal(str(vendor_charge + vendor_additional_cost))
+
+                saved_job.save(update_fields=['internal_additional_cost', 'vendor_charge', 'vendor_additional_cost', 'subcontractor_profit'])
+
 
             if current_estimatedETD != saved_job.estimatedETD:
                 JobStatusActivity.objects.create(job=job, user=request.user,
