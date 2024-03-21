@@ -94,11 +94,15 @@ class JobCommentView(ListCreateAPIView):
         emails = self.request.data.get('emails', [])
 
         is_customer_user = False
+        is_external_project_manager = False
 
         # when the user is customer and the customer matches the job customer then is_public is always true
         if user.profile.customer and user.profile.customer == job.customer:
             is_public = True
             is_customer_user = True
+
+        if user.profile.vendor and user.profile.vendor.is_external:
+            is_external_project_manager = True
 
         job_comment = JobComments(job=job,
                                   comment=comment,
@@ -108,9 +112,8 @@ class JobCommentView(ListCreateAPIView):
         job_comment.save()
 
         # if is_customer_user True always send sms
-        if is_customer_user:
+        if is_customer_user or is_external_project_manager:
             send_sms = True    
-
 
         # if send_sms then send notification to all project managers assigned to this job
         if send_sms:
