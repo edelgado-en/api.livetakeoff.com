@@ -85,11 +85,21 @@ class JobEstimateFormInfoView(APIView):
         if not fbo_dtos:
             return Response({'error': 'No fbos found'}, status=status.HTTP_404_NOT_FOUND)
         
+         # Check if the user is a customer and get the customer id
+        user_profile = UserProfile.objects.get(user=request.user)
+        is_customer = user_profile and user_profile.customer is not None
+
+        customer_id = None
+
+        if is_customer:
+            customer_id = user_profile.customer.id
+        
         response = {
             'customers': customer_dtos,
             'aircraft_types': aircraft_type_dtos,
             'airports': airport_dtos,
             'fbos': fbo_dtos,
+            'customer_id': customer_id,
         }
 
         return Response(response, status.HTTP_200_OK)
