@@ -89,3 +89,5 @@ from .user_job_email import UserJobEmailView
 from .vendors import VendorsView
 from .job_invoice_details import JobInvoiceDetailsView
 from .airport_available_users import AirportAvailableUsersView
+from .airport_customer_fees import AirportCustomerFeesView
+from .fbo_customer_fees import FBOCustomerFeesView

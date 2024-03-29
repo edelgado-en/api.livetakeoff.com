@@ -24,6 +24,8 @@ class UserView(APIView):
 
         canSeePrice = False
 
+        canSeeAirportAdditionalFees = False
+
         customerLogo = None
         if user_profile and user_profile.customer and user_profile.customer.logo:
             customerLogo = user_profile.customer.logo.url
@@ -34,6 +36,9 @@ class UserView(APIView):
 
             if user_profile.customer.customer_settings.show_job_price:
                 canSeePrice = user_profile.show_job_price
+
+        if user_profile and user_profile.show_airport_fees:
+            canSeeAirportAdditionalFees = user_profile.show_airport_fees
 
         first_name = ''
         last_name = ''
@@ -140,6 +145,7 @@ class UserView(APIView):
             'enableInvoices': user_profile.enable_invoice,
             'promptRequestedBy': user_profile.prompt_requested_by,
             'showInventory': showInventory,
+            'showAirportFees': canSeeAirportAdditionalFees
         }
 
         return Response(content)
