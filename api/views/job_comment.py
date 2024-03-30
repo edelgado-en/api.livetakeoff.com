@@ -112,28 +112,21 @@ class JobCommentView(ListCreateAPIView):
         job_comment.save()
 
         # if is_customer_user True always send sms
-        if is_customer_user or is_external_project_manager:
+        if is_customer_user:
             send_sms = True    
 
         # if send_sms then send notification to all project managers assigned to this job
+        notification_util = NotificationUtil()
+        
         if send_sms:
-            notification_util = NotificationUtil()
-
-            # Adding a link is throwing a 30007 error in Twilio
-            #message = f'An important message has been added to job {job.purchase_order} for Tail number {job.tailNumber}. Check it out at  http://livetakeoff.com/jobs/{job.id}/comments'
-
-            #message = f'An important message has been added to job {job.purchase_order} for Tail number {job.tailNumber}.'
-
-            # message has to be in the following format:
-            #Important note was added to this job
-            #• MIA
-            #• N1122AA
-            #• Signature MIA
-            # where MIA is the airport initials, N1122AA is the tailNumber and Signature MIA is the FBO name
-            
+            # if is_customer_user then the message should say 'CUSTOMER added import note to this job'
+            # otherwise it should say 'Important note was added to this job'
             message = 'Important note was added to this job'
-            message += f'\n• {job.airport.initials}\n• {job.tailNumber}\n• {job.fbo.name}\n'
+            
+            if is_customer_user:
+                message = 'CUSTOMER added important note to this job'
 
+            message += f'\n• {job.airport.initials}\n• {job.tailNumber}\n• {job.fbo.name}\n'
 
             # get all phone numbers for all project managers assigned to this job
             # iterate through jobServiceAssignments and JobRetainerServiceAssignments and get all the unique phone numbers
@@ -176,6 +169,22 @@ class JobCommentView(ListCreateAPIView):
                 notification_util.send(message, phone_number.as_e164)
 
         
+        if is_external_project_manager:
+            admin_phone_numbers = []
+            admins = User.objects.filter(Q(is_superuser=True) | Q(is_staff=True) | Q(groups__name='Account Managers'))
+
+            for user in admins:
+                if user.profile.phone_number:
+                    if user.profile.phone_number not in admin_phone_numbers:
+                        admin_phone_numbers.append(user.profile.phone_number)
+
+            message = 'EXTERNAL PROJECT MANAGER added a note to this job'
+            message += f'\n• {job.airport.initials}\n• {job.tailNumber}\n• {job.fbo.name}\n'
+
+            for phone_number in admin_phone_numbers:
+                notification_util.send(message, phone_number.as_e164)
+
+
         if send_email:
             # check if the job.created_by is a customer
             is_customer = job.created_by.profile.customer is not None

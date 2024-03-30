@@ -132,10 +132,6 @@ class EditJobView(APIView):
                             # get the phone number of the admin
                             phone_number = admin.profile.phone_number
                             if phone_number:
-                                # send a text message
-                                # Adding a link is throwing a 30007 error in Twilio
-                                #message = f'Job {job.purchase_order} for tail number {job.tailNumber} has been COMPLETED. Please review the job and close it out https://livetakeoff.com/completed/review/{job.id}'
-                                
                                 message = f'Job {job.purchase_order} for tail number {job.tailNumber} has been COMPLETED.'
                                 
                                 notification_util.send(message, phone_number.as_e164)
