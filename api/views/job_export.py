@@ -60,6 +60,9 @@ class JobExportCSVView(APIView):
                         .order_by('status') \
                         .all()    
 
+        if self.request.user.profile.customer:
+            qs = qs.filter(customer=self.request.user.profile.customer)
+
         if searchText:
                 qs = qs.filter(Q(tailNumber__icontains=searchText)
                                | Q(purchase_order__icontains=searchText)
