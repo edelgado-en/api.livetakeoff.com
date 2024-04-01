@@ -31,7 +31,6 @@ class JobExportCSVView(APIView):
         writer = csv.DictWriter(response, fieldnames=['P.O', 'Customer', 'Request Date', 'Tail Number', 'Aircraft', 'Airport', 'FBO', 'Arrival Date', 'Departure Date', 'Complete By Date', 'Completion Date', 'Price', 'Services', 'Retainers'])
         writer.writeheader()
 
-
         searchText = self.request.data.get('searchText')
         status = self.request.data.get('status')
         airport = self.request.data.get('airport')
@@ -111,6 +110,24 @@ class JobExportCSVView(APIView):
         if completionDateTo:
             qs = qs.filter(completion_date__lte=completionDateTo)
         
+        show_job_price = True
+
+        # check the customer settings if the user is a customer user to check if show_job_price is True
+        if request.user.profile.customer:
+            show_job_price_at_customer_level = request.user.profile.customer.customer_settings.show_job_price
+
+            if show_job_price_at_customer_level:
+                show_job_price_at_customer_user_level = request.user.profile.show_job_price
+
+                if show_job_price_at_customer_user_level:
+                    show_job_price = True
+                
+                else:
+                    show_job_price = False
+
+            else:
+                show_job_price = False
+
         # add jobs to csv
         for job in qs:
             if job.estimatedETA:
@@ -143,22 +160,39 @@ class JobExportCSVView(APIView):
             for retainer in job.job_retainer_service_assignments.all():
                 retainers += retainer.retainer_service.name + ' | '
 
-            writer.writerow({
-                'P.O': job.purchase_order,
-                'Customer': job.customer.name,
-                'Request Date': job.requestDate.strftime('%m/%d/%Y %H:%M'),
-                'Tail Number': job.tailNumber,
-                'Aircraft': job.aircraftType.name,
-                'Airport': job.airport.initials,
-                'FBO': job.fbo.name,
-                'Arrival Date': arrivalDate,
-                'Departure Date': departureDate,
-                'Complete By Date': completeByDate,
-                'Completion Date': completionDate,
-                'Price': job.price,
-                'Services': services,
-                'Retainers': retainers
-            })
+            if show_job_price:
+                writer.writerow({
+                    'P.O': job.purchase_order,
+                    'Customer': job.customer.name,
+                    'Request Date': job.requestDate.strftime('%m/%d/%Y %H:%M'),
+                    'Tail Number': job.tailNumber,
+                    'Aircraft': job.aircraftType.name,
+                    'Airport': job.airport.initials,
+                    'FBO': job.fbo.name,
+                    'Arrival Date': arrivalDate,
+                    'Departure Date': departureDate,
+                    'Complete By Date': completeByDate,
+                    'Completion Date': completionDate,
+                    'Price': job.price,
+                    'Services': services,
+                    'Retainers': retainers
+                })
+            else:
+                writer.writerow({
+                    'P.O': job.purchase_order,
+                    'Customer': job.customer.name,
+                    'Request Date': job.requestDate.strftime('%m/%d/%Y %H:%M'),
+                    'Tail Number': job.tailNumber,
+                    'Aircraft': job.aircraftType.name,
+                    'Airport': job.airport.initials,
+                    'FBO': job.fbo.name,
+                    'Arrival Date': arrivalDate,
+                    'Departure Date': departureDate,
+                    'Complete By Date': completeByDate,
+                    'Completion Date': completionDate,
+                    'Services': services,
+                    'Retainers': retainers
+                })
 
         
         return response
