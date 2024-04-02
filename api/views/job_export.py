@@ -35,6 +35,7 @@ class JobExportCSVView(APIView):
         status = self.request.data.get('status')
         airport = self.request.data.get('airport')
         customer = self.request.data.get('customer')
+        fbo = self.request.data.get('fbo')
 
         requestedDateFrom = self.request.data.get('requestedDateFrom')
         requestedDateTo = self.request.data.get('requestedDateTo')
@@ -77,6 +78,8 @@ class JobExportCSVView(APIView):
         if airport and airport != 'All':
             qs = qs.filter(airport_id=airport)
 
+        if fbo and fbo != 'All':
+            qs = qs.filter(fbo_id=fbo)
 
         if customer and customer != 'All':
             qs = qs.filter(customer_id=customer)
