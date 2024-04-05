@@ -24,3 +24,5 @@ class UserProfile(models.Model):
     prompt_requested_by = models.BooleanField(default=False, help_text='For customers users that use generic profiles, this will prompt them to enter their name when creating a job.')
 
     show_airport_fees = models.BooleanField(default=False, help_text='If enabled, the user will be able to see airport and fbo additional fees when creating a job. The information will be shown when selecting an airport or fbo.')
+
+    enable_confirm_jobs = models.BooleanField(default=False, help_text='If enabled, the user will be able to confirm jobs. If disabled, the user will not be able to confirm jobs. Admins can always confirm jobs.')
