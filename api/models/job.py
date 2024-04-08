@@ -77,5 +77,13 @@ class Job(models.Model):
 
     subcontractor_profit = models.DecimalField(max_digits=9, decimal_places=2, null=True, help_text='Calculated by subtracting the vendor charge and additional cost from the price')
 
+    is_publicly_confirmed = models.BooleanField(default=False, help_text='It is set to true when the job is confirmed via a public link.')
+
+    confirmed_full_name = models.CharField(max_length=300, blank=True, null=True)
+
+    confirmed_email = models.CharField(max_length=320, blank=True, null=True)
+
+    confirmed_phone_number = models.CharField(max_length=255, blank=True, null=True)
+
     def __str__(self) -> str:
         return str(self.id) + ' - ' + self.tailNumber + ' - ' + self.airport.initials + ' - ' + self.aircraftType.name
