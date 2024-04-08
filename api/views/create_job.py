@@ -63,7 +63,11 @@ class CreateJobView(APIView):
 
         if is_customer:
             customer = user_profile.customer
-            job_status = 'U'
+
+            if user_profile.enable_confirm_jobs:
+                job_status = 'A'
+            else:
+                job_status = 'U'
         else:
             customer = Customer.objects.get(id=data['customer_id'])
 
