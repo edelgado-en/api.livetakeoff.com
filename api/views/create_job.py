@@ -355,6 +355,10 @@ class CreateJobView(APIView):
 
             body = f'''
                     <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">Customer Job Request</div>
+                    <a href="http://livetakeoff.com/shared/jobs/{base64_message}/confirm" style="display: inline-block; padding: 0.5625rem 1.125rem; margin: 0 5px; font-size: 1.5rem; font-weight: 400; line-height: 1.5; text-align: center; vertical-align: middle; cursor: pointer; border: 1px solid transparent; border-radius: 0.375rem; transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; text-decoration: none; color: #fff; background-color: #007bff; border-color: #007bff;">CONFIRM</a>
+                    <a href="http://livetakeoff.com/jobs/{job.id}/details" style="display: inline-block; padding: 0.5625rem 1.125rem; margin: 0 5px; font-size: 1.5rem; font-weight: 400; line-height: 1.5; text-align: center; vertical-align: middle; cursor: pointer; border: 1px solid transparent; border-radius: 0.375rem; transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; text-decoration: none; color: #212529; background-color: #f8f9fa; border-color: #f8f9fa;">EDIT</a>
+
+                    <div style="margin-bottom:20px"></div>
                     <table style="border-collapse: collapse">
                         <tr>
                             <td style="padding:15px">Customer</td>
@@ -398,10 +402,7 @@ class CreateJobView(APIView):
                         </tr>
                     </table>
                     <div style="margin-top:20px;padding:5px;font-weight: 700;"></div>
-                    <a href="http://livetakeoff.com/shared/jobs/{base64_message}/confirm" style="display: inline-block; padding: 0.375rem 0.75rem; margin: 0 5px; font-size: 1rem; font-weight: 400; line-height: 1.5; text-align: center; vertical-align: middle; cursor: pointer; border: 1px solid transparent; border-radius: 0.25rem; transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; text-decoration: none; color: #fff; background-color: #007bff; border-color: #007bff;">CONFIRM</a>
-
-                    <a href="http://livetakeoff.com/jobs/{job.id}/details" style="display: inline-block; padding: 0.375rem 0.75rem; margin: 0 5px; font-size: 1rem; font-weight: 400; line-height: 1.5; text-align: center; vertical-align: middle; cursor: pointer; border: 1px solid transparent; border-radius: 0.25rem; transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; text-decoration: none; color: #212529; background-color: #f8f9fa; border-color: #f8f9fa;">REVIEW</a>
-                    <div style="margin-top:20px"></div>
+                    
                     '''
 
             email_util = EmailUtil()
