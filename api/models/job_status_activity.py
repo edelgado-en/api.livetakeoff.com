@@ -33,7 +33,7 @@ class JobStatusActivity(models.Model):
     job = models.ForeignKey(Job, on_delete=models.PROTECT, related_name='status_activities')
     status = models.CharField(max_length=1, choices=STATUS_CHOICES)
     price = models.DecimalField(max_digits=9, decimal_places=2, null=True)
-    user = models.ForeignKey('auth.User', on_delete=models.PROTECT, related_name='status_activities')
+    user = models.ForeignKey('auth.User', on_delete=models.PROTECT, null=True, blank=True, related_name='status_activities')
     timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:

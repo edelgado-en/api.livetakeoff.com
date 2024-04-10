@@ -31,4 +31,4 @@ class EmailUtil():
         #Fort Lauderdale, FL 33315 
         #ops@livetakeoff.com
 
-        return "<br><br>LiveTakeoff Team<br>+1(786)975-6255<br>750 SW 34th St<br>Suite 209<br>Fort Lauderdale, FL 33315<br>ops@livetakeoff.com"
+        return "<br><br><br>LiveTakeoff Team<br>+1(786)975-6255<br>750 SW 34th St<br>Suite 209<br>Fort Lauderdale, FL 33315<br>ops@livetakeoff.com"

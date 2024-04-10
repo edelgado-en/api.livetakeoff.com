@@ -7,6 +7,16 @@ class JobActivitySerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
     user = BasicUserSerializer()
 
+    user_full_name = serializers.SerializerMethodField()
+
+    def get_user_full_name(self, obj):
+        # get the obj.job.confirmed_full_name if it is not empty and the obj.status == 'A' and the obj.activity_type == 'S'
+        if obj.job.confirmed_full_name and obj.status == 'A' and obj.activity_type == 'S':
+            return obj.job.confirmed_full_name
+        else:
+            # return the obj.user.first_name + ' ' + obj.user.last_name
+            return obj.user.first_name + ' ' + obj.user.last_name
+
     class Meta:
         model = JobStatusActivity
         fields = (
@@ -15,5 +25,6 @@ class JobActivitySerializer(serializers.ModelSerializer):
             'price',
             'user',
             'timestamp',
-            'activity_type'
+            'activity_type',
+            'user_full_name'
             )

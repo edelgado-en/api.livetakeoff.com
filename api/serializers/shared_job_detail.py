@@ -51,5 +51,7 @@ class SharedJobDetailSerializer(serializers.ModelSerializer):
             'on_site',
             'created_by',
             'requested_by',
-            'completion_date'
+            'completion_date',
+            'is_publicly_confirmed',
+            'confirmed_full_name',
         )
