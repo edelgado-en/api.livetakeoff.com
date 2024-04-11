@@ -77,7 +77,11 @@ class JobDetailSerializer(serializers.ModelSerializer):
             'hours_worked',
             'minutes_worked',
             'number_of_workers',
-            'labor_time'
+            'labor_time',
+            'is_publicly_confirmed',
+            'confirmed_full_name',
+            'confirmed_email',
+            'confirmed_phone_number'
         )
 
 

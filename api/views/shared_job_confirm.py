@@ -35,14 +35,14 @@ class SharedJobConfirmView(APIView):
             return Response({'error': 'This job has already been confirmed'}, status=status.HTTP_400_BAD_REQUEST)
 
         full_name = request.data.get('full_name')
-        email_address = request.data.get('email_address')
-        phone_number = request.data.get('phone_number')
+        email_address = request.data.get('email')
+        phone_number = request.data.get('phone')
 
         # update job status
         job.status = 'A'
         job.is_publicly_confirmed = True
         job.confirmed_full_name = full_name
-        job.confirmed_email_address = email_address
+        job.confirmed_email = email_address
         job.confirmed_phone_number = phone_number
         
         job.save()
