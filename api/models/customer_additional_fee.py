@@ -3,9 +3,10 @@ from .customer_settings import CustomerSettings
 
 class CustomerAdditionalFee(models.Model):
     FEE_TYPE_CHOICES = [
-        ('F', 'By FBO'),
-        ('A', 'By Airport'),
+        ('F', 'FBO Fee'),
+        ('A', 'Travel Fees'),
         ('G', 'General'),
+        ('V', 'Higher Vendor Price')
     ]
 
     customer_setting = models.ForeignKey(CustomerSettings, on_delete=models.CASCADE, related_name='fees')

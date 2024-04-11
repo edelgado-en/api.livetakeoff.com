@@ -7,13 +7,13 @@ from rest_framework.views import APIView
 from api.models import (
         CustomerAdditionalFee,
         CustomerAdditionalFeeAirport,
+        CustomerAdditionalFeeVendor,
         CustomerAdditionalFeeFBO,
     )
 
 
 class CustomerFeeUpdateView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
-
 
     def get(self, request, id):
         customer_fee = get_object_or_404(CustomerAdditionalFee, pk=id)
@@ -25,7 +25,8 @@ class CustomerFeeUpdateView(APIView):
             'is_percentage': customer_fee.percentage
         }
             
-        airports = []
+        travel_fees_airports = []
+        vendor_higher_price_airports = []
         fbos = []
 
         if customer_fee.type == 'A':
@@ -39,7 +40,20 @@ class CustomerFeeUpdateView(APIView):
                     'name': airport.airport.name
                 }
 
-                airports.append(a)
+                travel_fees_airports.append(a)
+
+        if customer_fee.type == 'V':
+            customer_fee_airports = CustomerAdditionalFeeVendor.objects \
+                                            .select_related('airport') \
+                                            .filter(customer_additional_fee=customer_fee)
+
+            for airport in customer_fee_airports:
+                a = {
+                    'id': airport.airport.id,
+                    'name': airport.airport.name
+                }
+
+                vendor_higher_price_airports.append(a)
 
         if customer_fee.type == 'F':
             customer_fee_fbo = CustomerAdditionalFeeFBO.objects \
@@ -54,7 +68,8 @@ class CustomerFeeUpdateView(APIView):
 
                 fbos.append(f)
 
-        fee['airports'] = airports
+        fee['travel_fees_airports'] = travel_fees_airports
+        fee['vendor_higher_price_airports'] = vendor_higher_price_airports
         fee['fbos'] = fbos
 
         return Response(fee, status=status.HTTP_200_OK)
@@ -82,6 +97,15 @@ class CustomerFeeUpdateView(APIView):
                     airport_id=airport.get('id')
                 )
 
+        if customer_fee.type == 'V':
+            CustomerAdditionalFeeVendor.objects.filter(customer_additional_fee=customer_fee).delete()
+
+            for airport in request.data.get('airports'):
+                CustomerAdditionalFeeVendor.objects.create(
+                    customer_additional_fee=customer_fee,
+                    airport_id=airport.get('id')
+                )
+
         if customer_fee.type == 'F':
             CustomerAdditionalFeeFBO.objects.filter(customer_additional_fee=customer_fee).delete()
 
@@ -92,7 +116,6 @@ class CustomerFeeUpdateView(APIView):
                 )
 
         return Response({'message': 'success'}, status=status.HTTP_200_OK)
-
 
 
     def can_update_customer_fee(self, user):

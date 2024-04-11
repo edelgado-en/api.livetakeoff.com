@@ -7,6 +7,7 @@ from api.models import (
         CustomerAdditionalFee,
         Customer,
         CustomerAdditionalFeeAirport,
+        CustomerAdditionalFeeVendor,
         CustomerAdditionalFeeFBO,
         CustomerSettings
     )
@@ -32,7 +33,8 @@ class CustomerFeesView(APIView):
                 'is_percentage': customer_fee.percentage
             }
             
-            airports = []
+            travel_fees_airports = []
+            vendor_higher_price_airports = []
             fbos = []
 
             if customer_fee.type == 'A':
@@ -46,7 +48,20 @@ class CustomerFeesView(APIView):
                         'name': airport.airport.name
                     }
 
-                    airports.append(a)
+                    travel_fees_airports.append(a)
+
+            if customer_fee.type == 'V':
+                customer_fee_airports = CustomerAdditionalFeeVendor.objects \
+                                            .select_related('airport') \
+                                            .filter(customer_additional_fee=customer_fee)
+
+                for airport in customer_fee_airports:
+                    a = {
+                        'id': airport.airport.id,
+                        'name': airport.airport.name
+                    }
+
+                    vendor_higher_price_airports.append(a)
 
             if customer_fee.type == 'F':
                 customer_fee_fbo = CustomerAdditionalFeeFBO.objects \
@@ -61,11 +76,15 @@ class CustomerFeesView(APIView):
 
                     fbos.append(f)
 
-            fee['airports'] = airports
+            fee['travel_fees_airports'] = travel_fees_airports
+            fee['vendor_higher_price_airports'] = vendor_higher_price_airports
             fee['fbos'] = fbos
 
             fees.append(fee)
 
+
+        # sort by type
+        fees = sorted(fees, key=lambda k: k['type'])
 
         return Response(fees, status=status.HTTP_200_OK)
 
@@ -88,6 +107,13 @@ class CustomerFeesView(APIView):
         if request.data['type'] == 'A':
             for airport in request.data['airports']:
                 CustomerAdditionalFeeAirport.objects.create(
+                    customer_additional_fee=fee,
+                    airport_id=airport['id']
+                )
+        
+        if request.data['type'] == 'V':
+            for airport in request.data['airports']:
+                CustomerAdditionalFeeVendor.objects.create(
                     customer_additional_fee=fee,
                     airport_id=airport['id']
                 )

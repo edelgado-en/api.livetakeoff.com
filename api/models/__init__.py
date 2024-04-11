@@ -51,3 +51,4 @@ from .job_schedule import JobSchedule
 from .job_schedule_service import JobScheduleService
 from .job_schedule_retainer_service import JobScheduleRetainerService
 from .job_schedule_tag import JobScheduleTag
+from .customer_additional_fee_vendor import CustomerAdditionalFeeVendor
