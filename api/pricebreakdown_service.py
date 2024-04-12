@@ -128,36 +128,31 @@ class PriceBreakdownService():
                 else:
                     total_price -= discount['discount']
 
-            # iterate through additional_fees and calculate the actual amount for each additional_fee that is a percentage using the total_price.
-            # For example: if an additional_fee is 10% and the total_price is 100, then the additional_fee_dollar_amount is 10.
-            # add a new field called additional_fee_dollar_amount to the additional_fee dictionary if the entry is a percentage
-            # Do not change total_price in this loop. We just want to calculate the additional_fee_dollar_amount for each additional_fee that is a percentage
-            for additional_fee in additional_fees:
-                if additional_fee['isPercentage']:
-                    
-                    if additional_fee['name'] == 'M':
-                        dollar_amount = total_price * additional_fee['fee'] / 100
-                        # multiple dollar_amount by the number of services
-                        additional_fee['additional_fee_dollar_amount'] = dollar_amount * len(assigned_services)
-
-                    else:
-                        additional_fee['additional_fee_dollar_amount'] = total_price * additional_fee['fee'] / 100
-                
-                else:
-                    if additional_fee['name'] == 'M':
-                        additional_fee['additional_fee_dollar_amount'] = additional_fee['fee'] * len(assigned_services)
-                    else:
-                        additional_fee['additional_fee_dollar_amount'] = additional_fee['fee']
-
         discounted_price = total_price
 
         for additional_fee in additional_fees:
             if additional_fee['isPercentage']:
                 if additional_fee['fee'] > 0:
-                    total_price += total_price * additional_fee['fee'] / 100
+                    dollar_amount = total_price * additional_fee['fee'] / 100
+                    
+                    if additional_fee['name'] == 'M':
+                        # multiple dollar_amount by the number of services
+                        additional_fee['additional_fee_dollar_amount'] = dollar_amount * len(assigned_services)
+
+                    else:
+                        additional_fee['additional_fee_dollar_amount'] = dollar_amount
+
+                    total_price += dollar_amount
             
             else:
-                total_price += additional_fee['fee']
+                dollar_amount = additional_fee['fee']
+                if additional_fee['name'] == 'M':
+                        dollar_amount = additional_fee['fee'] * len(assigned_services)
+                        additional_fee['additional_fee_dollar_amount'] = dollar_amount
+                else:
+                    additional_fee['additional_fee_dollar_amount'] = dollar_amount
+                
+                total_price += dollar_amount
 
         total_travel_fees_amount_applied = 0
         total_fbo_fees_amount_applied = 0
