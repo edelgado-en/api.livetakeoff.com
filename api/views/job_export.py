@@ -28,7 +28,7 @@ class JobExportCSVView(APIView):
 
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="export.csv"'
-        writer = csv.DictWriter(response, fieldnames=['P.O', 'Customer', 'Request Date', 'Tail Number', 'Aircraft', 'Airport', 'FBO', 'Arrival Date', 'Departure Date', 'Complete By Date', 'Completion Date', 'Travel Fees', 'FBO Fees', 'Vendor Fees', 'Management Fees', 'Price', 'Services', 'Retainers'])
+        writer = csv.DictWriter(response, fieldnames=['P.O', 'Customer', 'Request Date', 'Tail Number', 'Aircraft', 'Airport', 'FBO', 'Arrival Date', 'Departure Date', 'Complete By Date', 'Completion Date', 'Travel Fees', 'FBO Fees', 'Vendor Price Diff', 'Management Fees', 'Price', 'Services', 'Retainers'])
         writer.writeheader()
 
         searchText = self.request.data.get('searchText')
@@ -183,7 +183,7 @@ class JobExportCSVView(APIView):
                     'Completion Date': completionDate,
                     'Travel Fees': job.travel_fees_amount_applied,
                     'FBO Fees': job.fbo_fees_amount_applied,
-                    'Vendor Fees': job.vendor_higher_price_amount_applied,
+                    'Vendor Price Diff': job.vendor_higher_price_amount_applied,
                     'Management Fees': job.management_fees_amount_applied,
                     'Price': job.price,
                     'Services': services,
