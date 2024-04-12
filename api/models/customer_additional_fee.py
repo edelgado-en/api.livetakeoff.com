@@ -6,7 +6,8 @@ class CustomerAdditionalFee(models.Model):
         ('F', 'FBO Fee'),
         ('A', 'Travel Fees'),
         ('G', 'General'),
-        ('V', 'Higher Vendor Price')
+        ('V', 'Higher Vendor Price'),
+        ('M', 'Management Fees')
     ]
 
     customer_setting = models.ForeignKey(CustomerSettings, on_delete=models.CASCADE, related_name='fees')

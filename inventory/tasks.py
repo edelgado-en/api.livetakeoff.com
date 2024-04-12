@@ -447,6 +447,11 @@ def handleCreateJob(job_schedule, today):
 
     price_breakdown = PriceBreakdownService().get_price_breakdown(job)
     job.price = price_breakdown.get('totalPrice')
+    job.travel_fees_amount_applied = price_breakdown.get('total_travel_fees_amount_applied')
+    job.fbo_fees_amount_applied = price_breakdown.get('total_fbo_fees_amount_applied')
+    job.vendor_higher_price_amount_applied = price_breakdown.get('total_vendor_higher_price_amount_applied')
+    job.management_fees_amount_applied = price_breakdown.get('total_management_fees_amount_applied')
+
     job.save()
     
     JobStatusActivity.objects.create(job=job, user=job_schedule.created_by, status='U')

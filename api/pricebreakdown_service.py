@@ -79,7 +79,7 @@ class PriceBreakdownService():
         customer_additional_fees = job.customer.customer_settings.fees.all()
         # we only include the additional fees that apply to this job based on fee type
         for customer_additional_fee in customer_additional_fees:
-            if customer_additional_fee.type == 'G':
+            if customer_additional_fee.type == 'G' or customer_additional_fee.type == 'M':
                 additional_fees.append({'id': customer_additional_fee.id, 'name': customer_additional_fee.type,
                                         'fee': customer_additional_fee.fee, 'isPercentage': customer_additional_fee.percentage})
             
@@ -92,6 +92,14 @@ class PriceBreakdownService():
 
             elif customer_additional_fee.type == 'A':
                 upcharged_airports = customer_additional_fee.airports.all()
+                for upcharged_airport in upcharged_airports:
+                    if job.airport == upcharged_airport.airport:
+                        additional_fees.append({'id': customer_additional_fee.id, 'name': customer_additional_fee.type,
+                                            'fee': customer_additional_fee.fee, 'isPercentage': customer_additional_fee.percentage})
+                        break
+
+            elif customer_additional_fee.type == 'V':
+                upcharged_airports = customer_additional_fee.vendors.all()
                 for upcharged_airport in upcharged_airports:
                     if job.airport == upcharged_airport.airport:
                         additional_fees.append({'id': customer_additional_fee.id, 'name': customer_additional_fee.type,
@@ -126,9 +134,20 @@ class PriceBreakdownService():
             # Do not change total_price in this loop. We just want to calculate the additional_fee_dollar_amount for each additional_fee that is a percentage
             for additional_fee in additional_fees:
                 if additional_fee['isPercentage']:
-                    additional_fee['additional_fee_dollar_amount'] = total_price * additional_fee['fee'] / 100
+                    
+                    if additional_fee['name'] == 'M':
+                        dollar_amount = total_price * additional_fee['fee'] / 100
+                        # multiple dollar_amount by the number of services
+                        additional_fee['additional_fee_dollar_amount'] = dollar_amount * len(assigned_services)
+
+                    else:
+                        additional_fee['additional_fee_dollar_amount'] = total_price * additional_fee['fee'] / 100
+                
                 else:
-                    additional_fee['additional_fee_dollar_amount'] = additional_fee['fee']
+                    if additional_fee['name'] == 'M':
+                        additional_fee['additional_fee_dollar_amount'] = additional_fee['fee'] * len(assigned_services)
+                    else:
+                        additional_fee['additional_fee_dollar_amount'] = additional_fee['fee']
 
         discounted_price = total_price
 
@@ -140,6 +159,21 @@ class PriceBreakdownService():
             else:
                 total_price += additional_fee['fee']
 
+        total_travel_fees_amount_applied = 0
+        total_fbo_fees_amount_applied = 0
+        total_vendor_higher_price_amount_applied = 0
+        total_management_fees_amount_applied = 0
+
+        for additional_fee in additional_fees:
+            if additional_fee['name'] == 'A':
+                total_travel_fees_amount_applied += additional_fee['additional_fee_dollar_amount']
+            elif additional_fee['name'] == 'F':
+                total_fbo_fees_amount_applied += additional_fee['additional_fee_dollar_amount']
+            elif additional_fee['name'] == 'V':
+                total_vendor_higher_price_amount_applied += additional_fee['additional_fee_dollar_amount']
+            elif additional_fee['name'] == 'M':
+                total_management_fees_amount_applied += additional_fee['additional_fee_dollar_amount']
+
         price_breakdown = {
             'aircraftType': aircraftType.name,
             'priceListType': priceListType.name.upper(),
@@ -149,7 +183,11 @@ class PriceBreakdownService():
             'discountedPrice': f'{discounted_price:,.2f}',
             'additionalFees': additional_fees,
             'totalPrice': total_price,
-            'manuallySet': not job.is_auto_priced
+            'manuallySet': not job.is_auto_priced,
+            'total_travel_fees_amount_applied': total_travel_fees_amount_applied,
+            'total_fbo_fees_amount_applied': total_fbo_fees_amount_applied,
+            'total_vendor_higher_price_amount_applied': total_vendor_higher_price_amount_applied,
+            'total_management_fees_amount_applied': total_management_fees_amount_applied
         }
 
         return price_breakdown

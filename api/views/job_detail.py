@@ -161,9 +161,13 @@ class JobDetail(APIView):
             
             if price != job.price:
                 job.price = price
+                job.travel_fees_amount_applied = price_breakdown.get('total_travel_fees_amount_applied')
+                job.fbo_fees_amount_applied = price_breakdown.get('total_fbo_fees_amount_applied')
+                job.vendor_higher_price_amount_applied = price_breakdown.get('total_vendor_higher_price_amount_applied')
+                job.management_fees_amount_applied = price_breakdown.get('total_management_fees_amount_applied')
+                
                 job.save()
             
-
         show_job_price = True
 
         # check the customer settings if the user is a customer user to check if show_job_price is True

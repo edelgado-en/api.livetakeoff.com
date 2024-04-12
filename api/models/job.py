@@ -85,5 +85,13 @@ class Job(models.Model):
 
     confirmed_phone_number = models.CharField(max_length=255, blank=True, null=True)
 
+    travel_fees_amount_applied = models.DecimalField(max_digits=9, decimal_places=2, default=0)
+
+    fbo_fees_amount_applied = models.DecimalField(max_digits=9, decimal_places=2, default=0)
+
+    vendor_higher_price_amount_applied = models.DecimalField(max_digits=9, decimal_places=2, default=0)
+
+    management_fees_amount_applied = models.DecimalField(max_digits=9, decimal_places=2, default=0)
+
     def __str__(self) -> str:
         return str(self.id) + ' - ' + self.tailNumber + ' - ' + self.airport.initials + ' - ' + self.aircraftType.name

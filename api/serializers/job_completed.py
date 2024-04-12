@@ -38,5 +38,9 @@ class JobCompletedSerializer(serializers.ModelSerializer):
             'is_auto_priced',
             'on_site',
             'completion_date',
-            'labor_time'
+            'labor_time',
+            'travel_fees_amount_applied',
+            'fbo_fees_amount_applied',
+            'vendor_higher_price_amount_applied',
+            'management_fees_amount_applied',
             )
