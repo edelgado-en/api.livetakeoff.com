@@ -4,9 +4,11 @@ from .job_estimate import JobEstimate
 
 class JobEstimateAdditionalFee(models.Model):
     FEE_TYPE_CHOICES = [
-        ('F', 'By FBO'),
-        ('A', 'By Airport'),
+        ('F', 'FBO Fee'),
+        ('A', 'Travel Fees'),
         ('G', 'General'),
+        ('V', 'Vendor Price Difference'),
+        ('M', 'Management Fees'),
     ]
 
     job_estimate = models.ForeignKey(JobEstimate, on_delete=models.CASCADE, related_name='job_estimate_additional_fees')

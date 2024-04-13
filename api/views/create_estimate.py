@@ -109,7 +109,7 @@ class CreateEstimateView(APIView):
         customer_additional_fees = customer.customer_settings.fees.all()
         
         for customer_additional_fee in customer_additional_fees:
-            if customer_additional_fee.type == 'G':
+            if customer_additional_fee.type == 'G' or customer_additional_fee.type == 'M':
                 additional_fees.append({'id': customer_additional_fee.id, 'name': customer_additional_fee.type,
                                         'fee': customer_additional_fee.fee, 'isPercentage': customer_additional_fee.percentage})
             
@@ -122,6 +122,14 @@ class CreateEstimateView(APIView):
 
             elif customer_additional_fee.type == 'A':
                 upcharged_airports = customer_additional_fee.airports.all()
+                for upcharged_airport in upcharged_airports:
+                    if airport == upcharged_airport.airport:
+                        additional_fees.append({'id': customer_additional_fee.id, 'name': customer_additional_fee.type,
+                                            'fee': customer_additional_fee.fee, 'isPercentage': customer_additional_fee.percentage})
+                        break
+
+            elif customer_additional_fee.type == 'V':
+                upcharged_airports = customer_additional_fee.vendors.all()
                 for upcharged_airport in upcharged_airports:
                     if airport == upcharged_airport.airport:
                         additional_fees.append({'id': customer_additional_fee.id, 'name': customer_additional_fee.type,
@@ -143,12 +151,27 @@ class CreateEstimateView(APIView):
         for additional_fee in additional_fees:
             if additional_fee['isPercentage']:
                 if additional_fee['fee'] > 0:
-                    total_price += total_price * additional_fee['fee'] / 100
-           
-            else:
-                total_price += additional_fee['fee']
+                    dollar_amount = total_price * additional_fee['fee'] / 100
+                    
+                    if additional_fee['name'] == 'M':
+                        # multiple dollar_amount by the number of services
+                        additional_fee['additional_fee_dollar_amount'] = dollar_amount * len(services_with_prices)
 
-        
+                    else:
+                        additional_fee['additional_fee_dollar_amount'] = dollar_amount
+
+                    total_price += dollar_amount
+            
+            else:
+                dollar_amount = additional_fee['fee']
+                if additional_fee['name'] == 'M':
+                        dollar_amount = additional_fee['fee'] * len(services_with_prices)
+                        additional_fee['additional_fee_dollar_amount'] = dollar_amount
+                else:
+                    additional_fee['additional_fee_dollar_amount'] = dollar_amount
+                
+                total_price += dollar_amount
+
 
         job_estimate = JobEstimate.objects.create(
             customer=customer,
