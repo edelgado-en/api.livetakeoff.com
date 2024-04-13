@@ -21,6 +21,8 @@ class PriceBreakdownService():
         assigned_services = []
         services = []
 
+        retainer_services_count = job.job_retainer_service_assignments.count()
+
         for job_service_assignment in job.job_service_assignments.all():
             service = job_service_assignment.service
             services.append(service)
@@ -137,7 +139,7 @@ class PriceBreakdownService():
                     
                     if additional_fee['name'] == 'M':
                         # multiple dollar_amount by the number of services
-                        additional_fee['additional_fee_dollar_amount'] = dollar_amount * len(assigned_services)
+                        additional_fee['additional_fee_dollar_amount'] = dollar_amount * (len(assigned_services) + retainer_services_count)
 
                     else:
                         additional_fee['additional_fee_dollar_amount'] = dollar_amount
@@ -147,7 +149,7 @@ class PriceBreakdownService():
             else:
                 dollar_amount = additional_fee['fee']
                 if additional_fee['name'] == 'M':
-                        dollar_amount = additional_fee['fee'] * len(assigned_services)
+                        dollar_amount = additional_fee['fee'] * (len(assigned_services) + retainer_services_count)
                         additional_fee['additional_fee_dollar_amount'] = dollar_amount
                 else:
                     additional_fee['additional_fee_dollar_amount'] = dollar_amount
