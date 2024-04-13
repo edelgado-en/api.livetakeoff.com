@@ -245,6 +245,13 @@ class EditJobView(APIView):
 
                 if current_price != serializer.data['price']:
                     job.is_auto_priced = False
+                    
+                    # reset fees applied to 0
+                    job.travel_fees_amount_applied = 0
+                    job.fbo_fees_amount_applied = 0
+                    job.vendor_higher_price_amount_applied = 0
+                    job.management_fees_amount_applied = 0
+
                     job.save()
 
                     JobStatusActivity.objects.create(job=job, user=request.user, status='P', activity_type='P', price=serializer.data['price'])
