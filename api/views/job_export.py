@@ -36,6 +36,7 @@ class JobExportCSVView(APIView):
         airport = self.request.data.get('airport')
         customer = self.request.data.get('customer')
         fbo = self.request.data.get('fbo')
+        additionalFees = self.request.data.get('additionalFees')
 
         requestedDateFrom = self.request.data.get('requestedDateFrom')
         requestedDateTo = self.request.data.get('requestedDateTo')
@@ -60,6 +61,16 @@ class JobExportCSVView(APIView):
                         .select_related('aircraftType') \
                         .order_by('status') \
                         .all()    
+        
+        for additionalFee in additionalFees:
+            if additionalFee == 'A':
+                qs = qs.filter(travel_fees_amount_applied__gt=0)
+            elif additionalFee == 'F':
+                qs = qs.filter(fbo_fees_amount_applied__gt=0)
+            elif additionalFee == 'M':
+                qs = qs.filter(management_fees_amount_applied__gt=0)
+            elif additionalFee == 'V':
+                qs = qs.filter(vendor_higher_price_amount_applied__gt=0)
 
         if self.request.user.profile.customer:
             qs = qs.filter(customer=self.request.user.profile.customer)

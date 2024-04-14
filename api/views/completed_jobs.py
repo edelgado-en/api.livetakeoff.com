@@ -23,6 +23,7 @@ class CompletedJobsListView(ListAPIView):
         airport = self.request.data.get('airport')
         fbo = self.request.data.get('fbo')
         customer = self.request.data.get('customer')
+        additionalFees = self.request.data.get('additionalFees')
 
         requestedDateFrom = self.request.data.get('requestedDateFrom')
         requestedDateTo = self.request.data.get('requestedDateTo')
@@ -45,6 +46,16 @@ class CompletedJobsListView(ListAPIView):
                         .select_related('aircraftType') \
                         .order_by('-completion_date') \
                         .all()
+        
+        for additionalFee in additionalFees:
+            if additionalFee == 'A':
+                qs = qs.filter(travel_fees_amount_applied__gt=0)
+            elif additionalFee == 'F':
+                qs = qs.filter(fbo_fees_amount_applied__gt=0)
+            elif additionalFee == 'M':
+                qs = qs.filter(management_fees_amount_applied__gt=0)
+            elif additionalFee == 'V':
+                qs = qs.filter(vendor_higher_price_amount_applied__gt=0)
 
         # if customer use, then only show jobs for that customer
         if self.request.user.profile.customer:
