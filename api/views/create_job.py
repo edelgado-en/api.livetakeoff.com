@@ -33,7 +33,8 @@ from ..models import (
         UserProfile,
         JobEstimate,
         Tag,
-        JobTag
+        JobTag,
+        UserEmail
     )
 
 from api.notification_util import NotificationUtil
@@ -317,7 +318,10 @@ class CreateJobView(APIView):
                     if customer_user.user.email not in emails:
                         emails.append(customer_user.user.email)
 
-                    # TODO: add extra emails
+                additional_emails = UserEmail.objects.filter(user=customer_user.user)
+                for additional_email in additional_emails:
+                    if additional_email.email not in emails:
+                        emails.append(additional_email.email)
 
                 if customer_user.phone_number:
                     if customer_user.phone_number not in unique_phone_numbers:
@@ -328,7 +332,10 @@ class CreateJobView(APIView):
                     if user.email not in emails:
                         emails.append(user.email)
 
-                    # TODO: add extra emails
+                additional_emails = UserEmail.objects.filter(user=user)
+                for additional_email in additional_emails:
+                    if additional_email.email not in emails:
+                        emails.append(additional_email.email)
 
                 if user.profile.phone_number:
                     if user.profile.phone_number not in unique_phone_numbers:

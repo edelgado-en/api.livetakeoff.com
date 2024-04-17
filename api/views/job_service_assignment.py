@@ -5,6 +5,8 @@ from rest_framework .response import Response
 from rest_framework.views import APIView
 from django.contrib.auth.models import User
 
+import base64
+
 from ..models import (
     JobServiceAssignment,
     Job,
@@ -15,7 +17,8 @@ from ..models import (
     RetainerService,
     ServiceActivity,
     UserAvailableAirport,
-    JobTag
+    JobTag,
+    UserEmail
     )
 
 from ..pricebreakdown_service import PriceBreakdownService
@@ -27,7 +30,7 @@ from ..serializers import (
                 )
 
 from api.notification_util import NotificationUtil
-
+from api.email_util import EmailUtil
 
 class JobServiceAssignmentView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
@@ -216,6 +219,10 @@ class JobServiceAssignmentView(APIView):
         external_vendor = None
 
         unique_phone_numbers = []
+        unique_emails = []
+
+        service_names = ''
+        retainer_service_names = ''
 
         # if all services are assigned and the job status is less than assigned, then set the job status to assigned
         for service in request.data['services']:
@@ -228,15 +235,23 @@ class JobServiceAssignmentView(APIView):
                 assignment.project_manager = user
                 
                 if job.status != 'C' and job.status != 'I' and job.status != 'T':
-                    if job.status == 'C':
-                        assignment.status = 'C'
-                    else:
-                        assignment.status = 'A'
+                    assignment.status = 'A'
+
+                    service_names += assignment.service.name + ', '
 
                     # add the phone number to the list of unique phone numbers
                     if user.profile.phone_number:
                         if user.profile.phone_number not in unique_phone_numbers:
                             unique_phone_numbers.append(user.profile.phone_number)
+
+                    if user.profile.enable_accept_jobs:
+                        if user.email not in unique_emails:
+                            unique_emails.append(user.email)
+
+                        additional_emails = UserEmail.objects.filter(user=user)
+                        for additional_email in additional_emails:
+                            if additional_email.email not in unique_emails:
+                                unique_emails.append(additional_email.email)
 
                     at_least_one_service_assigned = True
                 
@@ -263,15 +278,23 @@ class JobServiceAssignmentView(APIView):
                 retainer_assignment.project_manager = user
 
                 if job.status != 'C' and job.status != 'I' and job.status != 'T':
-                    if job.status == 'C':
-                        retainer_assignment.status = 'C'
-                    else:
-                        retainer_assignment.status = 'A'
+                    retainer_assignment.status = 'A'
+
+                    retainer_service_names += retainer_assignment.retainer_service.name + ', '
 
                     # add the phone number to the list of unique phone numbers
                     if user.profile.phone_number:
                         if user.profile.phone_number not in unique_phone_numbers:
                             unique_phone_numbers.append(user.profile.phone_number)
+
+                    if user.profile.enable_accept_jobs:
+                        if user.email not in unique_emails:
+                            unique_emails.append(user.email)
+
+                    additional_emails = UserEmail.objects.filter(user=user)
+                    for additional_email in additional_emails:
+                        if additional_email.email not in unique_emails:
+                            unique_emails.append(additional_email.email)
 
                     at_least_one_service_assigned = True
                 
@@ -280,7 +303,6 @@ class JobServiceAssignmentView(APIView):
                     if user.profile.vendor.is_external:
                         external_vendor = user.profile.vendor
                         retainer_assignment.vendor = external_vendor
-
 
             else :
                 retainer_assignment.status = 'U'
@@ -318,22 +340,7 @@ class JobServiceAssignmentView(APIView):
             #record JobStatusActivity X PM Unassigned
             JobStatusActivity.objects.create(job=job, status='X', user=request.user)
 
-        # get the list of unique project managers and their phone numbers and send the job information with the app link as body
-
         notification_util = NotificationUtil()
-
-        # Adding the link is throwing a 30007 error in Twilio
-        #message = f'Job {job.purchase_order} has been ASSIGNED to you for tail number {job.tailNumber} to be completed before {complete_by}. Please go to you Livetakeoff App and check it out http://livetakeoff.com/jobs/{job.id}/details'
-
-        # message needs to have the following format:
-        #Job ASSIGNED to you
-        #• MIA
-        #• N1122AA
-        #• Signature MIA
-        # Where MIA is the airport initials
-        # N1122AA is the tail number
-        # Signature MIA is the job.fbo.name
-        # 2/4/24 13:00 is the job.completeBy
 
         message = f'Job ASSIGNED to you\n• {job.airport.initials}\n• {job.tailNumber}\n• {job.fbo.name}\n'
 
@@ -341,6 +348,92 @@ class JobServiceAssignmentView(APIView):
             notification_util.send(message, phone_number.as_e164)
 
         # TODO: send email if flag enabled and add all the exra emails
+        etd = 'Not Specified'
+        if job.estimatedETD:
+            etd = job.estimatedETD.strftime('%m/%d/%y %H:%M')
+
+        eta = 'Not Specified'
+        if job.estimatedETA:
+            eta = job.estimatedETA.strftime('%m/%d/%y %H:%M')
+        
+        complete_before = 'Not Specified'
+        if job.completeBy:
+            complete_before = job.completeBy.strftime('%m/%d/%y %H:%M')
+
+        if job.on_site:
+            eta = 'On Site'
+        
+        subject = f'{job.tailNumber} - Job ASSIGNED - Review and ACCEPT it or RETURN it as soon as possible.'
+
+        # remove the last comma from service_names if not empty
+        if service_names:
+            service_names = service_names[:-2]
+
+        # remove the last comma from retainer_service_names if not empty
+        if retainer_service_names:
+            retainer_service_names = retainer_service_names[:-2]
+
+        message = str(job.id) + '-' + job.tailNumber
+        message_bytes = message.encode('ascii')
+        base64_bytes = base64.b64encode(message_bytes)
+        base64_message = base64_bytes.decode('ascii')
+
+        body = f'''
+                <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">Job Assignment</div>
+                <a href="http://livetakeoff.com/jobs/{job.id}/details" style="display: inline-block; padding: 0.5625rem 1.125rem; margin: 0 5px; font-size: 1.5rem; font-weight: 400; line-height: 1.5; text-align: center; vertical-align: middle; cursor: pointer; border: 1px solid transparent; border-radius: 0.375rem; transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; text-decoration: none; color: #212529; background-color: #f8f9fa; border-color: #f8f9fa;">REVIEW</a>
+
+                <div style="margin-bottom:20px"></div>
+                <table style="border-collapse: collapse">
+                    <tr>
+                        <td style="padding:15px">Customer</td>
+                        <td style="padding:15px">{job.customer.name}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:15px">Job PO</td>
+                        <td style="padding:15px">{job.purchase_order}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:15px">Tail</td>
+                        <td style="padding:15px">{job.tailNumber}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:15px">Airport</td>
+                        <td style="padding:15px">{job.airport.name}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:15px">FBO</td>
+                        <td style="padding:15px">{job.fbo.name}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:15px">Arrival</td>
+                        <td style="padding:15px">{eta}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:15px">Departure</td>
+                        <td style="padding:15px">{etd}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:15px">Complete Before</td>
+                        <td style="padding:15px">{complete_before}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:15px">Services</td>
+                        <td style="padding:15px">{service_names}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:15px">Retainer Services</td>
+                        <td style="padding:15px">{retainer_service_names}</td>
+                    </tr>
+                </table>
+                <div style="margin-top:20px;padding:5px;font-weight: 700;"></div>
+                '''
+
+        email_util = EmailUtil()
+
+        body += email_util.getEmailSignature()
+
+        for email in unique_emails:
+            email_util.send_email(email, subject, body)
 
         response = {
             'message': 'assigned succesfully'
