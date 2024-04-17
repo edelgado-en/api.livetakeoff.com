@@ -317,6 +317,8 @@ class CreateJobView(APIView):
                     if customer_user.user.email not in emails:
                         emails.append(customer_user.user.email)
 
+                    # TODO: add extra emails
+
                 if customer_user.phone_number:
                     if customer_user.phone_number not in unique_phone_numbers:
                         unique_phone_numbers.append(customer_user.phone_number)
@@ -325,6 +327,8 @@ class CreateJobView(APIView):
                 if user.email:
                     if user.email not in emails:
                         emails.append(user.email)
+
+                    # TODO: add extra emails
 
                 if user.profile.phone_number:
                     if user.profile.phone_number not in unique_phone_numbers:

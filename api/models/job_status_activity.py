@@ -26,6 +26,7 @@ class JobStatusActivity(models.Model):
         ('T', 'Tail Number Changed'),
         ('U', 'Photos Uploaded'),
         ('R', 'Job Returned'),
+        ('V', 'Vendor Accepted'),
     ]
 
     activity_type = models.CharField(max_length=1, choices=ACTIVITY_TYPE_CHOICES, default='S')

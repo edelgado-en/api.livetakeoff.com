@@ -444,6 +444,7 @@ class JobDetail(APIView):
                             notification_util.send(f'Job {job.purchase_order} for tail number {job.tailNumber} has been {status_name}.', phone_number.as_e164)
 
 
+
             return Response(serializer.data)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

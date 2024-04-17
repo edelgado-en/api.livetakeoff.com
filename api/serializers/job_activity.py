@@ -14,8 +14,10 @@ class JobActivitySerializer(serializers.ModelSerializer):
         if obj.job.confirmed_full_name and obj.status == 'A' and obj.activity_type == 'S':
             return obj.job.confirmed_full_name
         else:
-            # return the obj.user.first_name + ' ' + obj.user.last_name
-            return obj.user.first_name + ' ' + obj.user.last_name
+            if obj.user:
+                return obj.user.first_name + ' ' + obj.user.last_name
+            else:
+                return 'None'
 
     class Meta:
         model = JobStatusActivity

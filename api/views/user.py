@@ -26,6 +26,8 @@ class UserView(APIView):
 
         canConfirmJobs = False
 
+        canAcceptJobs = False
+
         canSeeAirportAdditionalFees = False
 
         customerLogo = None
@@ -44,6 +46,9 @@ class UserView(APIView):
 
         if user_profile and user_profile.show_airport_fees:
             canSeeAirportAdditionalFees = user_profile.show_airport_fees
+
+        if user_profile and user_profile.enable_accept_jobs:
+            canAcceptJobs = user_profile.enable_accept_jobs
 
         first_name = ''
         last_name = ''
@@ -144,6 +149,7 @@ class UserView(APIView):
             "isPremiumMember": is_premium_member,
             "canSeePrice": canSeePrice,
             'canConfirmJobs': canConfirmJobs,
+            'canAcceptJobs': canAcceptJobs,
             "receive_sms_notifications": user_profile.sms_notifications,
             "receive_email_notifications": user_profile.email_notifications,
             'showSpendingInfo': showSpendingInfo,

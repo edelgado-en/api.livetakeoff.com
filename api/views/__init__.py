@@ -92,3 +92,4 @@ from .airport_available_users import AirportAvailableUsersView
 from .airport_customer_fees import AirportCustomerFeesView
 from .fbo_customer_fees import FBOCustomerFeesView
 from .shared_job_confirm import SharedJobConfirmView
+from .job_accept import JobAcceptView
