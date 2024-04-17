@@ -68,14 +68,11 @@ class JobRetainerServiceAssignmentView(APIView):
         job = get_object_or_404(Job, pk=id)
         retainer_service = get_object_or_404(RetainerService, pk=request.data['retainer_service_id'])
 
-        project_manager = request.data['user_id']
+        user_id = request.data.get('user_id', None)
+        project_manager = None
 
-        # TODO: add validation to ensure the service to be added does not already exist for this job
-
-        # TODO: if all services are assigned, then the job status should be assigned if it less than assigned
-
-        if project_manager is not None:
-            project_manager = get_object_or_404(User, pk=request.data['user_id'])
+        if user_id is not None:
+            project_manager = get_object_or_404(User, pk=user_id)
             status = 'A'
         else:
             status = 'U'
@@ -83,6 +80,16 @@ class JobRetainerServiceAssignmentView(APIView):
         # if the job is in status W, then change the assignment status to W
         if job.status == 'W':
             status = 'W'
+        elif job.status == 'I' or job.status == 'C':
+            status = 'C'
+
+            # if the job is already invoice or completed and we are adding a new service with an specified project manager, we create
+            # an activity for the service with the status 'C' so that the service report is accurate
+            if project_manager is not None:
+                RetainerServiceActivity.objects.create(job=job,
+                                                   retainer_service=retainer_service,
+                                                   project_manager=project_manager,
+                                                   status='C')
 
         retainer_assignment = JobRetainerServiceAssignment(job=job,
                                                            project_manager=project_manager,

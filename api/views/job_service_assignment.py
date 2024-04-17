@@ -14,7 +14,8 @@ from ..models import (
     Service,
     RetainerService,
     ServiceActivity,
-    UserAvailableAirport
+    UserAvailableAirport,
+    JobTag
     )
 
 from ..pricebreakdown_service import PriceBreakdownService
@@ -150,14 +151,11 @@ class JobServiceAssignmentView(APIView):
         job = get_object_or_404(Job, pk=id)
         service = get_object_or_404(Service, pk=request.data['service_id'])
 
-        project_manager = request.data['user_id']
+        user_id = request.data.get('user_id', None)
+        project_manager = None
 
-        # TODO: add validation to ensure the service to be added does not already exist for this job
-
-        # TODO: if all services are assigned, then the job status should be assigned if it less than assigned
-
-        if project_manager is not None:
-            project_manager = get_object_or_404(User, pk=request.data['user_id'])
+        if user_id is not None:
+            project_manager = get_object_or_404(User, pk=user_id)
             status = 'A'
         else:
             status = 'U'
@@ -165,6 +163,13 @@ class JobServiceAssignmentView(APIView):
         # if the job is in status W, then change the assignment status to W
         if job.status == 'W':
             status = 'W'
+        elif job.status == 'I' or job.status == 'C':
+            status = 'C'
+            # if the job is already invoice or completed and we are adding a new service with an specified project manager, we create
+            # an activity for the service with the status 'C' so that the service report is accurate
+            if project_manager is not None:
+                ServiceActivity.objects.create(job=job, service=service, project_manager=project_manager, status='C')
+
 
         assignment = JobServiceAssignment(job=job, project_manager=project_manager, service=service, status=status)
         assignment.save()
@@ -176,6 +181,10 @@ class JobServiceAssignmentView(APIView):
         if job.is_auto_priced and job.status != 'I':
             price_breakdown = PriceBreakdownService().get_price_breakdown(updated_job)
             updated_job.price = price_breakdown.get('totalPrice')
+            updated_job.travel_fees_amount_applied = price_breakdown.get('total_travel_fees_amount_applied')
+            updated_job.fbo_fees_amount_applied = price_breakdown.get('total_fbo_fees_amount_applied')
+            updated_job.vendor_higher_price_amount_applied = price_breakdown.get('total_vendor_higher_price_amount_applied')
+            updated_job.management_fees_amount_applied = price_breakdown.get('total_management_fees_amount_applied')
 
             updated_job.save()
 
@@ -217,20 +226,25 @@ class JobServiceAssignmentView(APIView):
             if service['user_id']:
                 user = User.objects.get(pk=service['user_id'])
                 assignment.project_manager = user
-                assignment.status = 'A'
+                
+                if job.status != 'C' and job.status != 'I' and job.status != 'T':
+                    if job.status == 'C':
+                        assignment.status = 'C'
+                    else:
+                        assignment.status = 'A'
 
-                # add the phone number to the list of unique phone numbers
-                if user.profile.phone_number:
-                    if user.profile.phone_number not in unique_phone_numbers:
-                        unique_phone_numbers.append(user.profile.phone_number)
+                    # add the phone number to the list of unique phone numbers
+                    if user.profile.phone_number:
+                        if user.profile.phone_number not in unique_phone_numbers:
+                            unique_phone_numbers.append(user.profile.phone_number)
 
+                    at_least_one_service_assigned = True
+                
                 # Check if this user.profile.vendor is external vendor and set it external_vendor
                 if user.profile.vendor:
                     if user.profile.vendor.is_external:
                         external_vendor = user.profile.vendor
                         assignment.vendor = external_vendor
-
-                at_least_one_service_assigned = True
 
             else :
                 assignment.status = 'U'
@@ -247,20 +261,26 @@ class JobServiceAssignmentView(APIView):
             if retainer_service['user_id']:
                 user = User.objects.get(pk=retainer_service['user_id'])
                 retainer_assignment.project_manager = user
-                retainer_assignment.status = 'A'
 
-                # add the phone number to the list of unique phone numbers
-                if user.profile.phone_number:
-                    if user.profile.phone_number not in unique_phone_numbers:
-                        unique_phone_numbers.append(user.profile.phone_number)
+                if job.status != 'C' and job.status != 'I' and job.status != 'T':
+                    if job.status == 'C':
+                        retainer_assignment.status = 'C'
+                    else:
+                        retainer_assignment.status = 'A'
 
+                    # add the phone number to the list of unique phone numbers
+                    if user.profile.phone_number:
+                        if user.profile.phone_number not in unique_phone_numbers:
+                            unique_phone_numbers.append(user.profile.phone_number)
+
+                    at_least_one_service_assigned = True
+                
                 # Check if this user.profile.vendor is external vendor and set it external_vendor
                 if user.profile.vendor:
                     if user.profile.vendor.is_external:
                         external_vendor = user.profile.vendor
                         retainer_assignment.vendor = external_vendor
 
-                at_least_one_service_assigned = True
 
             else :
                 retainer_assignment.status = 'U'
@@ -272,21 +292,27 @@ class JobServiceAssignmentView(APIView):
 
         # if there is at least one service assigned, then set the status to assigned
         current_status = job.status
+        
+        job.vendor = external_vendor
 
         if at_least_one_service_assigned:
-            job.vendor = external_vendor
-
             if current_status == 'A' or current_status == 'U':
                 job.status = 'S' # assigned
 
                 JobStatusActivity.objects.create(job=job, status='S', user=request.user)
             
+            # if there is a JobTag with the name 'Vendor Accepted' then delete it
+            try:
+                job_tag = JobTag.objects.get(job=job, tag__name='Vendor Accepted')
+                job_tag.delete()
+            except JobTag.DoesNotExist:
+                pass
+
             job.save()
 
         # if none of the services are assigned and the job status is S or W, then set the job status to A
         if not at_least_one_service_assigned and (current_status == 'S' or current_status == 'W'):
             job.status = 'A'
-            job.vendor = None
             job.save()
 
             #record JobStatusActivity X PM Unassigned
@@ -313,6 +339,8 @@ class JobServiceAssignmentView(APIView):
 
         for phone_number in unique_phone_numbers:
             notification_util.send(message, phone_number.as_e164)
+
+        # TODO: send email if flag enabled and add all the exra emails
 
         response = {
             'message': 'assigned succesfully'
@@ -383,6 +411,10 @@ class JobServiceAssignmentView(APIView):
         if job.is_auto_priced and job.status != 'I':
             price_breakdown = PriceBreakdownService().get_price_breakdown(job)
             job.price = price_breakdown.get('totalPrice')
+            job.travel_fees_amount_applied = price_breakdown.get('total_travel_fees_amount_applied')
+            job.fbo_fees_amount_applied = price_breakdown.get('total_fbo_fees_amount_applied')
+            job.vendor_higher_price_amount_applied = price_breakdown.get('total_vendor_higher_price_amount_applied')
+            job.management_fees_amount_applied = price_breakdown.get('total_management_fees_amount_applied')
 
         external_vendor = None
         for service_assignment in job.job_service_assignments.all():
