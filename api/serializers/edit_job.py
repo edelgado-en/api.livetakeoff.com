@@ -7,9 +7,9 @@ class JobService(serializers.Serializer):
 
 
 class JobEditSerializer(serializers.ModelSerializer):
-    estimatedETA = serializers.DateTimeField(format="%m/%d/%Y %I:%M %p", required=False, allow_null=True)
-    estimatedETD = serializers.DateTimeField(format="%m/%d/%Y %I:%M %p", required=False, allow_null=True)
-    completeBy = serializers.DateTimeField(format="%m/%d/%Y %I:%M %p", required=False, allow_null=True)
+    estimatedETA = serializers.DateTimeField(format="%m/%d/%y %H:%M", required=False, allow_null=True)
+    estimatedETD = serializers.DateTimeField(format="%m/%d/%y %H:%M", required=False, allow_null=True)
+    completeBy = serializers.DateTimeField(format="%m/%d/%y %H:%M", required=False, allow_null=True)
 
 
     class Meta:
