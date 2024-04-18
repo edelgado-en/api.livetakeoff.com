@@ -8,6 +8,7 @@ from ..models import Job
 from .basic_user import BasicUserSerializer
 from .job_photo import JobPhotoSerializer
 from .job_comment import JobCommentSerializer
+from .job_tag import JobTagSerializer
 
 
 class SharedJobDetailSerializer(serializers.ModelSerializer):
@@ -27,6 +28,7 @@ class SharedJobDetailSerializer(serializers.ModelSerializer):
     job_photos = JobPhotoSerializer(many=True, read_only=True)
     job_comments = JobCommentSerializer(many=True, read_only=True)
     created_by = BasicUserSerializer(read_only=True)
+    tags = JobTagSerializer(many=True)
 
     class Meta:
         model = Job
@@ -54,4 +56,5 @@ class SharedJobDetailSerializer(serializers.ModelSerializer):
             'completion_date',
             'is_publicly_confirmed',
             'confirmed_full_name',
+            'tags',
         )

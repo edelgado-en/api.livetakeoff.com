@@ -6,45 +6,54 @@ from rest_framework.views import APIView
 from django.contrib.auth.models import User
 from datetime import datetime
 
-from api.models import (Job, JobStatusActivity, UserProfile, JobTag, Tag)
+import base64
+
+from api.models import (Job, JobStatusActivity, Tag, JobTag)
 
 from api.email_util import EmailUtil
 
-class JobAcceptView(APIView):
-    permission_classes = (permissions.IsAuthenticated,)
+class SharedJobReturnView(APIView):
+    permission_classes = (permissions.AllowAny,)
 
-    def get(self, request, id):
-        """ This enpoint is meant to be used by project managers only.
-           It allows them to accept a job that has been assigned to them.
-            This endpoint is only used if the user is configured to accept jobs.
-          """
-        job = get_object_or_404(Job, pk=id)
+    def post(self, request, encoded_id):
+         # Base64 DECODE
+        base64_bytes = encoded_id.encode('ascii')
+        message_bytes = base64.b64decode(base64_bytes)
+        decoded_id = message_bytes.decode('ascii')
+
+        # split message with delimiter - and get the first part
+        job_id = int(decoded_id.split('-')[0])
+
+        job = get_object_or_404(Job, pk=job_id)
 
         # You can only accept a job when the status is Assigned
         if job.status != 'S':
             return Response({'error': 'This job is not in the right status'}, status=status.HTTP_400_BAD_REQUEST)
 
-        can_accept_jobs = False
-        if request.user.profile:
-            can_accept_jobs = request.user.profile.enable_accept_jobs
+        full_name = request.data.get('full_name')
+        email_address = request.data.get('email')
+        phone_number = request.data.get('phone')
 
-        if not can_accept_jobs:
-            return Response({'error': 'You are not configured to accept jobs'}, status=status.HTTP_403_FORBIDDEN)
+        job.returned_full_name = full_name
+        job.returned_email = email_address
+        job.returned_phone_number = phone_number
+        
+        job.status = 'A'
 
+        job.save()
 
-        for tag in job.tags.all():
-            if tag.name == 'Vendor Accepted':
-                return Response({'error': 'This job has already been accepted'}, status=status.HTTP_400_BAD_REQUEST)
+        JobStatusActivity.objects.create(job=job, status='A', activity_type='R')
 
-        job_tag = Tag.objects.get(name='Vendor Accepted')
+        # update services
+        for service in job.job_service_assignments.all():
+            service.status = 'U'
+            service.project_manager = None
+            service.save(update_fields=['status', 'project_manager'])
 
-        if not job_tag:
-            return Response({'error': 'Tag not found'}, status=status.HTTP_400_BAD_REQUEST)
-
-
-        JobTag.objects.create(job=job, tag=job_tag)
-       
-        JobStatusActivity.objects.create(job=job, status='S', activity_type='V', user=request.user)
+        for retainer_service in job.job_retainer_service_assignments.all():
+            retainer_service.status = 'U'
+            retainer_service.project_manager = None
+            retainer_service.save(update_fields=['status', 'project_manager'])
 
         admins = User.objects.filter(Q(is_superuser=True) | Q(is_staff=True) | Q(groups__name='Account Managers'))
 
@@ -81,10 +90,10 @@ class JobAcceptView(APIView):
         if retainer_service_names:
             retainer_service_names = retainer_service_names[:-2]
 
-        subject = f'{job.tailNumber} - Job ACCEPTED by {request.user.first_name} {request.user.last_name}'
+        subject = f'{job.tailNumber} - Job RETURNED by {full_name}'
 
         body = f'''
-                <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">Job Accepted</div>
+                <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">Job Returned</div>
                 <table style="border-collapse: collapse">
                     <tr>
                         <td style="padding:15px">Tail</td>

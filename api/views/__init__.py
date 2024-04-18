@@ -93,3 +93,5 @@ from .airport_customer_fees import AirportCustomerFeesView
 from .fbo_customer_fees import FBOCustomerFeesView
 from .shared_job_confirm import SharedJobConfirmView
 from .job_accept import JobAcceptView
+from .shared_job_accept import SharedJobAcceptView
+from .shared_job_return import SharedJobReturnView

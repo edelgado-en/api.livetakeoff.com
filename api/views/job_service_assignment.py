@@ -291,10 +291,10 @@ class JobServiceAssignmentView(APIView):
                         if user.email not in unique_emails:
                             unique_emails.append(user.email)
 
-                    additional_emails = UserEmail.objects.filter(user=user)
-                    for additional_email in additional_emails:
-                        if additional_email.email not in unique_emails:
-                            unique_emails.append(additional_email.email)
+                        additional_emails = UserEmail.objects.filter(user=user)
+                        for additional_email in additional_emails:
+                            if additional_email.email not in unique_emails:
+                                unique_emails.append(additional_email.email)
 
                     at_least_one_service_assigned = True
                 
@@ -380,7 +380,8 @@ class JobServiceAssignmentView(APIView):
 
         body = f'''
                 <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">Job Assignment</div>
-                <a href="http://livetakeoff.com/jobs/{job.id}/details" style="display: inline-block; padding: 0.5625rem 1.125rem; margin: 0 5px; font-size: 1.5rem; font-weight: 400; line-height: 1.5; text-align: center; vertical-align: middle; cursor: pointer; border: 1px solid transparent; border-radius: 0.375rem; transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; text-decoration: none; color: #212529; background-color: #f8f9fa; border-color: #f8f9fa;">REVIEW</a>
+                <a href="http://livetakeoff.com/shared/jobs/{base64_message}/accept" style="display: inline-block; padding: 0.5625rem 1.125rem; margin: 0 5px; font-size: 1.5rem; font-weight: 400; line-height: 1.5; text-align: center; vertical-align: middle; cursor: pointer; border: 1px solid transparent; border-radius: 0.375rem; transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; text-decoration: none; color: #fff; background-color: #007bff; border-color: #007bff;">ACCEPT</a>
+                <a href="http://livetakeoff.com/shared/jobs/{base64_message}/accept" style="display: inline-block; padding: 0.5625rem 1.125rem; margin: 0 5px; font-size: 1.5rem; font-weight: 400; line-height: 1.5; text-align: center; vertical-align: middle; cursor: pointer; border: 1px solid transparent; border-radius: 0.375rem; transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; text-decoration: none; color: #212529; background-color: #f8f9fa; border-color: #f8f9fa;">RETURN</a>
 
                 <div style="margin-bottom:20px"></div>
                 <table style="border-collapse: collapse">

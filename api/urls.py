@@ -92,7 +92,9 @@ from .views import (
         AirportCustomerFeesView,
         FBOCustomerFeesView,
         SharedJobConfirmView,
-        JobAcceptView
+        JobAcceptView,
+        SharedJobAcceptView,
+        SharedJobReturnView
     )
 
 urlpatterns = [
@@ -199,6 +201,8 @@ urlpatterns = [
     path('shared/contact', ContactView.as_view()),
     path('shared/estimates/<str:encoded_id>/', SharedJobEstimateDetailView.as_view()),
     path('shared/jobs/confirm/<str:encoded_id>/', SharedJobConfirmView.as_view()),
+    path('shared/jobs/accept/<str:encoded_id>/', SharedJobAcceptView.as_view()),
+    path('shared/jobs/return/<str:encoded_id>/', SharedJobReturnView.as_view()),
 
     path('customers/activities', CustomerActivityView.as_view()),
     path('estimates/create', CreateEstimateView.as_view()),

@@ -13,6 +13,11 @@ class JobActivitySerializer(serializers.ModelSerializer):
         # get the obj.job.confirmed_full_name if it is not empty and the obj.status == 'A' and the obj.activity_type == 'S'
         if obj.job.confirmed_full_name and obj.status == 'A' and obj.activity_type == 'S':
             return obj.job.confirmed_full_name
+        elif obj.job.accepted_full_name and obj.status == 'S' and obj.activity_type == 'V':
+            return obj.job.accepted_full_name
+
+        elif obj.job.returned_full_name and obj.status == 'A' and obj.activity_type == 'R':
+            return obj.job.returned_full_name    
         else:
             if obj.user:
                 return obj.user.first_name + ' ' + obj.user.last_name

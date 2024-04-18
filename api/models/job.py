@@ -85,6 +85,18 @@ class Job(models.Model):
 
     confirmed_phone_number = models.CharField(max_length=255, blank=True, null=True)
 
+    accepted_full_name = models.CharField(max_length=300, blank=True, null=True, help_text='This is the name of the vendor that accepted the job via the shareable public link')
+
+    accepted_email = models.CharField(max_length=320, blank=True, null=True)
+
+    accepted_phone_number = models.CharField(max_length=255, blank=True, null=True)
+
+    returned_full_name = models.CharField(max_length=300, blank=True, null=True, help_text='This is the name of the vendor that returned the job via the shareable public link')
+
+    returned_email = models.CharField(max_length=320, blank=True, null=True)
+
+    returned_phone_number = models.CharField(max_length=255, blank=True, null=True)
+
     travel_fees_amount_applied = models.DecimalField(max_digits=9, decimal_places=2, default=0)
 
     fbo_fees_amount_applied = models.DecimalField(max_digits=9, decimal_places=2, default=0)
