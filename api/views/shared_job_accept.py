@@ -31,7 +31,7 @@ class SharedJobAcceptView(APIView):
             return Response({'error': 'This job is not in the right status'}, status=status.HTTP_400_BAD_REQUEST)
 
         for tag in job.tags.all():
-            if tag.name == 'Vendor Accepted':
+            if tag.tag.name == 'Vendor Accepted':
                 return Response({'error': 'This job has already been accepted'}, status=status.HTTP_400_BAD_REQUEST)
 
         job_tag = Tag.objects.get(name='Vendor Accepted')
