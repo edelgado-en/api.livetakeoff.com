@@ -347,22 +347,6 @@ class JobServiceAssignmentView(APIView):
         for phone_number in unique_phone_numbers:
             notification_util.send(message, phone_number.as_e164)
 
-        # TODO: send email if flag enabled and add all the exra emails
-        etd = 'Not Specified'
-        if job.estimatedETD:
-            etd = job.estimatedETD.strftime('%m/%d/%y %H:%M')
-
-        eta = 'Not Specified'
-        if job.estimatedETA:
-            eta = job.estimatedETA.strftime('%m/%d/%y %H:%M')
-        
-        complete_before = 'Not Specified'
-        if job.completeBy:
-            complete_before = job.completeBy.strftime('%m/%d/%y %H:%M')
-
-        if job.on_site:
-            eta = 'On Site'
-        
         subject = f'{job.tailNumber} - Job ASSIGNED - Review and ACCEPT it or RETURN it as soon as possible.'
 
         # remove the last comma from service_names if not empty
@@ -407,15 +391,15 @@ class JobServiceAssignmentView(APIView):
                     </tr>
                     <tr>
                         <td style="padding:15px">Arrival</td>
-                        <td style="padding:15px">{eta}</td>
+                        <td style="padding:15px">{job.arrival_formatted_date}</td>
                     </tr>
                     <tr>
                         <td style="padding:15px">Departure</td>
-                        <td style="padding:15px">{etd}</td>
+                        <td style="padding:15px">{job.departure_formatted_date}</td>
                     </tr>
                     <tr>
                         <td style="padding:15px">Complete Before</td>
-                        <td style="padding:15px">{complete_before}</td>
+                        <td style="padding:15px">{job.complete_before_formatted_date}</td>
                     </tr>
                     <tr>
                         <td style="padding:15px">Services</td>

@@ -164,6 +164,24 @@ class CreateJobView(APIView):
         if requested_by == "":
             requested_by = None
 
+        arrival_formatted_date = 'Not Specified'
+        if estimated_arrival_date:
+            arrival_formatted_date = estimated_arrival_date.strftime('%m/%d/%y %H:%M')
+            arrival_formatted_date += ' LT'
+
+        if on_site:
+            arrival_formatted_date = 'On Site'
+
+        departure_formatted_date = 'Not Specified'
+        if estimated_departure_date:
+            departure_formatted_date = estimated_departure_date.strftime('%m/%d/%y %H:%M')
+            departure_formatted_date += ' LT'
+
+        complete_before_formatted_date = 'Not Specified'
+        if complete_by_date:
+            complete_before_formatted_date = complete_by_date.strftime('%m/%d/%y %H:%M')
+            complete_before_formatted_date += ' LT'
+
         job = Job(purchase_order=purchase_order,
                   customer=customer,
                   tailNumber=tailNumber,
@@ -177,7 +195,10 @@ class CreateJobView(APIView):
                   status=job_status,
                   requested_by=requested_by,
                   customer_purchase_order=customer_purchase_order,
-                  on_site=on_site)
+                  on_site=on_site,
+                  arrival_formatted_date=arrival_formatted_date,
+                  departure_formatted_date=departure_formatted_date,
+                  complete_before_formatted_date=complete_before_formatted_date)
 
         job.save()
 
