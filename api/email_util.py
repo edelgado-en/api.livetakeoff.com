@@ -11,6 +11,9 @@ class EmailUtil():
                         subject=title,
                         html_content=body
                     )
+        
+        # Set  the display name
+        message.from_email.name = 'LiveTakeoff'
 
         # This doesnt work
         #message.template_id = 'd-bcb28d6f880444fca68dad0d1243d6b9'
