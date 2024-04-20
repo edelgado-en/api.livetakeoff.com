@@ -217,6 +217,13 @@ class JobDetail(APIView):
         if serializer.is_valid():
             serializer.save()
 
+            user_selected_id = request.data.get('user_selected_id')
+            user_selected = None
+            if user_selected_id:
+                user_selected = User.objects.get(id=user_selected_id)
+            else:
+                user_selected = request.user
+
             if ('status' in request.data 
                     and (request.data['status'] == 'W' or request.data['status'] == 'C')):
                 for service in job.job_service_assignments.all():
@@ -266,29 +273,12 @@ class JobDetail(APIView):
                     job_comment_checks.delete()
 
                 for admin in admins:
-                    # get the phone number of the admin
                     phone_number = admin.profile.phone_number
                     if phone_number:
-                        # send a text message
-                        
-                        #Adding a link is throwing a 30007 error in Twilio
-                        #message = f'Job {job.purchase_order} for tail number {job.tailNumber} has been COMPLETED. Please review the job and close it out https://livetakeoff.com/completed/review/{job.id}'
-
-                        # message this to have the following format:
-                        #Job COMPLETED by RICARDO
-                        #• Fly Alliance
-                        #• MIA
-                        #• N1122AA
-                        #Completion: 2/4/24 12:00
-                        # where RICARDO is the user.first_name
-                        # Fly Alliance is the customer name
-                        # MIA is the airport initials
-                        # N1122AA is the tail number
-                        # 2/4/24 12:00 is the job.completion_date date
                         completion_date = datetime.now().strftime('%m/%d/%y %H:%M')
                         first_name = ''
 
-                        if request.user.first_name:
+                        if user_selected.first_name:
                             first_name = request.user.first_name.upper()
 
                         message = f'Job COMPLETED by {first_name}\n• {job.customer.name}\n• {job.airport.initials}\n• {job.tailNumber}\nCompletion: {completion_date}'
@@ -346,8 +336,7 @@ class JobDetail(APIView):
                         ServiceActivity.objects.create(job=job,
                                                        service=service.service,
                                                        status='C',
-                                                       project_manager=request.user)
-
+                                                       project_manager=user_selected)
 
                 for retainer_service in job.job_retainer_service_assignments.all():
                     retainer_service.status = 'U'
@@ -359,7 +348,7 @@ class JobDetail(APIView):
                         RetainerServiceActivity.objects.create(job=job,
                                                                retainer_service=retainer_service.retainer_service,
                                                                status='C',
-                                                               project_manager=request.user)
+                                                               project_manager=user_selected)
 
             
             if 'status' in request.data and request.data['status'] == 'W':
@@ -367,21 +356,6 @@ class JobDetail(APIView):
                     # get the phone number of the admin
                     phone_number = admin.profile.phone_number
                     if phone_number:
-                        # send a text message
-                        
-                        #message = f'Job {job.purchase_order} for tail number {job.tailNumber} has been ACCEPTED by {request.user.username}. You can checkout the job at https://livetakeoff.com/jobs/{job.id}/details'
-
-                        # message needs to have following format:
-                        #Job ACCEPTED by RICARDO
-                        #• Fly Alliance
-                        #• MIA
-                        #• N1122AA
-                        # where RICARDO is the user.first_name
-                        # Fly Alliance is the customer name
-                        # MIA is the airport initials
-                        # N1122AA is the tail number
-                        # 2/4/24 13:00 is the completeBy date
-
                         first_name = ''
 
                         if request.user.first_name:
@@ -419,7 +393,7 @@ class JobDetail(APIView):
 
             
             if 'status' in request.data:
-                JobStatusActivity.objects.create(job=job, user=request.user, status=request.data['status'])
+                JobStatusActivity.objects.create(job=job, user=user_selected, status=request.data['status'])
                 
                 job_status = request.data["status"]
 
