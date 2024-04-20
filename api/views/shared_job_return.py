@@ -64,18 +64,6 @@ class SharedJobReturnView(APIView):
                 if user.email not in emails:
                     emails.append(user.email)
 
-        etd = 'Not Specified'
-        if job.estimatedETD:
-            etd = job.estimatedETD.strftime('%m/%d/%y %H:%M')
-
-        eta = 'Not Specified'
-        if job.estimatedETA:
-            eta = job.estimatedETA.strftime('%m/%d/%y %H:%M')
-        
-        complete_before = 'Not Specified'
-        if job.completeBy:
-            complete_before = job.completeBy.strftime('%m/%d/%y %H:%M')
-
         service_names = ''
         for service in job.job_service_assignments.all():
             service_names += service.service.name + ', '
@@ -109,15 +97,15 @@ class SharedJobReturnView(APIView):
                     </tr>
                     <tr>
                         <td style="padding:15px">Arrival</td>
-                        <td style="padding:15px">{eta}</td>
+                        <td style="padding:15px">{job.arrival_formatted_date}</td>
                     </tr>
                     <tr>
                         <td style="padding:15px">Departure</td>
-                        <td style="padding:15px">{etd}</td>
+                        <td style="padding:15px">{job.departure_formatted_date}</td>
                     </tr>
                     <tr>
                         <td style="padding:15px">Complete Before</td>
-                        <td style="padding:15px">{complete_before}</td>
+                        <td style="padding:15px">{job.complete_before_formatted_date}</td>
                     </tr>
                     <tr>
                         <td style="padding:15px">Services</td>

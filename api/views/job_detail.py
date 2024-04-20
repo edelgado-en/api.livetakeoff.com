@@ -387,7 +387,7 @@ class JobDetail(APIView):
                         if request.user.first_name:
                             first_name = request.user.first_name.upper()
 
-                        message = f'Job ACCEPTED by {first_name}\n• {job.customer.name}\n• {job.airport.initials}\n• {job.tailNumber}\n'
+                        message = f'Job STARTED by {first_name}\n• {job.customer.name}\n• {job.airport.initials}\n• {job.tailNumber}\n'
 
                         notification_util.send(message, phone_number.as_e164)
 
@@ -429,7 +429,7 @@ class JobDetail(APIView):
                     # Get Status name
                     status_name = 'COMPLETED'
                     if job_status == 'A':
-                        status_name = 'ACCEPTED'
+                        status_name = 'CONFIRMED'
                     elif job_status == 'W':
                         status_name = 'STARTED'
                     
