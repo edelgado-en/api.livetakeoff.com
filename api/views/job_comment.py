@@ -79,6 +79,15 @@ class JobCommentView(ListCreateAPIView):
 
 
     def create(self, request, *args, **kwargs):
+        """
+        Admins options:
+            send SMS: send text messages to all assigned project managers
+            send email: sends emails to all selected emails including the comment and the job information
+
+        Additional functionality:
+            1) When customer user adds a comment, an automatic email is send to all admins containing the comment and the job information
+            2) When an external project manager adds a comment, an automatic email is send to all admins
+        """
         user = self.request.user
         job_id = self.kwargs.get(self.lookup_url_kwarg)
         job = Job.objects.get(pk=job_id)
@@ -89,8 +98,8 @@ class JobCommentView(ListCreateAPIView):
 
         comment = self.request.data['comment']
         send_sms = self.request.data.get('sendSMS', False)
-        is_public = self.request.data.get('isPublic', False)
         send_email = self.request.data.get('sendEmail', False)
+        is_public = self.request.data.get('isPublic', False)
         emails = self.request.data.get('emails', [])
 
         is_customer_user = False
@@ -111,20 +120,12 @@ class JobCommentView(ListCreateAPIView):
 
         job_comment.save()
 
-        # if is_customer_user True always send sms
-        if is_customer_user:
-            send_sms = True    
 
         # if send_sms then send notification to all project managers assigned to this job
         notification_util = NotificationUtil()
         
         if send_sms:
-            # if is_customer_user then the message should say 'CUSTOMER added import note to this job'
-            # otherwise it should say 'Important note was added to this job'
             message = 'Important note was added to this job'
-            
-            if is_customer_user:
-                message = 'CUSTOMER added important note to this job'
 
             message += f'\n• {job.airport.initials}\n• {job.tailNumber}\n• {job.fbo.name}\n'
 
@@ -153,70 +154,91 @@ class JobCommentView(ListCreateAPIView):
                     if user.profile.phone_number not in unique_phone_numbers:
                         unique_phone_numbers.append(user.profile.phone_number)
 
-
-            # if a customer user is creating the comment then also send sms to all admins and account managers
-            if is_customer_user:
-                admins = User.objects.filter(Q(is_superuser=True) | Q(is_staff=True) | Q(groups__name='Account Managers'))
-                
-                for user in admins:
-                    if user.profile.phone_number:
-                        if user.profile.phone_number not in unique_phone_numbers:
-                            unique_phone_numbers.append(user.profile.phone_number)
-
-
-
             for phone_number in unique_phone_numbers:
                 notification_util.send(message, phone_number.as_e164)
 
-        
-        if is_external_project_manager:
-            admin_phone_numbers = []
-            admins = User.objects.filter(Q(is_superuser=True) | Q(is_staff=True) | Q(groups__name='Account Managers'))
-
-            for user in admins:
-                if user.profile.phone_number:
-                    if user.profile.phone_number not in admin_phone_numbers:
-                        admin_phone_numbers.append(user.profile.phone_number)
-
-            message = 'EXTERNAL PROJECT MANAGER added a note to this job'
-            message += f'\n• {job.airport.initials}\n• {job.tailNumber}\n• {job.fbo.name}\n'
-
-            for phone_number in admin_phone_numbers:
-                notification_util.send(message, phone_number.as_e164)
-
-
         if send_email:
-            # check if the job.created_by is a customer
-            is_customer = job.created_by.profile.customer is not None
+            title = f'{job.tailNumber} Job Comment Added'
 
-            if is_customer:
-                title = f'[{job.tailNumber}] Job Comment Added'
-                link = f'http://livetakeoff.com/jobs/{job.id}/comments'
+            body = f'''
+                    <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">Job Comment Added</div>
+                    <table style="border-collapse: collapse">
+                        <tr>
+                            <td style="padding:15px">Comment</td>
+                            <td style="padding:15px">{comment}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:15px">Tail</td>
+                            <td style="padding:15px">{job.tailNumber}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:15px">Airport</td>
+                            <td style="padding:15px">{job.airport.name}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:15px">FBO</td>
+                            <td style="padding:15px">{job.fbo.name}</td>
+                        </tr>
+                    </table>
+                    <div style="margin-top:20px;padding:5px;font-weight: 700;"></div>
+                    <a href="http://livetakeoff.com/jobs/{job.id}/comments" style="display: inline-block; padding: 0.375rem 0.75rem; margin: 0 5px; font-size: 1rem; font-weight: 400; line-height: 1.5; text-align: center; vertical-align: middle; cursor: pointer; border: 1px solid transparent; border-radius: 0.25rem; transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; text-decoration: none; color: #212529; background-color: #f8f9fa; border-color: #f8f9fa;">REVIEW</a>
+                    <div style="margin-top:20px"></div>
+                    '''
 
-                body = f'''
-                <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">Job Comment Added</div>
-                
-                <div>
-                    <div style="padding:5px;font-weight: 700;">Tail Number</div>
-                    <div style="padding:5px">{job.tailNumber}</div>
-                    <div style="padding:5px;font-weight: 700;">Airport</div>
-                    <div style="padding:5px">{job.airport.name}</div>
-                    <div style="padding:5px;font-weight: 700;">Aircraft</div>
-                    <div style="padding:5px">{job.aircraftType.name}</div>
-                    <div style="padding:5px;font-weight: 700;">Comment</div>
-                    <div style="padding:5px">{comment}</div>
-                    <div style="padding:5px;font-weight: 700;">Link</div>
-                    <div style="padding:5px">{link}</div>
-                </div>
-                '''
+            email_util = EmailUtil()
 
-                email_util = EmailUtil()
+            body += email_util.getEmailSignature()
 
-                body += email_util.getEmailSignature()
+            # iterate through emails and send an email to each email address
+            for email_address in emails:
+                email_util.send_email(email_address, title, body)
 
-                # iterate through emails and send an email to each email address
-                for email_address in emails:
-                    email_util.send_email(email_address, title, body)
+        if is_customer_user or is_external_project_manager:
+            # if the customer user is adding a comment, send an email to all admins including the comment and the job information
+            admins = User.objects.filter(Q(is_superuser=True) | Q(is_staff=True) | Q(groups__name='Account Managers'))
+            emails = []
+            for user in admins:
+                if user.email:
+                    if user.email not in emails:
+                        emails.append(user.email)
+
+            subject = ''
+            if is_customer_user:
+                subject = f'{job.tailNumber} - CUSTOMER ADDED COMMENT'
+            elif is_external_project_manager:
+                subject = f'{job.tailNumber} - EXTERNAL PROJECT MANAGER ADDED COMMENT'
+
+            body = f'''
+                    <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">Job Comment Added</div>
+                    <table style="border-collapse: collapse">
+                        <tr>
+                            <td style="padding:15px">Comment</td>
+                            <td style="padding:15px">{comment}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:15px">Tail</td>
+                            <td style="padding:15px">{job.tailNumber}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:15px">Airport</td>
+                            <td style="padding:15px">{job.airport.name}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:15px">FBO</td>
+                            <td style="padding:15px">{job.fbo.name}</td>
+                        </tr>
+                    </table>
+                    <div style="margin-top:20px;padding:5px;font-weight: 700;"></div>
+                    <a href="http://livetakeoff.com/jobs/{job.id}/comments" style="display: inline-block; padding: 0.375rem 0.75rem; margin: 0 5px; font-size: 1rem; font-weight: 400; line-height: 1.5; text-align: center; vertical-align: middle; cursor: pointer; border: 1px solid transparent; border-radius: 0.25rem; transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; text-decoration: none; color: #212529; background-color: #f8f9fa; border-color: #f8f9fa;">REVIEW</a>
+                    <div style="margin-top:20px"></div>
+                    '''
+            
+            email_util = EmailUtil()
+
+            body += email_util.getEmailSignature()
+
+            for email in emails:
+                email_util.send_email(email, subject, body)
 
 
         serializer = JobCommentSerializer(job_comment)
