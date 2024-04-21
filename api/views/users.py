@@ -24,13 +24,21 @@ class UsersView(ListAPIView):
         # role can be project manager group, admin group, account manager group, or customer. A customer is determined by the customer field in the user profile.
         # if the role is 'All', then do not filter by role
         role = self.request.data.get('role')
+        customer_id = self.request.data.get('customer_id')
+        vendor_id = self.request.data.get('vendor_id')
 
         users = User.objects.filter(is_active=True) \
                             .select_related('profile') \
                             .order_by('first_name', 'last_name')
         
         open_jobs_only = self.request.data.get('open_jobs_only', False)
+
+        if customer_id:
+            users = users.filter(profile__customer_id=customer_id)
         
+        if vendor_id:
+            users = users.filter(profile__vendor_id=vendor_id)
+
         if name:
             users = users.filter(Q(first_name__icontains=name)
                                     | Q(last_name__icontains=name)
