@@ -10,9 +10,8 @@ from ..models import (
         CustomerRetainerService,
         RetainerService,
         Service,
-        CustomerService
+        CustomerService,
     )
-
 
 class CustomerRetainersServicesView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
@@ -43,6 +42,7 @@ class CustomerRetainersServicesView(APIView):
             
             services = Service.objects.filter(Q(id__in=service_ids)).all().order_by('name')
 
+
         service_dtos = []
         for service in services:
             s = {
@@ -50,6 +50,19 @@ class CustomerRetainersServicesView(APIView):
                 'name': service.name,
                 'category': service.category
             }
+
+            checklist_actions = service.checklistActions.all()
+            checklist_action_dtos = []
+
+            for checklist_action in checklist_actions:
+                c = {
+                    'id': checklist_action.id,
+                    'name': checklist_action.name
+                }
+
+                checklist_action_dtos.append(c)
+
+            s['checklist_actions'] = checklist_action_dtos
 
             service_dtos.append(s)
 
@@ -60,6 +73,19 @@ class CustomerRetainersServicesView(APIView):
                 'name': retainer_service.name,
                 'category': retainer_service.category
             }
+
+            checklist_actions = retainer_service.checklistActions.all()
+            checklist_action_dtos = []
+
+            for checklist_action in checklist_actions:
+                c = {
+                    'id': checklist_action.id,
+                    'name': checklist_action.name
+                }
+
+                checklist_action_dtos.append(c)
+
+            r['checklist_actions'] = checklist_action_dtos
 
             retainer_service_dtos.append(r)
 
