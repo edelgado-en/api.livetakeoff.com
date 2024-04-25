@@ -105,7 +105,7 @@ class Job(models.Model):
 
     management_fees_amount_applied = models.DecimalField(max_digits=9, decimal_places=2, default=0)
 
-    arrival_formatted_date = models.CharField(max_length=255, blank=True, null=True, help_text='This is the formatted date for the arrival date and time of the job to avoid complications with timezones when sending emails and sms notifications')
+    arrival_formatted_date = models.CharField(max_length=255, blank=True, null=True, help_text='This is the formatted date for the arrival date and time of the job to avoid complications with timezones when sending emails and sms notifica')
 
     departure_formatted_date = models.CharField(max_length=255, blank=True, null=True)
 

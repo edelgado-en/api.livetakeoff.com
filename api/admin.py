@@ -40,7 +40,9 @@ from api.models import (
     UserEmail,
     JobFiles,
     JobSchedule,
-    TailAlert
+    TailAlert,
+    LastProjectManagersNotified,
+    JobAcceptanceNotification
 )
 
 class UserProfileInline(admin.StackedInline):
@@ -330,5 +332,14 @@ class TailAlertAdmin(admin.ModelAdmin):
     list_per_page = 100
     search_fields = ['tailNumber']
 
+@admin.register(LastProjectManagersNotified)
+class LastProjectManagersNotifiedAdmin(admin.ModelAdmin):
+    list_display = ['id', 'job', 'project_manager']
+    list_per_page = 100
+    search_fields = ['job']
 
-
+@admin.register(JobAcceptanceNotification)
+class JobAcceptanceNotificationAdmin(admin.ModelAdmin):
+    list_display = ['id', 'job', 'project_manager', 'attempt', 'timestamp']
+    list_per_page = 100
+    search_fields = ['job']

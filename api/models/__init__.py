@@ -52,3 +52,5 @@ from .job_schedule_service import JobScheduleService
 from .job_schedule_retainer_service import JobScheduleRetainerService
 from .job_schedule_tag import JobScheduleTag
 from .customer_additional_fee_vendor import CustomerAdditionalFeeVendor
+from .last_project_managers_notified import LastProjectManagersNotified
+from .job_acceptance_notification import JobAcceptanceNotification
