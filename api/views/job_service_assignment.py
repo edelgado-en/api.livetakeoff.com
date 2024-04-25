@@ -382,10 +382,6 @@ class JobServiceAssignmentView(APIView):
                 <div style="margin-bottom:20px"></div>
                 <table style="border-collapse: collapse">
                     <tr>
-                        <td style="padding:15px">Customer</td>
-                        <td style="padding:15px">{job.customer.name}</td>
-                    </tr>
-                    <tr>
                         <td style="padding:15px">Job PO</td>
                         <td style="padding:15px">{job.purchase_order}</td>
                     </tr>
@@ -581,10 +577,6 @@ class JobServiceAssignmentView(APIView):
 
                 <div style="margin-bottom:20px"></div>
                 <table style="border-collapse: collapse">
-                    <tr>
-                        <td style="padding:15px">Customer</td>
-                        <td style="padding:15px">{job.customer.name}</td>
-                    </tr>
                     <tr>
                         <td style="padding:15px">Job PO</td>
                         <td style="padding:15px">{job.purchase_order}</td>
