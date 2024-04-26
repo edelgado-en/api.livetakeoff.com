@@ -94,7 +94,8 @@ from .views import (
         SharedJobConfirmView,
         JobAcceptView,
         SharedJobAcceptView,
-        SharedJobReturnView
+        SharedJobReturnView,
+        CreateFBOView
     )
 
 urlpatterns = [
@@ -196,6 +197,8 @@ urlpatterns = [
     path('airports/available-fbos', AirportAvailableFbosView.as_view()),
     path('airports/available-fbos/<int:id>/', AirportAvailableFbosView.as_view()),
     path('airports/create', CreateAirportView.as_view()),
+
+    path('fbos/create', CreateFBOView.as_view()),
 
     path('shared/jobs/<str:encoded_id>/', SharedJobDetailView.as_view()),
     path('shared/contact', ContactView.as_view()),

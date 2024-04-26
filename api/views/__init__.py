@@ -95,3 +95,4 @@ from .shared_job_confirm import SharedJobConfirmView
 from .job_accept import JobAcceptView
 from .shared_job_accept import SharedJobAcceptView
 from .shared_job_return import SharedJobReturnView
+from .create_fbo import CreateFBOView
