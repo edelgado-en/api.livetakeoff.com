@@ -30,15 +30,19 @@ class JobFormInfoView(APIView):
 
         customers = Customer.objects.all().order_by('name')
 
+        user_profile = UserProfile.objects.get(user=request.user)
+
         if self.request.user.groups.filter(name='Internal Coordinators').exists():
-            user_customers = UserCustomer.objects.filter(user=self.request.user).all()
 
-            if user_customers:
-                customer_ids = []
-                for user_customer in user_customers:
-                    customer_ids.append(user_customer.customer.id)
+            if not user_profile.enable_all_customers:
+                user_customers = UserCustomer.objects.filter(user=self.request.user).all()
 
-                customers = customers.filter(id__in=customer_ids)
+                if user_customers:
+                    customer_ids = []
+                    for user_customer in user_customers:
+                        customer_ids.append(user_customer.customer.id)
+
+                    customers = customers.filter(id__in=customer_ids)
 
 
         aircraft_types = AircraftType.objects.all().order_by('name')
@@ -49,14 +53,16 @@ class JobFormInfoView(APIView):
         airports = Airport.objects.all().order_by('name')
         
         if self.request.user.groups.filter(name='Internal Coordinators').exists():
-            user_airports = UserAvailableAirport.objects.filter(user=self.request.user).all()
 
-            if user_airports:
-                airport_ids = []
-                for user_airport in user_airports:
-                    airport_ids.append(user_airport.airport.id)
+            if not user_profile.enable_all_airports:
+                user_airports = UserAvailableAirport.objects.filter(user=self.request.user).all()
 
-                airports = airports.filter(id__in=airport_ids)
+                if user_airports:
+                    airport_ids = []
+                    for user_airport in user_airports:
+                        airport_ids.append(user_airport.airport.id)
+
+                    airports = airports.filter(id__in=airport_ids)
         
         
         fbos = FBO.objects.all().order_by('name')
@@ -120,7 +126,7 @@ class JobFormInfoView(APIView):
             return Response({'error': 'No fbos found'}, status=status.HTTP_404_NOT_FOUND)
         
         # Check if the user is a customer and get the customer id
-        user_profile = UserProfile.objects.get(user=request.user)
+       
         is_customer = user_profile and user_profile.customer is not None
 
         customer_id = None

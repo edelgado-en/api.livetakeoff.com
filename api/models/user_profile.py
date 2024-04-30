@@ -28,3 +28,7 @@ class UserProfile(models.Model):
     enable_confirm_jobs = models.BooleanField(default=False, help_text='If enabled, the user will be able to confirm jobs. If disabled, the user will not be able to confirm jobs. Admins can always confirm jobs.')
 
     enable_accept_jobs = models.BooleanField(default=False, help_text='If enabled, the user will be able to accept jobs. This is only applicable to project managers. If disabled, the project manager will skip the acceptance process and go straigh to start job.')
+
+    enable_all_customers = models.BooleanField(default=False, help_text='If enabled, the user will be able to see all customers in the system. If disabled, the user will only see the customers that are associated with the user.')
+
+    enable_all_airports = models.BooleanField(default=False, help_text='If enabled, the user will be able to see all airports in the system. If disabled, the user will only see the airports that are associated with the user.')

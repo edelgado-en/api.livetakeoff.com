@@ -120,8 +120,8 @@ class JobListView(ListAPIView):
 
             customer_ids = []
 
-            # Fetch UserCustomer objects for the current user. if it is empty, user can see all jobs.
-            # If not, then they can only see the jobs for the provided customers
+            user_profile = self.request.user.profile
+
             user_customers = UserCustomer.objects.filter(user=self.request.user).all()
 
             if user_customers:
@@ -151,11 +151,16 @@ class JobListView(ListAPIView):
                     if assignment.status != 'C':
                         job_ids.add(assignment.job.id)
 
-                # filter by customer ids if the user has any or job ids if the user is a project manager
-                qs = qs.filter(Q(customer_id__in=customer_ids) | Q(id__in=job_ids))
+                if not user_profile.enable_all_customers:
+                    # filter by customer ids if the user has any or job ids if the user is a project manager
+                    qs = qs.filter(Q(customer_id__in=customer_ids) | Q(id__in=job_ids))
                 
+                else:
+                    qs = qs.filter(id__in=job_ids)
+
             else:
-                qs = qs.filter(customer_id__in=customer_ids)
+                if not user_profile.enable_all_customers:
+                    qs = qs.filter(customer_id__in=customer_ids)
                 
 
             user_available_airports = UserAvailableAirport.objects.filter(user=self.request.user).all()

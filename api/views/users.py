@@ -46,54 +46,74 @@ class UsersView(ListAPIView):
 
         if open_jobs_only:
             if self.request.user.groups.filter(name='Internal Coordinators').exists():
-                # Check if the user had any entries in the UserCustomer table. If so, then only include users that are associated with those customers via job_service_assignments.job.customer
-                user_customers = UserCustomer.objects.filter(user=self.request.user).all()
 
-                if user_customers:
-                    customer_ids = []
-                    for user_customer in user_customers:
-                        customer_ids.append(user_customer.customer.id)
+                user_profile = self.request.user.profile
 
-                    users = users.filter(Q(job_service_assignments__job__customer_id__in=customer_ids)
-                                            | Q(job_retainer_service_assignments__job__customer_id__in=customer_ids)).distinct()
-                    
-                    users = users.filter(Q(job_service_assignments__status__in=['A', 'W'])
-                                            | Q(job_retainer_service_assignments__status__in=['A', 'W'])).distinct()
-                    
-                    users = users.filter(Q(job_service_assignments__job__status__in=['A', 'S', 'U', 'W'])
-                                            | Q(job_retainer_service_assignments__job__status__in=['A', 'S', 'U', 'W'])).distinct()
-                    
-                else:
+                if user_profile.enable_all_customers:
                     users = users.filter(Q(job_service_assignments__status__in=['A', 'W']) 
                                         | Q(job_retainer_service_assignments__status__in=['A', 'W'])).distinct()
                     
                     users = users.filter(Q(job_service_assignments__job__status__in=['A', 'S', 'U', 'W'])
                                         | Q(job_retainer_service_assignments__job__status__in=['A', 'S', 'U', 'W'])).distinct()
                     
-                    
-                user_available_airports = UserAvailableAirport.objects.filter(user=self.request.user).all()
-
-                if user_available_airports:
-                    airport_ids = []
-                    for user_available_airport in user_available_airports:
-                        airport_ids.append(user_available_airport.airport.id)
-
-                    # filter users by using the list of airports ids in job_service_assignments.job.airport_id or job_retainer_service_assignments.job.airport_id
-                    users = users.filter(Q(job_service_assignments__job__airport_id__in=airport_ids)
-                                             | Q(job_retainer_service_assignments__job__airport_id__in=airport_ids)).distinct()
-
-                    users = users.filter(Q(job_service_assignments__status__in=['A', 'W'])
-                                             | Q(job_retainer_service_assignments__status__in=['A', 'W'])).distinct()
-
-                    users = users.filter(Q(job_service_assignments__job__status__in=['A', 'S', 'U', 'W'])
-                                             | Q(job_retainer_service_assignments__job__status__in=['A', 'S', 'U', 'W'])).distinct()
-
                 else:
+                    # Check if the user had any entries in the UserCustomer table. If so, then only include users that are associated with those customers via job_service_assignments.job.customer
+                    user_customers = UserCustomer.objects.filter(user=self.request.user).all()
+
+                    if user_customers:
+                        customer_ids = []
+                        for user_customer in user_customers:
+                            customer_ids.append(user_customer.customer.id)
+
+                        users = users.filter(Q(job_service_assignments__job__customer_id__in=customer_ids)
+                                                | Q(job_retainer_service_assignments__job__customer_id__in=customer_ids)).distinct()
+                        
+                        users = users.filter(Q(job_service_assignments__status__in=['A', 'W'])
+                                                | Q(job_retainer_service_assignments__status__in=['A', 'W'])).distinct()
+                        
+                        users = users.filter(Q(job_service_assignments__job__status__in=['A', 'S', 'U', 'W'])
+                                                | Q(job_retainer_service_assignments__job__status__in=['A', 'S', 'U', 'W'])).distinct()
+                        
+                    else:
+                        users = users.filter(Q(job_service_assignments__status__in=['A', 'W']) 
+                                            | Q(job_retainer_service_assignments__status__in=['A', 'W'])).distinct()
+                        
+                        users = users.filter(Q(job_service_assignments__job__status__in=['A', 'S', 'U', 'W'])
+                                            | Q(job_retainer_service_assignments__job__status__in=['A', 'S', 'U', 'W'])).distinct()
+                    
+                    
+                if user_profile.enable_all_airports:
                     users = users.filter(Q(job_service_assignments__status__in=['A', 'W']) 
                                         | Q(job_retainer_service_assignments__status__in=['A', 'W'])).distinct()
                     
                     users = users.filter(Q(job_service_assignments__job__status__in=['A', 'S', 'U', 'W'])
-                                        | Q(job_retainer_service_assignments__job__status__in=['A', 'S', 'U', 'W'])).distinct()            
+                                        | Q(job_retainer_service_assignments__job__status__in=['A', 'S', 'U', 'W'])).distinct()
+                    
+                else:
+
+                    user_available_airports = UserAvailableAirport.objects.filter(user=self.request.user).all()
+
+                    if user_available_airports:
+                        airport_ids = []
+                        for user_available_airport in user_available_airports:
+                            airport_ids.append(user_available_airport.airport.id)
+
+                        # filter users by using the list of airports ids in job_service_assignments.job.airport_id or job_retainer_service_assignments.job.airport_id
+                        users = users.filter(Q(job_service_assignments__job__airport_id__in=airport_ids)
+                                                | Q(job_retainer_service_assignments__job__airport_id__in=airport_ids)).distinct()
+
+                        users = users.filter(Q(job_service_assignments__status__in=['A', 'W'])
+                                                | Q(job_retainer_service_assignments__status__in=['A', 'W'])).distinct()
+
+                        users = users.filter(Q(job_service_assignments__job__status__in=['A', 'S', 'U', 'W'])
+                                                | Q(job_retainer_service_assignments__job__status__in=['A', 'S', 'U', 'W'])).distinct()
+
+                    else:
+                        users = users.filter(Q(job_service_assignments__status__in=['A', 'W']) 
+                                            | Q(job_retainer_service_assignments__status__in=['A', 'W'])).distinct()
+                        
+                        users = users.filter(Q(job_service_assignments__job__status__in=['A', 'S', 'U', 'W'])
+                                            | Q(job_retainer_service_assignments__job__status__in=['A', 'S', 'U', 'W'])).distinct()            
 
 
             else:

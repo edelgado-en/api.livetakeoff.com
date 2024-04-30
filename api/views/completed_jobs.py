@@ -47,6 +47,8 @@ class CompletedJobsListView(ListAPIView):
                         .order_by('-completion_date') \
                         .all()
         
+        user_profile = self.request.user.profile
+        
         for additionalFee in additionalFees:
             if additionalFee == 'A':
                 qs = qs.filter(travel_fees_amount_applied__gt=0)
@@ -58,27 +60,30 @@ class CompletedJobsListView(ListAPIView):
                 qs = qs.filter(vendor_higher_price_amount_applied__gt=0)
 
         # if customer use, then only show jobs for that customer
-        if self.request.user.profile.customer:
+        if user_profile.customer:
             qs = qs.filter(customer=self.request.user.profile.customer)
 
         if self.request.user.groups.filter(name='Internal Coordinators').exists():
-            user_customers = UserCustomer.objects.filter(user=self.request.user).all()
+            
+            if not user_profile.enable_all_customers:
+                user_customers = UserCustomer.objects.filter(user=self.request.user).all()
 
-            if user_customers:
-                customer_ids = []
-                for user_customer in user_customers:
-                    customer_ids.append(user_customer.customer.id)
+                if user_customers:
+                    customer_ids = []
+                    for user_customer in user_customers:
+                        customer_ids.append(user_customer.customer.id)
 
-                qs = qs.filter(customer_id__in=customer_ids)
+                    qs = qs.filter(customer_id__in=customer_ids)
 
-            user_available_airports = UserAvailableAirport.objects.filter(user=self.request.user).all()
+            if not user_profile.enable_all_airports:
+                user_available_airports = UserAvailableAirport.objects.filter(user=self.request.user).all()
 
-            if user_available_airports:
-                airport_ids = []
-                for user_available_airport in user_available_airports:
-                    airport_ids.append(user_available_airport.airport.id)
+                if user_available_airports:
+                    airport_ids = []
+                    for user_available_airport in user_available_airports:
+                        airport_ids.append(user_available_airport.airport.id)
 
-                qs = qs.filter(airport_id__in=airport_ids)
+                    qs = qs.filter(airport_id__in=airport_ids)
 
 
         if searchText:

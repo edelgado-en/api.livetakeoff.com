@@ -134,14 +134,16 @@ class ServiceActivityListView(ListAPIView):
 
 
         if self.request.user.groups.filter(name='Internal Coordinators').exists():
-            user_customers = UserCustomer.objects.filter(user=self.request.user).all()
 
-            if user_customers:
-                customer_ids = []
-                for user_customer in user_customers:
-                    customer_ids.append(user_customer.customer.id)
+            if not user_profile.enable_all_customers:
+                user_customers = UserCustomer.objects.filter(user=self.request.user).all()
 
-                qs = qs.filter(job__customer_id__in=customer_ids)
+                if user_customers:
+                    customer_ids = []
+                    for user_customer in user_customers:
+                        customer_ids.append(user_customer.customer.id)
+
+                    qs = qs.filter(job__customer_id__in=customer_ids)
 
 
         if customer_id:
