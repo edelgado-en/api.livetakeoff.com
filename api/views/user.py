@@ -103,14 +103,15 @@ class UserView(APIView):
             canSeePrice = True
             showSpendingInfo = True
 
-        elif is_project_manager:
-            access_level_label = 'Project Manager'
-
         elif is_customer:
             access_level_label = 'Customer'
 
         elif is_internal_coordinator:
             access_level_label = 'Internal Coordinator'
+            canSeePrice = user_profile.show_job_price
+
+        elif is_project_manager:
+            access_level_label = 'Project Manager'
 
         
         phone_number = ''
