@@ -28,13 +28,15 @@ from ..models import (
 
 from ..pricebreakdown_service import PriceBreakdownService
 
+from api.email_notification_service import EmailNotificationService
+from api.sms_notification_service import SMSNotificationService
+
 from ..serializers import (
                     JobServiceAssignmentSerializer,
                     JobRetainerServiceAssignmentSerializer,
                     BasicUserSerializer
                 )
 
-from api.notification_util import NotificationUtil
 from api.email_util import EmailUtil
 
 class JobServiceAssignmentView(APIView):
@@ -352,82 +354,9 @@ class JobServiceAssignmentView(APIView):
             #record JobStatusActivity X PM Unassigned
             JobStatusActivity.objects.create(job=job, status='X', user=request.user)
 
-        notification_util = NotificationUtil()
+        SMSNotificationService().send_job_assigned_notification(job, unique_phone_numbers)
 
-        message = f'Job ASSIGNED to you\n• {job.airport.initials}\n• {job.tailNumber}\n• {job.fbo.name}\n'
-
-        for phone_number in unique_phone_numbers:
-            notification_util.send(message, phone_number.as_e164)
-
-        subject = f'{job.tailNumber} - Job ASSIGNED - Review and ACCEPT it or RETURN it as soon as possible.'
-
-        # remove the last comma from service_names if not empty
-        if service_names:
-            service_names = service_names[:-2]
-
-        # remove the last comma from retainer_service_names if not empty
-        if retainer_service_names:
-            retainer_service_names = retainer_service_names[:-2]
-
-        message = str(job.id) + '-' + job.tailNumber
-        message_bytes = message.encode('ascii')
-        base64_bytes = base64.b64encode(message_bytes)
-        base64_message = base64_bytes.decode('ascii')
-
-        body = f'''
-                <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">Job Assignment</div>
-                <a href="http://livetakeoff.com/shared/jobs/{base64_message}/accept" style="display: inline-block; padding: 0.5625rem 1.125rem; margin: 0 5px; font-size: 1.5rem; font-weight: 400; line-height: 1.5; text-align: center; vertical-align: middle; cursor: pointer; border: 1px solid transparent; border-radius: 0.375rem; transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; text-decoration: none; color: #fff; background-color: #007bff; border-color: #007bff;">ACCEPT</a>
-                <a href="http://livetakeoff.com/shared/jobs/{base64_message}/accept" style="display: inline-block; padding: 0.5625rem 1.125rem; margin: 0 5px; font-size: 1.5rem; font-weight: 400; line-height: 1.5; text-align: center; vertical-align: middle; cursor: pointer; border: 1px solid transparent; border-radius: 0.375rem; transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; text-decoration: none; color: #212529; background-color: #f8f9fa; border-color: #f8f9fa;">RETURN</a>
-
-                <div style="margin-bottom:20px"></div>
-                <table style="border-collapse: collapse">
-                    <tr>
-                        <td style="padding:15px">Job PO</td>
-                        <td style="padding:15px">{job.purchase_order}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding:15px">Tail</td>
-                        <td style="padding:15px">{job.tailNumber}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding:15px">Airport</td>
-                        <td style="padding:15px">{job.airport.name}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding:15px">FBO</td>
-                        <td style="padding:15px">{job.fbo.name}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding:15px">Arrival</td>
-                        <td style="padding:15px">{job.arrival_formatted_date}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding:15px">Departure</td>
-                        <td style="padding:15px">{job.departure_formatted_date}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding:15px">Complete Before</td>
-                        <td style="padding:15px">{job.complete_before_formatted_date}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding:15px">Services</td>
-                        <td style="padding:15px">{service_names}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding:15px">Retainer Services</td>
-                        <td style="padding:15px">{retainer_service_names}</td>
-                    </tr>
-                </table>
-                <div style="margin-top:20px;padding:5px;font-weight: 700;"></div>
-                '''
-
-        email_util = EmailUtil()
-
-        body += email_util.getEmailSignature()
-
-        for email in unique_emails:
-            email_util.send_email(email, subject, body)
-
+        EmailNotificationService().send_job_assigned_notification(job, unique_emails, service_names, retainer_service_names)
 
         if unique_project_manager_ids_notified:
             LastProjectManagersNotified.objects.filter(job=job).delete()

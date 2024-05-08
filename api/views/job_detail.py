@@ -14,6 +14,9 @@ from ..serializers import (
 
 from ..pricebreakdown_service import PriceBreakdownService
 
+from api.email_notification_service import EmailNotificationService
+from api.sms_notification_service import SMSNotificationService
+
 from ..models import (
         Job,
         JobServiceAssignment,
@@ -23,16 +26,7 @@ from ..models import (
         JobCommentCheck,
         ServiceActivity,
         RetainerServiceActivity,
-        UserEmail,
-        JobFiles
     )
-
-
-from twilio.rest import Client
-import os
-
-from api.notification_util import NotificationUtil
-from api.email_util import EmailUtil
 
 
 class JobDetail(APIView):
@@ -260,66 +254,15 @@ class JobDetail(APIView):
                                                                project_manager=request.user)
 
 
-            
-            notification_util = NotificationUtil()
-            
-            #Send a notification to all admins and account managers
-            admins = User.objects.filter(Q(is_superuser=True) | Q(is_staff=True) | Q(groups__name='Account Managers'))
-            
             if 'status' in request.data and request.data['status'] == 'C':
                 job_comment_checks = JobCommentCheck.objects.filter(job=job)
 
                 if job_comment_checks:
                     job_comment_checks.delete()
 
-                for admin in admins:
-                    phone_number = admin.profile.phone_number
-                    if phone_number:
-                        completion_date = datetime.now().strftime('%m/%d/%y %H:%M')
-                        first_name = ''
-
-                        if user_selected.first_name:
-                            first_name = request.user.first_name.upper()
-
-                        message = f'Job COMPLETED by {first_name}\n• {job.customer.name}\n• {job.airport.initials}\n• {job.tailNumber}\nCompletion: {completion_date}'
-
-                        notification_util.send(message, phone_number.as_e164)
-
-                # send an email notification to the customer user if the job was created by a customer user
-                if job.created_by.profile.customer \
-                        and job.created_by.profile.email_notifications:
-                    
-                    title = f'[{job.tailNumber}] Job COMPLETED'
-                    link = f'http://livetakeoff.com/jobs/{job.id}/details'
-
-                    body = f'''
-                    <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">Job has been COMPLETED</div>
-                    
-                    <div>
-                        <div style="padding:5px;font-weight: 700;">Tail Number</div>
-                        <div style="padding:5px">{job.tailNumber}</div>
-                        <div style="padding:5px;font-weight: 700;">Airport</div>
-                        <div style="padding:5px">{job.airport.name}</div>
-                        <div style="padding:5px;font-weight: 700;">Aircraft</div>
-                        <div style="padding:5px">{job.aircraftType.name}</div>
-                        <div style="padding:5px;font-weight: 700;">Link</div>
-                        <div style="padding:5px">{link}</div>
-                    </div>
-                    '''
-
-                    email_util = EmailUtil()
-
-                    body += email_util.getEmailSignature()
-
-                    if job.created_by.email:
-                        email_util.send_email(job.created_by.email, title, body)
-
-                    #fetch entries of UserEmail for the customer user and send an email to each email address
-                    user_emails = UserEmail.objects.filter(user=job.created_by)
-
-                    for user_email in user_emails:
-                        if user_email.email:
-                            email_util.send_email(user_email.email, title, body)
+                
+                SMSNotificationService().send_job_completed_notification(job)
+                EmailNotificationService().send_job_completed_notification(job)
 
                 # set the actual_completion_date to today
                 job.completion_date = datetime.now()
@@ -352,18 +295,12 @@ class JobDetail(APIView):
 
             
             if 'status' in request.data and request.data['status'] == 'W':
-                for admin in admins:
-                    # get the phone number of the admin
-                    phone_number = admin.profile.phone_number
-                    if phone_number:
-                        first_name = ''
+                first_name = ''
 
-                        if request.user.first_name:
-                            first_name = request.user.first_name.upper()
+                if request.user.first_name:
+                    first_name = request.user.first_name.upper()
 
-                        message = f'Job STARTED by {first_name}\n• {job.customer.name}\n• {job.airport.initials}\n• {job.tailNumber}\n'
-
-                        notification_util.send(message, phone_number.as_e164)
+                SMSNotificationService().send_job_started_notification(job, first_name)
 
 
             # Cancel job
@@ -379,45 +316,16 @@ class JobDetail(APIView):
                     retainer_service.project_manager = None
                     retainer_service.save(update_fields=['project_manager', 'status'])
 
+                first_name = ''
 
-                for admin in admins:
-                    # get the phone number of the admin
-                    phone_number = admin.profile.phone_number
-                    if phone_number:
-                        # send a text message
-                        #message = f'Job {job.purchase_order} for tail number {job.tailNumber} has been CANCELLED by {request.user.username}. You can checkout the job at https://livetakeoff.com/jobs/{job.id}/details'
+                if request.user.first_name:
+                    first_name = request.user.first_name.upper()
 
-                        message = f'Job {job.purchase_order} for tail number {job.tailNumber} has been CANCELLED by {request.user.username}.'
-                        
-                        notification_util.send(message, phone_number.as_e164)
+                SMSNotificationService().send_job_cancelled_notification(job, first_name)
 
             
             if 'status' in request.data:
                 JobStatusActivity.objects.create(job=job, user=user_selected, status=request.data['status'])
-                
-                job_status = request.data["status"]
-
-                #we only notify customer for status A, W, C
-                if job_status == 'A' or job_status == 'W' or job_status == 'C':
-                    
-                    # Get Status name
-                    status_name = 'COMPLETED'
-                    if job_status == 'A':
-                        status_name = 'CONFIRMED'
-                    elif job_status == 'W':
-                        status_name = 'STARTED'
-                    
-                    
-                    # if the job.requested_by is a customer user (check if userProfile has a customer specified), send an SMS notification to the customer if he/she has the sms_notification enabled in its UserProfile
-                    if job.created_by.profile.customer and job.created_by.profile.sms_notifications:
-                        # check if user has a phone number
-                        phone_number = job.created_by.profile.phone_number
-
-                        # check if the request_by is different than the user who is updating the job. Only send notification if the user is different
-                        if phone_number and job.created_by != request.user:
-                            notification_util.send(f'Job {job.purchase_order} for tail number {job.tailNumber} has been {status_name}.', phone_number.as_e164)
-
-
 
             return Response(serializer.data)
 

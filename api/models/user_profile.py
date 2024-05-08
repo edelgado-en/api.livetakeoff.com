@@ -32,3 +32,41 @@ class UserProfile(models.Model):
     enable_all_customers = models.BooleanField(default=False, help_text='If enabled, the user will be able to see all customers in the system. If disabled, the user will only see the customers that are associated with the user.')
 
     enable_all_airports = models.BooleanField(default=False, help_text='If enabled, the user will be able to see all airports in the system. If disabled, the user will only see the airports that are associated with the user.')
+
+    ########################
+
+    enable_email_notification_job_created = models.BooleanField(default=False, help_text='If enabled, the user will receive an email notification when a job is created.')
+
+    enable_email_notification_scheduled_job_created = models.BooleanField(default=False, help_text='If enabled, the user will receive an email notification when a scheduled job is created.')
+
+    enable_email_notification_job_completed = models.BooleanField(default=False, help_text='If enabled, the user will receive an email notification when a job is completed.')
+
+    enable_email_notification_job_accepted = models.BooleanField(default=False, help_text='If enabled, the user will receive an email notification when a job is accepted.')
+
+    enable_email_notification_job_confirmed = models.BooleanField(default=False, help_text='If enabled, the user will receive an email notification when a job is confirmed.')
+
+    enable_email_notification_job_returned = models.BooleanField(default=False, help_text='If enabled, the user will receive an email notification when a job is returned.')
+
+    enable_email_notification_job_comment_added = models.BooleanField(default=False, help_text='If enabled, the user will receive an email notification when a comment is added to a job.')
+
+    enable_email_notification_inventory_out_of_stock = models.BooleanField(default=False, help_text='If enabled, the user will receive an email notification when an inventory item is out of stock.')
+
+    enable_email_notification_inventory_threshold_met = models.BooleanField(default=False, help_text='If enabled, the user will receive an email notification when an inventory item reaches its threshold.')
+    
+    #####################
+
+    enable_sms_notification_job_created = models.BooleanField(default=False, help_text='If enabled, the user will receive an sms notification when a job is created.')
+
+    enable_sms_notification_job_completed = models.BooleanField(default=False, help_text='If enabled, the user will receive an sms notification when a job is completed.')
+
+    enable_sms_notification_job_started = models.BooleanField(default=False, help_text='If enabled, the user will receive an sms notification when a job is started.')
+
+    enable_sms_notification_job_cancelled = models.BooleanField(default=False, help_text='If enabled, the user will receive an sms notification when a job is cancelled.')
+
+
+
+
+
+
+
+

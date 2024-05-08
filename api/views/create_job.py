@@ -8,11 +8,9 @@ from datetime import (date, datetime, timedelta)
 import pytz
 from email.utils import parsedate_tz, mktime_tz
 
-from django.contrib.auth.models import User
-
-import base64
-
 from api.pricebreakdown_service import PriceBreakdownService
+from api.email_notification_service import EmailNotificationService
+from api.sms_notification_service import SMSNotificationService
 
 from ..models import (
         Job,
@@ -34,11 +32,7 @@ from ..models import (
         JobEstimate,
         Tag,
         JobTag,
-        UserEmail
     )
-
-from api.notification_util import NotificationUtil
-from api.email_util import EmailUtil
 
 class CreateJobView(APIView):
     parser_classes = (MultiPartParser, FormParser)
@@ -287,169 +281,9 @@ class CreateJobView(APIView):
 
         # if is_customer is True, send SMS and email to all admins and account managers
         if is_customer and not enable_confirm_jobs:
-            # send SMS to all admins and account managers
-            notification_util = NotificationUtil()
-
-            # the link is throwing a 30007 error in Twilio
-            #message = f'Customer {job.customer.name} has submitted job {job.purchase_order} for Tail number {job.tailNumber}. Check it out at  http://livetakeoff.com/jobs/{job.id}/details'
-
-            # the message needs to look like this:
-            #JOB SUBMITTED
-            #•⁠  ⁠Fly Alliance
-            #•⁠  ⁠MIA
-            #•⁠  ⁠N1122AA
-            #ETA: On Site
-            #ETD: 2/4/24 13:00
+            EmailNotificationService().send_create_job_notification(job, services, retainer_services, request.user)
+            SMSNotificationService().send_create_job_notification(job, request.user)
             
-            # where Fly Alliance is the job.customer.name
-            # MIA is the job.airport.initials
-            # N1122AA is the job.tailNumber
-            # ETA: On Site is the job.on_site
-            # ETD: 2/4/24 13:00 is the job.estimatedETD
-
-            # format job.estimatedETD to look like 2/4/24 13:00 and if it is none, then just put 'Not Specified'
-            etd = 'Not Specified'
-            if job.estimatedETD:
-                etd = job.estimatedETD.strftime('%m/%d/%y %H:%M')
-
-            eta = 'Not Specified'
-            if job.estimatedETA:
-                eta = job.estimatedETA.strftime('%m/%d/%y %H:%M')
-            
-            complete_before = 'Not Specified'
-            if job.completeBy:
-                complete_before = job.completeBy.strftime('%m/%d/%y %H:%M')
-
-            if job.on_site:
-                eta = 'On Site'
-
-            message = f'JOB SUBMITTED\n•⁠  ⁠{job.customer.name}\n•⁠  ⁠{job.airport.initials}\n•⁠  ⁠{job.tailNumber}\nETA: {eta}\nETD: {etd}'
-
-            admins = User.objects.filter(Q(is_superuser=True) | Q(is_staff=True) | Q(groups__name='Account Managers'))
-
-            unique_phone_numbers = []
-            emails = []
-
-            # Fetch all emails from customer users that belong to this customer that have enable_confirmed_jobs
-            # set to True excluding the current user
-            customer_users = UserProfile.objects.filter(customer=job.customer, enable_confirm_jobs=True).exclude(user=request.user)
-
-            for customer_user in customer_users:
-                if customer_user.user.email:
-                    if customer_user.user.email not in emails:
-                        emails.append(customer_user.user.email)
-
-                additional_emails = UserEmail.objects.filter(user=customer_user.user)
-                for additional_email in additional_emails:
-                    if additional_email.email not in emails:
-                        emails.append(additional_email.email)
-
-                if customer_user.phone_number:
-                    if customer_user.phone_number not in unique_phone_numbers:
-                        unique_phone_numbers.append(customer_user.phone_number)
-
-            for user in admins:
-                if user.email:
-                    if user.email not in emails:
-                        emails.append(user.email)
-
-                additional_emails = UserEmail.objects.filter(user=user)
-                for additional_email in additional_emails:
-                    if additional_email.email not in emails:
-                        emails.append(additional_email.email)
-
-                if user.profile.phone_number:
-                    if user.profile.phone_number not in unique_phone_numbers:
-                        unique_phone_numbers.append(user.profile.phone_number)
-
-
-            for phone_number in unique_phone_numbers:
-                notification_util.send(message, phone_number.as_e164)
-
-            # send email to all admins and account managers
-            subject = f'{job.tailNumber} - Job SUBMITTED by {job.customer.name}'
-
-            service_names = ''
-            for service in services:
-                service_names += service.name + ', '
-
-            # remove the last comma from service_names if not empty
-            if service_names:
-                service_names = service_names[:-2]
-
-            retainer_service_names = ''
-            for retainer_service in retainer_services:
-                retainer_service_names += retainer_service.name + ', '
-
-            # remove the last comma from retainer_service_names if not empty
-            if retainer_service_names:
-                retainer_service_names = retainer_service_names[:-2]
-
-            message = str(job.id) + '-' + job.tailNumber
-            message_bytes = message.encode('ascii')
-            base64_bytes = base64.b64encode(message_bytes)
-            base64_message = base64_bytes.decode('ascii')
-
-            body = f'''
-                    <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">Customer Job Request</div>
-                    <a href="http://livetakeoff.com/shared/jobs/{base64_message}/confirm" style="display: inline-block; padding: 0.5625rem 1.125rem; margin: 0 5px; font-size: 1.5rem; font-weight: 400; line-height: 1.5; text-align: center; vertical-align: middle; cursor: pointer; border: 1px solid transparent; border-radius: 0.375rem; transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; text-decoration: none; color: #fff; background-color: #007bff; border-color: #007bff;">CONFIRM</a>
-                    <a href="http://livetakeoff.com/jobs/{job.id}/details" style="display: inline-block; padding: 0.5625rem 1.125rem; margin: 0 5px; font-size: 1.5rem; font-weight: 400; line-height: 1.5; text-align: center; vertical-align: middle; cursor: pointer; border: 1px solid transparent; border-radius: 0.375rem; transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; text-decoration: none; color: #212529; background-color: #f8f9fa; border-color: #f8f9fa;">EDIT</a>
-
-                    <div style="margin-bottom:20px"></div>
-                    <table style="border-collapse: collapse">
-                        <tr>
-                            <td style="padding:15px">Customer</td>
-                            <td style="padding:15px">{job.customer.name}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding:15px">Job PO</td>
-                            <td style="padding:15px">{job.purchase_order}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding:15px">Tail</td>
-                            <td style="padding:15px">{job.tailNumber}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding:15px">Airport</td>
-                            <td style="padding:15px">{job.airport.name}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding:15px">FBO</td>
-                            <td style="padding:15px">{job.fbo.name}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding:15px">Arrival</td>
-                            <td style="padding:15px">{eta}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding:15px">Departure</td>
-                            <td style="padding:15px">{etd}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding:15px">Complete Before</td>
-                            <td style="padding:15px">{complete_before}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding:15px">Services</td>
-                            <td style="padding:15px">{service_names}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding:15px">Retainer Services</td>
-                            <td style="padding:15px">{retainer_service_names}</td>
-                        </tr>
-                    </table>
-                    <div style="margin-top:20px;padding:5px;font-weight: 700;"></div>
-                    
-                    '''
-
-            email_util = EmailUtil()
-
-            body += email_util.getEmailSignature()
-
-            for email in emails:
-                email_util.send_email(email, subject, body)
-        
-            # Fetch a Tag with the name VIP and create a JobTag for this job
             try:
                 vip_tag = Tag.objects.get(name='VIP')
             except:

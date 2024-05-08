@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from api.serializers.user_profile import UserProfileSerializer
 
 class UsersSerializer(serializers.Serializer):
     id = serializers.ReadOnlyField()
@@ -14,12 +15,15 @@ class UsersSerializer(serializers.Serializer):
     is_project_manager = serializers.SerializerMethodField()
     is_account_manager = serializers.SerializerMethodField()
     is_internal_coordinator = serializers.SerializerMethodField()
+    is_customer_user = serializers.SerializerMethodField()
     avatar = serializers.SerializerMethodField()
     customer_name = serializers.SerializerMethodField()
     vendor_name = serializers.SerializerMethodField()
     location = serializers.SerializerMethodField()
     phone_number = serializers.SerializerMethodField()
     member_since = serializers.SerializerMethodField()
+
+    profile = UserProfileSerializer()
 
 
     def get_is_project_manager(self, obj):
@@ -30,6 +34,11 @@ class UsersSerializer(serializers.Serializer):
 
     def get_is_internal_coordinator(self, obj):
         return obj.groups.filter(name='Internal Coordinators').exists()
+
+    def get_is_customer_user(self, obj):
+        if obj.profile.customer:
+            return True
+        return False
 
     def get_avatar(self, obj):
         if obj.profile.avatar:
@@ -73,9 +82,11 @@ class UsersSerializer(serializers.Serializer):
             'is_project_manager',
             'is_account_manager',
             'is_internal_coordinator',
+            'is_customer_user',
             'groups',
             'avatar',
             'customerName',
             'vendorName',
-            'phone_number'
+            'phone_number',
+            'profile'
         )

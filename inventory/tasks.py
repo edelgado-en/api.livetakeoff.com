@@ -35,9 +35,8 @@ from api.models import (
     JobStatusActivity
 )
 
-from api.email_util import EmailUtil
-
 from api.pricebreakdown_service import PriceBreakdownService
+from api.email_notification_service import EmailNotificationService
 
 import threading
 import time
@@ -480,33 +479,8 @@ def handleCreateJob(job_schedule, today):
     job_schedule.last_job_created_at = today
     job_schedule.save()
 
-    #Notify all admins
-    email_util = EmailUtil()
+    EmailNotificationService().send_scheduled_job_created_notification(job_schedule)
 
-    admins = User.objects.filter(Q(is_superuser=True) | Q(is_staff=True) | Q(groups__name='Account Managers'))
-
-    for admin in admins:
-        if admin.email is not None:
-            subject = f'Scheduled Job Created - {job_schedule.customer.name} - {job_schedule.tailNumber}'
-
-            body = f'''
-                    <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">Scheduled Job</div>
-                    <table style="border-collapse: collapse">
-                        <tr>
-                            <td style="padding:15px">Customer</td>
-                            <td style="padding:15px">{job_schedule.customer.name}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding:15px">Tail</td>
-                            <td style="padding:15px">{job_schedule.tailNumber}</td>
-                        </tr>
-                    </table>
-                    
-                    '''
-            
-            body += email_util.getEmailSignature()
-
-            email_util.send_email(admin.email, subject, body)
 
 
 

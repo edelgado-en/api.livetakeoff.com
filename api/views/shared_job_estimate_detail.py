@@ -8,13 +8,11 @@ from datetime import datetime
 
 import base64
 
-from api.models import (JobEstimate, JobEstimateDiscount, JobEstimateAdditionalFee)
+from api.models import (JobEstimate)
 
 from api.serializers import (JobEstimateDetailSerializer,)
 
-from api.notification_util import NotificationUtil
-from api.email_util import EmailUtil
-
+from api.sms_notification_service import SMSNotificationService
 
 class SharedJobEstimateDetailView(APIView):
     permission_classes = (permissions.AllowAny,)
@@ -79,27 +77,7 @@ class SharedJobEstimateDetailView(APIView):
         
         estimate.save()
 
-       # notify the user who requested the estimate via email and text message
-        notification_util = NotificationUtil()
-
-        # get the phone number of the user who requested the estimate
-        phone_number = estimate.requested_by.profile.phone_number
-
-        status_name = 'REJECTED'
-
-        if estimate.status == 'A':
-            status_name = 'ACCEPTED'
-
-        if phone_number:
-            # send a text message
-            
-            #Adding a link is throwing a 30007 error in Twilio
-            #message = f'Your estimate for tail {estimate.tailNumber} at airport {estimate.airport.initials} has been {status_name}. You can checkout it out at https://livetakeoff.com/estimates/{estimate.id}'
-
-            message = f'Your estimate for tail {estimate.tailNumber} at airport {estimate.airport.initials} has been {status_name}.'
-            
-            notification_util.send(message, phone_number.as_e164)
-
+        SMSNotificationService().send_job_estimate_notification(estimate)
 
 
         return Response(status=status.HTTP_200_OK)

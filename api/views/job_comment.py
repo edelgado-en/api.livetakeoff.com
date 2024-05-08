@@ -4,16 +4,13 @@ from rest_framework import (permissions, status)
 from rest_framework .response import Response
 from datetime import datetime
 
-from django.contrib.auth.models import User
-
 from ..serializers import (JobCommentSerializer)
 from rest_framework.generics import ListCreateAPIView
 from ..pagination import CustomPageNumberPagination
-from ..models import (JobComments, Job, JobCommentCheck, JobServiceAssignment, JobRetainerServiceAssignment, UserEmail)
+from ..models import (JobComments, Job, JobCommentCheck)
 
-from api.notification_util import NotificationUtil
-
-from api.email_util import EmailUtil
+from api.sms_notification_service import SMSNotificationService
+from api.email_notification_service import EmailNotificationService
 
 class JobCommentView(ListCreateAPIView):
     permission_classes = (permissions.IsAuthenticated,)
@@ -77,7 +74,6 @@ class JobCommentView(ListCreateAPIView):
         return Response(status=status.HTTP_200_OK)
 
 
-
     def create(self, request, *args, **kwargs):
         """
         Admins options:
@@ -121,125 +117,18 @@ class JobCommentView(ListCreateAPIView):
         job_comment.save()
 
 
-        # if send_sms then send notification to all project managers assigned to this job
-        notification_util = NotificationUtil()
-        
         if send_sms:
-            message = 'Important note was added to this job'
+            SMSNotificationService().send_job_comment_added_notification(job)
 
-            message += f'\n• {job.airport.initials}\n• {job.tailNumber}\n• {job.fbo.name}\n'
-
-            # get all phone numbers for all project managers assigned to this job
-            # iterate through jobServiceAssignments and JobRetainerServiceAssignments and get all the unique phone numbers
-            unique_phone_numbers = []
-            
-            job_service_assignments = JobServiceAssignment.objects \
-                                                          .select_related('project_manager').filter(job=job)
-            
-            for assignment in job_service_assignments:
-                user = assignment.project_manager
-                
-                if user and user.profile.phone_number:
-                    if user.profile.phone_number not in unique_phone_numbers:
-                        unique_phone_numbers.append(user.profile.phone_number)
-
-
-            job_retainer_service_assignments = JobRetainerServiceAssignment.objects \
-                                                            .select_related('project_manager').filter(job=job)
-            
-            for assignment in job_retainer_service_assignments:
-                user = assignment.project_manager
-                
-                if user and user.profile.phone_number:
-                    if user.profile.phone_number not in unique_phone_numbers:
-                        unique_phone_numbers.append(user.profile.phone_number)
-
-            for phone_number in unique_phone_numbers:
-                notification_util.send(message, phone_number.as_e164)
 
         if send_email:
-            title = f'{job.tailNumber} Job Comment Added'
+            EmailNotificationService().send_job_comment_added_notification_to_customers(job, comment, emails)
 
-            body = f'''
-                    <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">Job Comment Added</div>
-                    <table style="border-collapse: collapse">
-                        <tr>
-                            <td style="padding:15px">Comment</td>
-                            <td style="padding:15px">{comment}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding:15px">Tail</td>
-                            <td style="padding:15px">{job.tailNumber}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding:15px">Airport</td>
-                            <td style="padding:15px">{job.airport.name}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding:15px">FBO</td>
-                            <td style="padding:15px">{job.fbo.name}</td>
-                        </tr>
-                    </table>
-                    <div style="margin-top:20px;padding:5px;font-weight: 700;"></div>
-                    <a href="http://livetakeoff.com/jobs/{job.id}/comments" style="display: inline-block; padding: 0.375rem 0.75rem; margin: 0 5px; font-size: 1rem; font-weight: 400; line-height: 1.5; text-align: center; vertical-align: middle; cursor: pointer; border: 1px solid transparent; border-radius: 0.25rem; transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; text-decoration: none; color: #212529; background-color: #f8f9fa; border-color: #f8f9fa;">REVIEW</a>
-                    <div style="margin-top:20px"></div>
-                    '''
-
-            email_util = EmailUtil()
-
-            body += email_util.getEmailSignature()
-
-            # iterate through emails and send an email to each email address
-            for email_address in emails:
-                email_util.send_email(email_address, title, body)
 
         if is_customer_user or is_external_project_manager:
-            # if the customer user is adding a comment, send an email to all admins including the comment and the job information
-            admins = User.objects.filter(Q(is_superuser=True) | Q(is_staff=True) | Q(groups__name='Account Managers'))
-            emails = []
-            for user in admins:
-                if user.email:
-                    if user.email not in emails:
-                        emails.append(user.email)
-
-            subject = ''
-            if is_customer_user:
-                subject = f'{job.tailNumber} - CUSTOMER ADDED COMMENT'
-            elif is_external_project_manager:
-                subject = f'{job.tailNumber} - EXTERNAL PROJECT MANAGER ADDED COMMENT'
-
-            body = f'''
-                    <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">Job Comment Added</div>
-                    <table style="border-collapse: collapse">
-                        <tr>
-                            <td style="padding:15px">Comment</td>
-                            <td style="padding:15px">{comment}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding:15px">Tail</td>
-                            <td style="padding:15px">{job.tailNumber}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding:15px">Airport</td>
-                            <td style="padding:15px">{job.airport.name}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding:15px">FBO</td>
-                            <td style="padding:15px">{job.fbo.name}</td>
-                        </tr>
-                    </table>
-                    <div style="margin-top:20px;padding:5px;font-weight: 700;"></div>
-                    <a href="http://livetakeoff.com/jobs/{job.id}/comments" style="display: inline-block; padding: 0.375rem 0.75rem; margin: 0 5px; font-size: 1rem; font-weight: 400; line-height: 1.5; text-align: center; vertical-align: middle; cursor: pointer; border: 1px solid transparent; border-radius: 0.25rem; transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; text-decoration: none; color: #212529; background-color: #f8f9fa; border-color: #f8f9fa;">REVIEW</a>
-                    <div style="margin-top:20px"></div>
-                    '''
-            
-            email_util = EmailUtil()
-
-            body += email_util.getEmailSignature()
-
-            for email in emails:
-                email_util.send_email(email, subject, body)
-
+            EmailNotificationService().send_job_comment_added_notification_to_admins(job, comment,
+                                                                                     is_customer_user,
+                                                                                     is_external_project_manager)
 
         serializer = JobCommentSerializer(job_comment)
 

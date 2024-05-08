@@ -9,9 +9,6 @@ from django.contrib.auth.models import User
 from datetime import datetime
 from decimal import Decimal
 
-from api.notification_util import NotificationUtil
-from api.email_util import EmailUtil
-
 from ..models import (
     Job,
     JobStatusActivity,
@@ -24,6 +21,8 @@ from ..models import (
     UserEmail
     )
 
+from api.email_notification_service import EmailNotificationService
+from api.sms_notification_service import SMSNotificationService
 
 class EditJobView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
@@ -150,55 +149,9 @@ class EditJobView(APIView):
                         if job_comment_checks:
                             job_comment_checks.delete()
 
-                        #Send a notification to all admins and account managers
-                        notification_util = NotificationUtil()
-                        admins = User.objects.filter(Q(is_superuser=True) | Q(is_staff=True) | Q(groups__name='Account Managers'))
+                        SMSNotificationService().send_job_completed_notification(job)
 
-                        for admin in admins:
-                            # get the phone number of the admin
-                            phone_number = admin.profile.phone_number
-                            if phone_number:
-                                message = f'Job {job.purchase_order} for tail number {job.tailNumber} has been COMPLETED.'
-                                
-                                notification_util.send(message, phone_number.as_e164)
-
-                        
-                        # send an email notification to the customer user if the job was created by a customer user
-                        if job.created_by.profile.customer \
-                                and job.created_by.profile.email_notifications:
-                            
-                            title = f'[{job.tailNumber}] Job COMPLETED'
-                            link = f'http://livetakeoff.com/jobs/{job.id}/details'
-
-                            body = f'''
-                            <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">Job has been COMPLETED</div>
-                            
-                            <div>
-                                <div style="padding:5px;font-weight: 700;">Tail Number</div>
-                                <div style="padding:5px">{job.tailNumber}</div>
-                                <div style="padding:5px;font-weight: 700;">Airport</div>
-                                <div style="padding:5px">{job.airport.name}</div>
-                                <div style="padding:5px;font-weight: 700;">Aircraft</div>
-                                <div style="padding:5px">{job.aircraftType.name}</div>
-                                <div style="padding:5px;font-weight: 700;">Link</div>
-                                <div style="padding:5px">{link}</div>
-                            </div>
-                            '''
-
-                            email_util = EmailUtil()
-
-                            body += email_util.getEmailSignature()
-
-                            if job.created_by.email:
-                                email_util.send_email(job.created_by.email, title, body)
-
-                            #fetch entries of UserEmail for the customer user and send an email to each email address
-                            user_emails = UserEmail.objects.filter(user=job.created_by)
-
-                            for user_email in user_emails:
-                                if user_email.email:
-                                    email_util.send_email(user_email.email, title, body)
-
+                        EmailNotificationService().send_job_completed_notification(job)
 
                         #unassign all services and retainer services
                         for service in job.job_service_assignments.all():

@@ -11,7 +11,7 @@ from ..models import (
         JobStatusActivity
     )
 
-from api.notification_util import NotificationUtil
+from api.email_notification_service import EmailNotificationService
 
 class JobReturnView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
@@ -59,17 +59,8 @@ class JobReturnView(APIView):
 
         job_comment.save()
 
-        notification_util = NotificationUtil()
+        full_name = request.user.first_name + ' ' + request.user.last_name
 
-        #Send a notification to all admins and account managers
-        admins = User.objects.filter(Q(is_superuser=True) | Q(is_staff=True) | Q(groups__name='Account Managers'))
-
-        for admin in admins:
-            phone_number = admin.profile.phone_number
-            
-            if phone_number:
-                message = f'Job {job.purchase_order} for tail number {job.tailNumber} was RETURNED by {request.user.username}.'
-                
-                notification_util.send(message, phone_number.as_e164)
+        EmailNotificationService().send_job_returned_notification(job, full_name, comment)
 
         return Response({'success': 'Job returned successfully'}, status=status.HTTP_200_OK)
