@@ -55,7 +55,7 @@ class EmailNotificationService():
             email_util.send_email(email, subject, body)
 
 
-    def send_job_completed_notification(self, job: Job):
+    def send_job_completed_notification(self, job: Job, user: User):
         internal_users = UserProfile.objects.filter(user__is_active=True,
                                                     email_notifications=True,
                                                     enable_email_notification_job_completed=True,
@@ -81,8 +81,10 @@ class EmailNotificationService():
                     unique_emails.append(additional_email.email)
 
         email_util = EmailUtil()
+
+        full_name = user.first_name + ' ' + user.last_name
         
-        subject = f'{job.tailNumber} - Job COMPLETED'
+        subject = f'{job.tailNumber} - Job COMPLETED by {full_name}'
         body = self.build_email_body(job, 'Job Completed', '', email_util)
 
         for email in unique_emails:

@@ -149,9 +149,9 @@ class EditJobView(APIView):
                         if job_comment_checks:
                             job_comment_checks.delete()
 
-                        SMSNotificationService().send_job_completed_notification(job)
+                        SMSNotificationService().send_job_completed_notification(job, request.user)
 
-                        EmailNotificationService().send_job_completed_notification(job)
+                        EmailNotificationService().send_job_completed_notification(job, request.user)
 
                         #unassign all services and retainer services
                         for service in job.job_service_assignments.all():

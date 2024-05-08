@@ -77,7 +77,7 @@ class SMSNotificationService():
             notification_util.send(message, phone_number.as_e164)
 
 
-    def send_job_completed_notification(self, job: Job):
+    def send_job_completed_notification(self, job: Job, user: User):
         internal_users = UserProfile.objects.filter(user__is_active=True,
                                                     sms_notifications=True,
                                                     enable_sms_notification_job_completed=True,
@@ -115,7 +115,10 @@ class SMSNotificationService():
                 unique_phone_numbers.append(user_profile.phone_number)
 
         notification_util = NotificationUtil()
-        message = f'JOB COMPLETED\n•⁠  ⁠{job.customer.name}\n•⁠  ⁠{job.airport.initials}\n•⁠  ⁠{job.tailNumber}'
+
+        full_name = user.first_name + ' ' + user.last_name
+
+        message = f'JOB COMPLETED by {full_name}\n•⁠  ⁠{job.customer.name}\n•⁠  ⁠{job.airport.initials}\n•⁠  ⁠{job.tailNumber}'
 
         for phone_number in unique_phone_numbers:
             notification_util.send(message, phone_number.as_e164)
