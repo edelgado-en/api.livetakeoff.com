@@ -118,7 +118,7 @@ class SMSNotificationService():
 
         full_name = user.first_name + ' ' + user.last_name
 
-        message = f'JOB COMPLETED \n•⁠  ⁠{job.airport.initials}\n•⁠  ⁠{job.tailNumber}'
+        message = f'JOB COMPLETED by {full_name}\n•⁠  ⁠{job.customer.name}\n•⁠  ⁠{job.airport.initials}\n•⁠  ⁠{job.tailNumber}'
 
         for phone_number in unique_phone_numbers:
             notification_util.send(message, phone_number.as_e164)
