@@ -84,7 +84,7 @@ class EmailNotificationService():
 
         full_name = user.first_name + ' ' + user.last_name
         
-        subject = f'{job.tailNumber} - Job COMPLETED by {full_name}'
+        subject = f'{job.tailNumber} - Job COMPLETED'
         body = self.build_email_body(job, 'Job Completed', '', email_util)
 
         for email in unique_emails:
