@@ -122,11 +122,12 @@ class JobListView(ListAPIView):
 
             user_profile = self.request.user.profile
 
-            user_customers = UserCustomer.objects.filter(user=self.request.user).all()
+            if not user_profile.enable_all_customers:
+                user_customers = UserCustomer.objects.filter(user=self.request.user).all()
 
-            if user_customers:
-                for user_customer in user_customers:
-                    customer_ids.append(user_customer.customer.id)
+                if user_customers:
+                    for user_customer in user_customers:
+                        customer_ids.append(user_customer.customer.id)
 
 
             if self.request.user.groups.filter(name='Project Managers').exists():
