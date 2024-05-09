@@ -8,6 +8,7 @@ from ..models import (Airport, UserAvailableAirport)
 
 class AirportsView(ListAPIView):
     queryset = Airport.objects.all()
+    
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = AirportSerializer
 
@@ -16,8 +17,6 @@ class AirportsView(ListAPIView):
         name = self.request.data.get('name', '')
         open_jobs = self.request.data.get('open_jobs', False)
         closed_jobs = self.request.data.get('closed_jobs', False)
-
-        onlyIncludeCustomerJobs = self.request.data.get('onlyIncludeCustomerJobs', False)
 
         qs = Airport.objects \
                        .filter(name__icontains=name, active=True) \
@@ -37,7 +36,8 @@ class AirportsView(ListAPIView):
             else:
                 qs = qs.filter(jobs__status__in=['C', 'I', 'T']).distinct()
 
-        if self.request.user.groups.filter(name='Internal Coordinators').exists():
+        if self.request.user.groups.filter(name='Internal Coordinators').exists() \
+          or self.request.user.groups.filter(name='Project Managers').exists():
             user_airports = UserAvailableAirport.objects.filter(user=self.request.user).all()
 
             if user_airports:
