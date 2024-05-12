@@ -83,9 +83,11 @@ class JobExportCSVView(APIView):
         if status == 'All':
             # if customer user, do not include T status
             if self.request.user.profile.customer:
-                qs = qs.filter(Q(status='C') | Q(status='I') | Q(status='A') | Q(status='S') | Q(status='U') | Q(status='W'))
+                qs = qs.filter(Q(status='C') | Q(status='I') | Q(status='A') | Q(status='S') | Q(status='U') | Q(status='W') | Q(status='N'))
             else:
-                qs = qs.filter(Q(status='C') | Q(status='I') | Q(status='T'))
+                qs = qs.filter(Q(status='C') | Q(status='I') | Q(status='T') | Q(status='N'))
+        else:
+            qs = qs.filter(status=status)
 
 
         if airport and airport != 'All':

@@ -161,7 +161,8 @@ class CompletedJobsListView(ListAPIView):
             'W': 4,
             'C': 5,
             'I': 6,
-            'T': 7
+            'N': 7,
+            'T': 8
         }
 
         ordering_conditions = [When(status=status, then=Value(order.get(status))) for status in order.keys()]
@@ -202,8 +203,8 @@ class CompletedJobsListView(ListAPIView):
                 job.subcontractor_profit = job.price - (vendor_charge + vendor_additional_cost)
 
                 job.save(update_fields=['subcontractor_profit'])
-
-            JobStatusActivity.objects.create(job=job, user=request.user, status='I')
+            
+            JobStatusActivity.objects.create(job=job, user=request.user, status=request.data['status'])
 
             for service in job.job_service_assignments.all():
                 service_price = 0

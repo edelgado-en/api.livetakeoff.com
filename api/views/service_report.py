@@ -181,6 +181,7 @@ class ServiceReportView(APIView):
                 show_retainers = False
 
         total_jobs_revenue = 0
+        total_jobs_revenue_not_invoiced = 0
 
         if show_spending_info:
             # Sum the total price from JobStatusActivity where the status = 'I' 
@@ -212,6 +213,37 @@ class ServiceReportView(APIView):
 
             if total_jobs_revenue is None:
                 total_jobs_revenue = 0
+
+            ################################
+
+            qs = JobStatusActivity.objects.filter(
+                Q(status__in=['N']) &
+                Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date)
+            )
+
+            if airport_id:
+                qs = qs.filter(job__airport_id=airport_id)
+            
+            if fbo_id:
+                qs = qs.filter(job__fbo_id=fbo_id)
+            
+            if tail_number:
+                qs = qs.filter(job__tailNumber__icontains=tail_number)
+
+            if service_id:
+                # only include the jobs where the service_id is present in job_service_assignments
+                qs = qs.filter(job__job_service_assignments__service_id=service_id)
+
+            if is_customer:
+                qs = qs.filter(job__customer_id=user_profile.customer.id)
+
+            if customer_id:
+                qs = qs.filter(job__customer_id=customer_id)
+
+            total_jobs_revenue_not_invoiced = qs.aggregate(Sum('job__price'))['job__price__sum']
+
+            if total_jobs_revenue_not_invoiced is None:
+                total_jobs_revenue_not_invoiced = 0
 
         total_labor_time_only_services = 0
 
@@ -250,6 +282,7 @@ class ServiceReportView(APIView):
                 'number_of_unique_locations': number_of_unique_locations,
                 'total_labor_time_only_services': total_labor_time_only_services,
                 'total_jobs_revenue': total_jobs_revenue,
+                'total_jobs_revenue_not_invoiced': total_jobs_revenue_not_invoiced,
                 'show_spending_info': show_spending_info,
                 'show_retainers': show_retainers,
             }

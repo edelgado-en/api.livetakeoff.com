@@ -18,6 +18,7 @@ class Job(models.Model):
         ('T', 'Cancelled'),
         ('R', 'Review'),
         ('I', 'Invoiced'),
+        ('N', 'Not Invoiced'),
     ]
 
        # This is duplicated. I already have requestDate

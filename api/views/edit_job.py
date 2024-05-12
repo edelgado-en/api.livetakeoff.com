@@ -194,6 +194,8 @@ class EditJobView(APIView):
                             retainer_service.save(update_fields=['project_manager', 'status'])
 
                     elif new_status == 'I':
+                        JobStatusActivity.objects.filter(job=job, status='N').delete()
+
                         # calculate the price for each service associated with this job
                         for service in job.job_service_assignments.all():
                             service_price = 0
@@ -218,6 +220,9 @@ class EditJobView(APIView):
 
                             except PriceListEntries.DoesNotExist:
                                 continue
+
+                    elif new_status == 'N':
+                        JobStatusActivity.objects.filter(job=job, status='I').delete()
 
 
                     JobStatusActivity.objects.create(job=job, user=request.user, status=new_status)
