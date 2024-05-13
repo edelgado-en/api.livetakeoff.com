@@ -188,6 +188,20 @@ class TeamProductivityView(APIView):
 
         total_jobs_revenue = total_jobs_revenue.aggregate(Sum('job__price'))['job__price__sum']
 
+        #####################################
+        total_jobs_revenue_not_invoiced = JobStatusActivity.objects.filter(
+             Q(status__in=['N']) &
+             Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date)
+        )
+
+        if customer_id:
+            total_jobs_revenue_not_invoiced = total_jobs_revenue_not_invoiced.filter(job__customer_id=customer_id)          
+
+        if tailNumber:
+            total_jobs_revenue_not_invoiced = total_jobs_revenue_not_invoiced.filter(Q(job__tailNumber__icontains=tailNumber))
+
+        total_jobs_revenue_not_invoiced = total_jobs_revenue_not_invoiced.aggregate(Sum('job__price'))['job__price__sum']
+
 
         # Get the top 5 services in the last 30 days by querying the ServiceActivity table and join to Services Table to get the service name. The resulset should be service name with its corresponding times the service was completed in the last 30 days
         qs = ServiceActivity.objects.filter(
@@ -317,14 +331,14 @@ class TeamProductivityView(APIView):
 
             total_revenue = total_revenue.aggregate(Sum('price'))['price__sum']
 
+            if total_revenue is None:
+                total_revenue = 0
+            
             total_retainer_services = 0
             for item in qs_retainer:
                 total_retainer_services += item['total']
 
             avatar_url = user_profile.avatar.url if user_profile.avatar else None
-
-            if total_revenue is None:
-                total_revenue = 0
 
             # Sum the Job.labor_time from JobStatusActivity where the status = 'C' for this project_manager_id
             s_total_labor_time = JobStatusActivity.objects.filter(
@@ -476,6 +490,7 @@ class TeamProductivityView(APIView):
             'total_services': grand_total_services,
             'total_retainer_services': grand_total_retainer_services,
             'total_jobs_price': total_jobs_revenue,
+            'total_jobs_price_not_invoiced': total_jobs_revenue_not_invoiced,
             'total_labor_time': grand_total_labor_time,
             'top_services': top_services,
             'top_retainer_services': top_retainer_services,
