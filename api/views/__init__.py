@@ -96,3 +96,4 @@ from .job_accept import JobAcceptView
 from .shared_job_accept import SharedJobAcceptView
 from .shared_job_return import SharedJobReturnView
 from .create_fbo import CreateFBOView
+from .remove_airport_available_user import RemoveAirportAvailableUsersView

@@ -25,6 +25,7 @@ class UsersSerializer(serializers.Serializer):
 
     profile = UserProfileSerializer()
 
+    is_preferred_project_manager = serializers.BooleanField(default=False)
 
     def get_is_project_manager(self, obj):
         return obj.groups.filter(name='Project Managers').exists()
