@@ -118,60 +118,26 @@ class JobListView(ListAPIView):
                                 .select_related('fbo') \
                                 .all()
 
-            customer_ids = []
-
             user_profile = self.request.user.profile
 
             if not user_profile.enable_all_customers:
                 user_customers = UserCustomer.objects.filter(user=self.request.user).all()
-
+                customer_ids = []
                 if user_customers:
                     for user_customer in user_customers:
                         customer_ids.append(user_customer.customer.id)
-
-
-            if self.request.user.groups.filter(name='Project Managers').exists():
-                job_ids = set()
-                # Get job ids from pending services/retainer_services assigned to the current user
-                # If you have at least one pending service assigned to you, you can see the job
-                assignments = JobServiceAssignment.objects \
-                                                .select_related('job') \
-                                                .filter(project_manager=self.request.user.id) \
-                                                .all()
-
-                for assignment in assignments:
-                    if assignment.status != 'C':
-                        job_ids.add(assignment.job.id)
-                
-                retainer_assignment = JobRetainerServiceAssignment.objects \
-                                                                .select_related('job') \
-                                                                .filter(project_manager=self.request.user.id) \
-                                                                .all()
-
-                for assignment in retainer_assignment:
-                    if assignment.status != 'C':
-                        job_ids.add(assignment.job.id)
-
-                if not user_profile.enable_all_customers:
-                    # filter by customer ids if the user has any or job ids if the user is a project manager
-                    qs = qs.filter(Q(customer_id__in=customer_ids) | Q(id__in=job_ids))
-                
-                else:
-                    qs = qs.filter(id__in=job_ids)
-
-            else:
-                if not user_profile.enable_all_customers:
+                    
                     qs = qs.filter(customer_id__in=customer_ids)
-                
 
-            user_available_airports = UserAvailableAirport.objects.filter(user=self.request.user).all()
+            if not user_profile.enable_all_airports:
+                user_available_airports = UserAvailableAirport.objects.filter(user=self.request.user).all()
 
-            if user_available_airports:
-                airport_ids = []
-                for user_available_airport in user_available_airports:
-                    airport_ids.append(user_available_airport.airport.id)
+                if user_available_airports:
+                    airport_ids = []
+                    for user_available_airport in user_available_airports:
+                        airport_ids.append(user_available_airport.airport.id)
 
-                qs = qs.filter(airport_id__in=airport_ids)
+                    qs = qs.filter(airport_id__in=airport_ids)
 
             # if project_manager then only include the jobs where the project_manager is assigned. You can find the project manager in the job_service_assignments
             if project_manager != 'All':
