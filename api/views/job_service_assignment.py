@@ -147,8 +147,15 @@ class JobServiceAssignmentView(APIView):
 
         users = BasicUserSerializer(project_managers, many=True)
 
+        preferred_project_manager_id = None
+        for project_manager in project_managers:
+            if job.airport.preferred_project_manager == project_manager:
+                preferred_project_manager_id = project_manager.id
+                break
+
         response = {
             'services': service_assignments.data,
+            'preferred_project_manager_id': preferred_project_manager_id,
             'retainer_services': retainer_service_assignments.data,
             'project_managers': users.data
         }
