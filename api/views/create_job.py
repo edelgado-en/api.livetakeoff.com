@@ -12,6 +12,8 @@ from api.pricebreakdown_service import PriceBreakdownService
 from api.email_notification_service import EmailNotificationService
 from api.sms_notification_service import SMSNotificationService
 
+import threading
+
 from ..models import (
         Job,
         Service,
@@ -32,6 +34,9 @@ from ..models import (
         JobEstimate,
         Tag,
         JobTag,
+        UserEmail,
+        LastProjectManagersNotified,
+        JobAcceptanceNotification
     )
 
 class CreateJobView(APIView):
@@ -53,16 +58,18 @@ class CreateJobView(APIView):
         # if user is customer, get customer from user profile
         user_profile = UserProfile.objects.get(user=request.user)
         is_customer = user_profile and user_profile.customer is not None
-        enable_confirm_jobs = user_profile.enable_confirm_jobs
+        current_user_enable_confirm_jobs = user_profile.enable_confirm_jobs
         estimate_id = data.get('estimate_id')
         customer_purchase_order = data.get('customer_purchase_order')
 
         job_status = 'A'
 
+        customer = None
+
         if is_customer:
             customer = user_profile.customer
 
-            if enable_confirm_jobs:
+            if current_user_enable_confirm_jobs:
                 job_status = 'A'
             else:
                 job_status = 'U'
@@ -280,10 +287,7 @@ class CreateJobView(APIView):
 
 
         # if is_customer is True, send SMS and email to all admins and account managers
-        if is_customer and not enable_confirm_jobs:
-            EmailNotificationService().send_create_job_notification(job, services, retainer_services, request.user)
-            SMSNotificationService().send_create_job_notification(job, request.user)
-            
+        if is_customer:
             try:
                 vip_tag = Tag.objects.get(name='VIP')
             except:
@@ -293,7 +297,79 @@ class CreateJobView(APIView):
                 job_tag = JobTag(job=job, tag=vip_tag)
                 job_tag.save()
 
-        
+            SMSNotificationService().send_create_job_notification(job, request.user)
+
+            if customer.customer_settings.enable_approval_process:
+                # if the current user is enable to confirm jobs, that means that the should is already set to Accepted status
+                # and there is not need to send the email notification to confirm the job
+                if not current_user_enable_confirm_jobs:
+                    EmailNotificationService().send_create_job_notification(job, services, retainer_services, request.user)
+            
+            # AUTO ASSIGNMENT
+            if customer.customer_settings.enable_auto_assignment \
+                and not customer.customer_settings.enable_approval_process \
+                and airport.preferred_project_manager:
+                
+                preferred_project_manager = airport.preferred_project_manager
+                
+                external_vendor = None
+                if preferred_project_manager.profile.vendor \
+                    and preferred_project_manager.profile.vendor.is_external:
+                    external_vendor = preferred_project_manager.profile.vendor
+
+                service_names = ''
+                retainer_service_names = ''
+
+                for assignment in job.job_service_assignments.all():
+                    assignment.project_manager = preferred_project_manager
+                    assignment.status = 'A'
+                    assignment.vendor = external_vendor
+
+                    assignment.save()
+
+                    service_names += assignment.service.name + ', '
+
+                for assignment in job.job_retainer_service_assignments.all():
+                    assignment.project_manager = preferred_project_manager
+                    assignment.status = 'A'
+                    assignment.vendor = external_vendor
+
+                    assignment.save()
+
+                    retainer_service_names += assignment.retainer_service.name + ', '
+                
+                job.vendor = external_vendor
+                job.status = 'S'
+                job.save()
+                
+                # the user is null because the system is assigning the job
+                JobStatusActivity.objects.create(job=job, status='S')
+
+                if preferred_project_manager.profile.phone_number:
+                    unique_phone_numbers = []
+                    unique_phone_numbers.append(preferred_project_manager.profile.phone_number)
+                    SMSNotificationService().send_job_assigned_notification(job, unique_phone_numbers)
+
+                # if preferred_project_manager is enable_accept_jobs, then send the email notification
+                if preferred_project_manager.profile.enable_accept_jobs:
+                    unique_emails = []
+                    if preferred_project_manager.profile.enable_accept_jobs:
+                        if preferred_project_manager.email not in unique_emails:
+                            unique_emails.append(preferred_project_manager.email)
+
+                        additional_emails = UserEmail.objects.filter(user=preferred_project_manager)
+                        for additional_email in additional_emails:
+                            if additional_email.email not in unique_emails:
+                                unique_emails.append(additional_email.email)
+
+                    EmailNotificationService().send_job_assigned_notification(job, unique_emails, service_names, retainer_service_names)
+
+                    LastProjectManagersNotified.objects.create(job=job, project_manager_id=preferred_project_manager.id)
+                    JobAcceptanceNotification.objects.create(job=job, project_manager_id=preferred_project_manager.id, attempt=1)
+
+                    thread1 = threading.Thread(target=self.schedule_acceptance_emails, args=(job.id,))
+                    thread1.start()
+
         # if there is an estimate for this job, then you need to update the estimate status to accepted if it is in pending
         try:
             job_estimate = JobEstimate.objects.get(job=job)
@@ -331,3 +407,6 @@ class CreateJobView(APIView):
             return True
         else:
             return False
+        
+    def schedule_acceptance_emails(self, job_id):
+        EmailNotificationService().schedule_acceptance_emails(job_id)

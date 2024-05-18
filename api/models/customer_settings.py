@@ -12,6 +12,10 @@ class CustomerSettings(models.Model):
     special_instructions = models.TextField(blank=True, null=True)
     price_list = models.ForeignKey(PriceList, on_delete=models.CASCADE, related_name='customer_settings', null=True)
 
+    enable_approval_process = models.BooleanField(default=False)
+
+    enable_auto_assignment = models.BooleanField(default=False)
+
     def __str__(self) -> str:
         return self.customer.name
 

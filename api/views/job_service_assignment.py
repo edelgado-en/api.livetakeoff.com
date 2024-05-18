@@ -8,7 +8,6 @@ from django.contrib.auth.models import User
 import base64
 
 import threading
-import time
 
 from ..models import (
     JobServiceAssignment,
@@ -373,7 +372,6 @@ class JobServiceAssignmentView(APIView):
 
             JobAcceptanceNotification.objects.create(job=job, project_manager_id=project_manager_id, attempt=1)
 
-
         if unique_project_manager_ids_notified:
             thread1 = threading.Thread(target=self.schedule_acceptance_emails, args=(job.id,))
             thread1.start()
@@ -556,69 +554,6 @@ class JobServiceAssignmentView(APIView):
         return body
     
     def schedule_acceptance_emails(self, job_id):
-        while True:
-            # Wait for 30 minutes before executing again
-            time.sleep(30 * 60)
-
-            #Refetch job from database
-            job = Job.objects.get(pk=job_id)
-
-            if job.status != 'S':
-                return
-            
-            # check if this job has a tag with name 'Vendor Accepted'
-            for job_tag in job.tags.all():
-                if job_tag.tag.name == 'Vendor Accepted':
-                    return
-           
-            last_project_managers_notified = LastProjectManagersNotified.objects.filter(job=job).all()
-
-            # Check if all of the last_project_managers_notified have been notified already 3 times in JobacceptanceNotification. If they have, you can exit the function
-            all_notified = True
-            for last_project_manager_notified in last_project_managers_notified:
-                job_acceptance_notifications = JobAcceptanceNotification.objects.filter(job=job, project_manager=last_project_manager_notified.project_manager).all()
-
-                if job_acceptance_notifications.count() < 3:
-                    all_notified = False
-                    break
-
-            if all_notified:
-                return
-            
-            email_util = EmailUtil()
-
-            for last_project_manager_notified in last_project_managers_notified:
-                
-                project_manager = User.objects.get(pk=last_project_manager_notified.project_manager_id)
-
-                # Get the last notification attempt
-                job_acceptance_notification = JobAcceptanceNotification.objects.filter(job=job, project_manager=project_manager).order_by('-attempt').first()
-
-                if job_acceptance_notification.attempt < 3:
-                    unique_emails = []
-                    if project_manager.email not in unique_emails:
-                        unique_emails.append(project_manager.email)
-
-                        additional_emails = UserEmail.objects.filter(user=project_manager)
-                        for additional_email in additional_emails:
-                            if additional_email.email not in unique_emails:
-                                unique_emails.append(additional_email.email)
-
-
-                    body = self.build_email_body_for_recurrent_acceptance(job)
-                    body += email_util.getEmailSignature()
-
-                    attempt = job_acceptance_notification.attempt + 1
-
-                    if attempt == 2:
-                        subject = f'Second Notification - {job.tailNumber} - Job ASSIGNED - Review and ACCEPT it or RETURN it as soon as possible.'
-
-                    elif attempt == 3:
-                        subject = f'Last Notification - {job.tailNumber} - Job ASSIGNED - Review and ACCEPT it or RETURN it as soon as possible.'
-
-                    for email in unique_emails:
-                        email_util.send_email(email, subject, body)
-
-                    JobAcceptanceNotification.objects.create(job=job, project_manager=project_manager, attempt=attempt)
+        EmailNotificationService().schedule_acceptance_emails(job_id)
 
     

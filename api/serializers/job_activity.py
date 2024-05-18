@@ -17,7 +17,11 @@ class JobActivitySerializer(serializers.ModelSerializer):
             return obj.job.accepted_full_name
 
         elif obj.job.returned_full_name and obj.status == 'A' and obj.activity_type == 'R':
-            return obj.job.returned_full_name    
+            return obj.job.returned_full_name
+
+        elif obj.activity_type == 'S' and obj.status == 'S' and obj.user is None:
+            # This accounts for auto-assignment
+            return 'Livetakeoff'
         else:
             if obj.user:
                 return obj.user.first_name + ' ' + obj.user.last_name
