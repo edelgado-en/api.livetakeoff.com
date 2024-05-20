@@ -16,6 +16,8 @@ class CustomerSettings(models.Model):
 
     enable_auto_assignment = models.BooleanField(default=False)
 
+    enable_request_priority = models.BooleanField(default=False, help_text='If enabled, the customer will be able to request priority service when creating a job')
+
     def __str__(self) -> str:
         return self.customer.name
 

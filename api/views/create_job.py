@@ -61,6 +61,7 @@ class CreateJobView(APIView):
         current_user_enable_confirm_jobs = user_profile.enable_confirm_jobs
         estimate_id = data.get('estimate_id')
         customer_purchase_order = data.get('customer_purchase_order')
+        priority = data.get('priority', 'N')
 
         job_status = 'A'
 
@@ -216,6 +217,16 @@ class CreateJobView(APIView):
             job_tag = JobTag(job=job, tag=tag)
             job_tag.save()
 
+        if priority == 'H':
+            try:
+                priority_tag = Tag.objects.get(name='High Priority')
+            except:
+                priority_tag = Tag(name='High Priority', short_name='High Priority')
+                priority_tag.save()
+
+            job_tag = JobTag(job=job, tag=priority_tag)
+            job_tag.save()
+
         # TODO: Calculate estimated completion time based on the estimated times of the selected services and aircraft type
 
         if comment:
@@ -299,12 +310,8 @@ class CreateJobView(APIView):
 
             SMSNotificationService().send_create_job_notification(job, request.user)
 
-            if customer.customer_settings.enable_approval_process:
-                # if the current user is enable to confirm jobs, that means that the should is already set to Accepted status
-                # and there is not need to send the email notification to confirm the job
-                if not current_user_enable_confirm_jobs:
-                    EmailNotificationService().send_create_job_notification(job, services, retainer_services, request.user)
-            
+            EmailNotificationService().send_create_job_notification(job, services, retainer_services, request.user)
+
             # AUTO ASSIGNMENT
             if customer.customer_settings.enable_auto_assignment \
                 and not customer.customer_settings.enable_approval_process \

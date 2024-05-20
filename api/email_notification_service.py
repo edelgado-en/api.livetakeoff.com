@@ -32,22 +32,26 @@ class EmailNotificationService():
                                                                          | Q(groups__name='Account Managers')
                                                                          | Q(groups__name='Internal Coordinators')))
         
-        customer_users = UserProfile.objects.filter(user__is_active=True,
-                                                    customer=job.customer,
-                                                    email_notifications=True,
-                                                    enable_email_notification_job_created=True,
-                                                    enable_confirm_jobs=True).exclude(user=current_user)
-
         unique_emails = self.get_unique_emails(internal_users, job.customer.id)
+        
+        if job.customer.customer_settings.enable_approval_process:
+            current_user_enable_confirm_jobs = current_user.profile.enable_confirm_jobs
 
-        for user_profile in customer_users:
-            if user_profile.user.email and user_profile.user.email not in unique_emails:
-                unique_emails.append(user_profile.user.email)
+            if not current_user_enable_confirm_jobs:
+                customer_users = UserProfile.objects.filter(user__is_active=True,
+                                                            customer=job.customer,
+                                                            email_notifications=True,
+                                                            enable_email_notification_job_created=True,
+                                                            enable_confirm_jobs=True).exclude(user=current_user)
+                
+                for user_profile in customer_users:
+                    if user_profile.user.email and user_profile.user.email not in unique_emails:
+                        unique_emails.append(user_profile.user.email)
 
-            additional_emails = UserEmail.objects.filter(user=user_profile.user)
-            for additional_email in additional_emails:
-                if additional_email.email not in unique_emails:
-                    unique_emails.append(additional_email.email)
+                    additional_emails = UserEmail.objects.filter(user=user_profile.user)
+                    for additional_email in additional_emails:
+                        if additional_email.email not in unique_emails:
+                            unique_emails.append(additional_email.email)
 
 
         email_util = EmailUtil()
