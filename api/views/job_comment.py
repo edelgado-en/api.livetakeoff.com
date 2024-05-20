@@ -79,6 +79,7 @@ class JobCommentView(ListCreateAPIView):
         Admins options:
             send SMS: send text messages to all assigned project managers
             send email: sends emails to all selected emails including the comment and the job information
+            send email to project managers: sends emails to all assigned project managers including the comment and the job information
 
         Additional functionality:
             1) When customer user adds a comment, an automatic email is send to all admins containing the comment and the job information
@@ -95,8 +96,10 @@ class JobCommentView(ListCreateAPIView):
         comment = self.request.data['comment']
         send_sms = self.request.data.get('sendSMS', False)
         send_email = self.request.data.get('sendEmail', False)
+        send_email_to_project_manager = self.request.data.get('sendEmailToProjectManager', False)
         is_public = self.request.data.get('isPublic', False)
         emails = self.request.data.get('emails', [])
+        projectManagerEmails = self.request.data.get('projectManagerEmails', [])
 
         is_customer_user = False
         is_external_project_manager = False
@@ -122,7 +125,10 @@ class JobCommentView(ListCreateAPIView):
 
 
         if send_email:
-            EmailNotificationService().send_job_comment_added_notification_to_customers(job, comment, emails)
+            EmailNotificationService().send_job_comment_added_notification(job, comment, emails)
+
+        if send_email_to_project_manager:
+            EmailNotificationService().send_job_comment_added_notification(job, comment, projectManagerEmails)
 
 
         if is_customer_user or is_external_project_manager:

@@ -114,7 +114,7 @@ class EmailNotificationService():
             email_util.send_email(email, subject, body)
 
 
-    def send_job_comment_added_notification_to_customers(self, job: Job, comment: str, emails: [str]):
+    def send_job_comment_added_notification(self, job: Job, comment: str, emails: [str]):
         email_util = EmailUtil()
 
         subject = f'{job.tailNumber} Job Comment Added'
@@ -563,7 +563,7 @@ class EmailNotificationService():
 
                     JobAcceptanceNotification.objects.create(job=job, project_manager=project_manager, attempt=attempt)
     
-    
+
     def build_email_body(self, job: Job,
                          title: str,
                          comment: str,
