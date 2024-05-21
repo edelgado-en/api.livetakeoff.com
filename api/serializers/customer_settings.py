@@ -15,5 +15,6 @@ class CustomerSettingsSerializer(serializers.ModelSerializer):
             'retainer_amount',
             'show_job_price',
             'special_instructions',
-            'price_list'
+            'price_list',
+            'enable_request_priority'
         )

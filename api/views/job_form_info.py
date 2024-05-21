@@ -131,8 +131,11 @@ class JobFormInfoView(APIView):
 
         customer_id = None
 
+        is_enable_request_priority = False
+
         if is_customer:
             customer_id = user_profile.customer.id
+            is_enable_request_priority = user_profile.customer.customer_settings.enable_request_priority
         
         response = {
             'customers': customer_dtos,
@@ -141,6 +144,7 @@ class JobFormInfoView(APIView):
             'fbos': fbo_dtos,
             'tags': tag_dtos,
             'customer_id': customer_id,
+            'is_enable_request_priority': is_enable_request_priority
         }
 
         return Response(response, status.HTTP_200_OK)

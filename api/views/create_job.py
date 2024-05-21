@@ -219,9 +219,9 @@ class CreateJobView(APIView):
 
         if priority == 'H':
             try:
-                priority_tag = Tag.objects.get(name='High Priority')
+                priority_tag = Tag.objects.get(name='HIGH PRIORITY')
             except:
-                priority_tag = Tag(name='High Priority', short_name='High Priority')
+                priority_tag = Tag(name='HIGH PRIORITY', short_name='HIGH PRIORITY')
                 priority_tag.save()
 
             job_tag = JobTag(job=job, tag=priority_tag)
