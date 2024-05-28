@@ -20,7 +20,6 @@ class JobExportCSVView(APIView):
     serializer_class = JobAdminSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
-
     def post(self, request, format=None):
         if not self.can_export(request.user):
             return Response({'error': 'You do not have permission to export jobs'}, status=status.HTTP_403_FORBIDDEN)

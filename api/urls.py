@@ -96,7 +96,8 @@ from .views import (
         SharedJobAcceptView,
         SharedJobReturnView,
         CreateFBOView,
-        RemoveAirportAvailableUsersView
+        RemoveAirportAvailableUsersView,
+        PriceListExportView
     )
 
 urlpatterns = [
@@ -164,6 +165,7 @@ urlpatterns = [
     path('pricing-plans', PricePlansView.as_view()),
     path('pricing-plans/<int:id>/', PricePlansView.as_view()),
     path('price-listing/<int:id>/', PriceListingView.as_view()),
+    path('price-listing/export', PriceListExportView.as_view()),
     path('customers', CustomersView.as_view()),
     path('customers/retainers', CustomerRetainersView.as_view()),
     path('customers/create', CreateCustomerView.as_view()),
