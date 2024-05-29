@@ -17,7 +17,7 @@ class PriceListEntriesView(APIView):
         #aircraft_one        basic exterior 100                200                300                400 
 
         # Fetch all PriceListEntries
-        price_list_entries = PriceListEntries.objects.all()
+        price_list_entries = PriceListEntries.objects.all()[:500]
 
         # Create a array to store the data
 
