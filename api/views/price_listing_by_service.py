@@ -7,20 +7,20 @@ from api.models import (PriceList, PriceListEntries, AircraftType, Service, Job)
 
 from ..pricebreakdown_service import PriceBreakdownService
 
-class PriceListingView(APIView):
+class PriceListingByServiceView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, id):
-        aircraft_type = AircraftType.objects.get(pk=id)
-        # get the prices for each service for the provided aircraft type for all price lists
+        aircraft_type = Service.objects.get(pk=id)
+        # get the prices for each service for the provided service for all price lists
         price_list_entries = PriceListEntries.objects \
             .select_related('price_list') \
-            .select_related('service') \
-            .filter(aircraft_type=aircraft_type) \
-            .order_by('price_list__id', 'service__id')
+            .select_related('aircraft_type') \
+            .filter(service=aircraft_type) \
+            .order_by('price_list__id', 'aircraft_type__id')
 
-        # get all the services
-        services = Service.objects.all().order_by('id')
+        # get all the aircraft types
+        aircraft_types = AircraftType.objects.all().order_by('id')
 
         # get all the price lists
         price_lists = PriceList.objects.all().order_by('id')
@@ -28,21 +28,21 @@ class PriceListingView(APIView):
         # create the dictionary
         price_list_entries_dict = {}
 
-        for service in services:
-            price_list_entries_dict[service.name] = {}
+        for aircraft_type in aircraft_types:
+            price_list_entries_dict[aircraft_type.name] = {}
             for price_list in price_lists:
-                price_list_entries_dict[service.name][price_list.name] = Decimal('0.00')
+                price_list_entries_dict[aircraft_type.name][price_list.name] = Decimal('0.00')
 
         # populate the dictionary with the prices
         for price_list_entry in price_list_entries:
-            price_list_entries_dict[price_list_entry.service.name][price_list_entry.price_list.name] = price_list_entry.price
+            price_list_entries_dict[price_list_entry.aircraft_type.name][price_list_entry.price_list.name] = price_list_entry.price
 
 
         # instead of a dictionary, return an array of services and in each entry an array of price list entries by price list
         # the array will look like this:
         # [
         #   {
-        #     "service": "Service 1",
+        #     "aircraft_type": "Aircraft 1",
         #     "price_list_entries": [
         #       {
         #         "price_list": "Price List 1",
@@ -55,7 +55,7 @@ class PriceListingView(APIView):
         #     ]
         #   },
         #   {
-        #     "service": "Service 2",
+        #     "aircraft_type": "Aircraft 2",
         #     "price_list_entries": [
         #       {
         #         "price_list": "Price List 1",
@@ -68,7 +68,7 @@ class PriceListingView(APIView):
         #     ]
         #   },
         #   {
-        #     "service": "Service 3",
+        #     "aircraft_type": "Aircraft 3",
         #     "price_list_entries": [
         #       {
         #         "price_list": "Price List 1",
@@ -81,56 +81,54 @@ class PriceListingView(APIView):
         #     ]
         #   }
         # ]
-        # where the first entry is the service name and the price list entries are the prices for each price list
-        # the price list entries are an array of price list entries
-        # each price list entry is the price list name and the price
+
 
         # create the array
         price_list_entries_array = []
 
         # if there is no price list entry, it should have a zero price
-        for service in services:
+        for aircraft_type in aircraft_types:
             price_list_entries_array.append({
-                "service": service.name,
+                "aircraft_type": aircraft_type.name,
                 "price_list_entries": []
             })
             for price_list in price_lists:
                 price_list_entries_array[-1]["price_list_entries"].append({
                     "price_list": price_list.name,
-                    "price": price_list_entries_dict[service.name][price_list.name]
+                    "price": price_list_entries_dict[aircraft_type.name][price_list.name]
                 })
     
-
 
         return Response(price_list_entries_array, status.HTTP_200_OK)
 
 
     def post(self, request, id):
-
         price_list_name = self.request.data.get('name')
-        price_list_entries = self.request.data.get('price_list_entries') # service name, price
-        aircraft_type_id = self.request.data.get('aircraft_type_id')
+        price_list_entries = self.request.data.get('price_list_entries') # aircraft_type name, price
+        service_id = self.request.data.get('service_id')
 
         # get price list by name
         price_list = PriceList.objects.get(name=price_list_name)
 
         # update the prices in PriceListEntries for the provided price list with the list of services and prices
         for price_list_entry in price_list_entries:
-            service_name = price_list_entry.get('service')
+            aircraft_type_name = price_list_entry.get('aircraft_type')
             price = price_list_entry.get('price')
             
-            service = Service.objects.get(name=service_name)
+            aircraft_type = AircraftType.objects.get(name=aircraft_type_name)
 
             # if the price list entry does not exist, create a new one
             try:
-                price_list_entry = PriceListEntries.objects.get(price_list=price_list, service=service, aircraft_type_id=aircraft_type_id)
+                price_list_entry = PriceListEntries.objects.get(price_list=price_list,
+                                                                aircraft_type=aircraft_type,
+                                                                service_id=service_id)
                 price_list_entry.price = price
                 price_list_entry.save()
 
             except PriceListEntries.DoesNotExist:
                 price_list_entry = PriceListEntries(price_list=price_list,
-                                                    service=service,
-                                                    aircraft_type_id=aircraft_type_id,
+                                                    aircraft_type=aircraft_type,
+                                                    service_id=service_id,
                                                     price=price)
                 price_list_entry.save()
 
@@ -139,7 +137,7 @@ class PriceListingView(APIView):
         # get all the jobs with customer using a customer setting with the price list and aircraft type with is_auto_priced as true
         # not invoiced
         jobs = Job.objects.filter(Q(customer__customer_settings__price_list=price_list) & 
-                                  Q(aircraftType_id=aircraft_type_id) &
+                                  Q(aircraftType_id=service_id) &
                                   Q(is_auto_priced=True) &
                                   ~Q(status='I')
                                   )

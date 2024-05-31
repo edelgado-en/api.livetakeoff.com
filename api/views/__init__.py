@@ -99,3 +99,4 @@ from .create_fbo import CreateFBOView
 from .remove_airport_available_user import RemoveAirportAvailableUsersView
 from .price_list_export import PriceListExportView
 from .price_list_entries import PriceListEntriesView
+from .price_listing_by_service import PriceListingByServiceView
