@@ -39,6 +39,12 @@ class UserJobEmailView(APIView):
             if project_manager:
                 if project_manager.email not in [email['email'] for email in unique_project_manager_emails]:
                     unique_project_manager_emails.append({'id': project_manager.id, 'email': project_manager.email})
+                
+                project_manager_emails = UserEmail.objects.filter(user=project_manager).all()
+
+                for project_manager_email in project_manager_emails:
+                    if project_manager_email.email not in [email['email'] for email in unique_project_manager_emails]:
+                        unique_project_manager_emails.append({'id': project_manager_email.id, 'email': project_manager_email.email})
 
         for job_retainer_service_assignment in job.job_retainer_service_assignments.all():
             project_manager = job_retainer_service_assignment.project_manager
@@ -46,6 +52,12 @@ class UserJobEmailView(APIView):
             if project_manager:
                 if project_manager.email not in [email['email'] for email in unique_project_manager_emails]:
                     unique_project_manager_emails.append({'id': project_manager.id, 'email': project_manager.email})
+
+                project_manager_emails = UserEmail.objects.filter(user=project_manager).all()
+
+                for project_manager_email in project_manager_emails:
+                    if project_manager_email.email not in [email['email'] for email in unique_project_manager_emails]:
+                        unique_project_manager_emails.append({'id': project_manager_email.id, 'email': project_manager_email.email})
 
         return Response({'emails': unique_emails,
                          'project_manager_emails': unique_project_manager_emails}, status=status.HTTP_200_OK)
