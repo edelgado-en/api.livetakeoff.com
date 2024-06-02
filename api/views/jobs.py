@@ -219,8 +219,9 @@ class JobListView(ListAPIView):
             searchText = self.request.data.get('searchText')
             status = self.request.data.get('status')
             airport = self.request.data.get('airport')
+            tags = self.request.data.get('tags')
 
-            qs = Job.objects.filter(customer_id=user_profile.customer.id)
+            qs = Job.objects.prefetch_related('tags').filter(customer_id=user_profile.customer.id)
 
             if searchText:
                 qs = qs.filter(Q(tailNumber__icontains=searchText)
@@ -232,10 +233,11 @@ class JobListView(ListAPIView):
             else:
                 qs = qs.filter(status=status)
 
-
             if airport != 'All':
                 qs = qs.filter(airport_id=airport)
 
+            if tags:
+                qs = qs.filter(tags__tag_id__in=tags)
 
             sortField = self.request.data.get('sortField')
             if sortField == 'requestDate':
