@@ -13,6 +13,7 @@ from ..models import (
         Tag,
         UserCustomer,
         UserAvailableAirport,
+        Vendor
 )
 
 class JobFormInfoView(APIView):
@@ -49,6 +50,8 @@ class JobFormInfoView(APIView):
         tags = Tag.objects.all().order_by('name')
 
         tags = tags.exclude(name='Scheduled')
+
+        vendors = Vendor.objects.all().order_by('name')
         
         airports = Airport.objects.all().order_by('name')
         
@@ -113,6 +116,15 @@ class JobFormInfoView(APIView):
 
             tag_dtos.append(t)
         
+        vendor_dtos = []
+        for vendor in vendors:
+            v = {
+                'id': vendor.id,
+                'name': vendor.name,
+            }
+
+            vendor_dtos.append(v)
+
         if not customer_dtos:
             return Response({'error': 'No customers found'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -144,7 +156,8 @@ class JobFormInfoView(APIView):
             'fbos': fbo_dtos,
             'tags': tag_dtos,
             'customer_id': customer_id,
-            'is_enable_request_priority': is_enable_request_priority
+            'is_enable_request_priority': is_enable_request_priority,
+            'vendors': vendor_dtos,
         }
 
         return Response(response, status.HTTP_200_OK)

@@ -61,13 +61,14 @@ class EditJobView(APIView):
              or request.user.groups.filter(name='Account Managers').exists():
                 saved_job.internal_additional_cost = request.data.get('internal_additional_cost', saved_job.internal_additional_cost)
                 
-                if saved_job.vendor:
-                    vendor_charge = request.data.get('vendor_charge', saved_job.vendor_charge)
-                    vendor_additional_cost = request.data.get('vendor_additional_cost', saved_job.vendor_additional_cost)
+                vendor_id = request.data.get('vendor', saved_job.vendor_id)
+                vendor_charge = request.data.get('vendor_charge', saved_job.vendor_charge)
+                vendor_additional_cost = request.data.get('vendor_additional_cost', saved_job.vendor_additional_cost)
 
-                    saved_job.vendor_charge = vendor_charge
-                    saved_job.vendor_additional_cost = vendor_additional_cost
-                    saved_job.subcontractor_profit = saved_job.price - Decimal(str(vendor_charge + vendor_additional_cost))
+                saved_job.vendor_id = vendor_id
+                saved_job.vendor_charge = vendor_charge
+                saved_job.vendor_additional_cost = vendor_additional_cost
+                saved_job.subcontractor_profit = saved_job.price - Decimal(str(vendor_charge + vendor_additional_cost))
 
                 saved_job.save(update_fields=['internal_additional_cost', 'vendor_charge', 'vendor_additional_cost', 'subcontractor_profit'])
 
