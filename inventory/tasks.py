@@ -4,7 +4,7 @@ from django.db.models import Q, F
 from django.db import models
 from django.db.models import Count, Sum, Func
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 from datetime import date
 import pytz
@@ -32,7 +32,8 @@ from api.models import (
     JobTag,
     Tag,
     JobScheduleTag,
-    JobStatusActivity
+    JobStatusActivity,
+    JobPhotos
 )
 
 from api.pricebreakdown_service import PriceBreakdownService
@@ -388,6 +389,16 @@ def deleteRepeatedScheduledJobs():
             jobs[i+1].save()
     
 
+def deletePhotosOlderThanOneYear():
+    #Fetch all the JobPhotos where the created_at date is older than one year from today
+    job_photos = JobPhotos.objects.filter(created_at__lt=datetime.now() - timedelta(days=365))
+
+    #Iterate through job_photos and delete each one
+    for job_photo in job_photos:
+        # this deletes from Cloudinary!
+        job_photo.image.delete()
+        # now delete the instance from the database
+        job_photo.delete()
 
 
 def handleCreateJob(job_schedule, today):
@@ -495,5 +506,8 @@ scheduler.add_job(createJobSchedules, 'cron', hour=4, minute=0, second=0)
 
 #run job every day at 4:10 am
 scheduler.add_job(deleteRepeatedScheduledJobs, 'cron', hour=4, minute=10, second=0)
+
+#run job once a month on the first day of the month at 4:00 am
+scheduler.add_job(deletePhotosOlderThanOneYear, 'cron', day=1, hour=4, minute=0, second=0)
 
 scheduler.start()
