@@ -3,7 +3,7 @@ from .aircraft_type import AircraftTypeSerializer
 from .airport import AirportSerializer
 from .fbo import FBOSerializer
 from .customer import CustomerSerializer
-from ..models import Job
+from ..models import (Job, JobCommentCheck, JobComments)
 from .job_service_assignment import (
         JobServiceAssignmentSerializer,
         JobRetainerServiceAssignmentSerializer,
@@ -29,6 +29,25 @@ class JobAdminSerializer(serializers.ModelSerializer):
     tags = JobTagSerializer(many=True)
     created_by = BasicUserSerializer(read_only=True)
     completion_date = serializers.DateTimeField(format="%m/%d %H:%M", read_only=True)
+    comments_count = serializers.SerializerMethodField()
+
+    def get_comments_count(self, obj):
+        comments_count = 0
+        
+        if self.context['request']:
+            try:
+                job_comment_check = JobCommentCheck.objects.get(job=obj, user=self.context['request'].user)
+                qs = JobComments.objects.filter(job=obj, created__gt=job_comment_check.last_time_check).exclude(author=self.context['request'].user)
+                if self.context['request'].user.profile.customer and self.context['request'].user.profile.customer == obj.customer:
+                    qs = qs.filter(is_public=True)
+                comments_count = qs.count()
+            except JobCommentCheck.DoesNotExist:
+                qs = JobComments.objects.filter(job=obj).exclude(author=self.context['request'].user)
+                if self.context['request'].user.profile.customer and self.context['request'].user.profile.customer == obj.customer:
+                    qs = qs.filter(is_public=True)
+                comments_count = qs.count()
+        
+        return comments_count
 
     class Meta:
         model = Job
@@ -58,5 +77,6 @@ class JobAdminSerializer(serializers.ModelSerializer):
             'completion_date',
             'internal_additional_cost',
             'vendor_additional_cost',
-            'vendor_charge'
+            'vendor_charge',
+            'comments_count'
             )
