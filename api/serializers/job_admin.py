@@ -33,17 +33,19 @@ class JobAdminSerializer(serializers.ModelSerializer):
 
     def get_comments_count(self, obj):
         comments_count = 0
+
+        request = self.context.get('request')
         
-        if self.context['request']:
+        if request:
             try:
-                job_comment_check = JobCommentCheck.objects.get(job=obj, user=self.context['request'].user)
+                job_comment_check = JobCommentCheck.objects.get(job=obj, user=request.user)
                 qs = JobComments.objects.filter(job=obj, created__gt=job_comment_check.last_time_check).exclude(author=self.context['request'].user)
-                if self.context['request'].user.profile.customer and self.context['request'].user.profile.customer == obj.customer:
+                if request.user.profile.customer and request.user.profile.customer == obj.customer:
                     qs = qs.filter(is_public=True)
                 comments_count = qs.count()
             except JobCommentCheck.DoesNotExist:
-                qs = JobComments.objects.filter(job=obj).exclude(author=self.context['request'].user)
-                if self.context['request'].user.profile.customer and self.context['request'].user.profile.customer == obj.customer:
+                qs = JobComments.objects.filter(job=obj).exclude(author=request.user)
+                if request.user.profile.customer and request.user.profile.customer == obj.customer:
                     qs = qs.filter(is_public=True)
                 comments_count = qs.count()
         
