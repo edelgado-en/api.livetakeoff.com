@@ -37,8 +37,10 @@ class JobPriceBreakdownView(APIView):
             return True
 
 
-        if user.is_superuser or user.is_staff or user.groups.filter(name='Account Managers').exists():
+        if user.is_superuser \
+            or user.is_staff \
+            or user.profile.show_job_price \
+            or user.groups.filter(name='Account Managers').exists():
             return True
-        
 
         return False
