@@ -19,36 +19,6 @@ class JobStatsView(APIView):
     def get(self, request, id):
         job = get_object_or_404(Job, pk=id)
 
-        comments_count = 0
-
-        try:
-            job_comment_check = JobCommentCheck.objects.get(job=job, user=request.user)
-
-            # Only show me the comments that have been created AFTER job_comments_check.last_time_check
-            # if customer user then only include public comments
-            
-            qs = JobComments.objects.filter(job=job,
-                                            created__gt=job_comment_check.last_time_check) \
-                                            .exclude(author=request.user)
-
-            # if customer user and customer matches job customer then only return public comments
-            # request.user.profile.customer and request.user.profile.customer == job.customer
-            if request.user.profile.customer and request.user.profile.customer == job.customer:
-                qs = qs.filter(is_public=True)
-
-            comments_count = qs.count()
-                                                
-
-        except JobCommentCheck.DoesNotExist:
-            # this means that the user hasn't check the comments section for this job
-            qs = JobComments.objects.filter(job=job).exclude(author=request.user)
-
-            if request.user.profile.customer and request.user.profile.customer == job.customer:
-                qs = qs.filter(is_public=True)
-
-            comments_count = qs.count()
-
-
         photos_count = JobPhotos.objects.filter(job=job).count()
 
         message = str(job.id) + '-' + job.tailNumber
@@ -59,7 +29,6 @@ class JobStatsView(APIView):
 
         response = {
             'purchase_order': job.purchase_order,
-            'comments_count': comments_count,
             'photos_count': photos_count,
             'encoded_id': encoded_id
         }
