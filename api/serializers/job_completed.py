@@ -43,4 +43,7 @@ class JobCompletedSerializer(serializers.ModelSerializer):
             'fbo_fees_amount_applied',
             'vendor_higher_price_amount_applied',
             'management_fees_amount_applied',
+            'arrival_formatted_date',
+            'departure_formatted_date',
+            'complete_before_formatted_date'
             )

@@ -81,7 +81,10 @@ class JobDetailSerializer(serializers.ModelSerializer):
             'is_publicly_confirmed',
             'confirmed_full_name',
             'confirmed_email',
-            'confirmed_phone_number'
+            'confirmed_phone_number',
+            'arrival_formatted_date',
+            'departure_formatted_date',
+            'complete_before_formatted_date'
         )
 
 

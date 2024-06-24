@@ -57,4 +57,7 @@ class SharedJobDetailSerializer(serializers.ModelSerializer):
             'is_publicly_confirmed',
             'confirmed_full_name',
             'tags',
+            'arrival_formatted_date',
+            'departure_formatted_date',
+            'complete_before_formatted_date'
         )

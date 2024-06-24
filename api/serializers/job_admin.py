@@ -80,5 +80,8 @@ class JobAdminSerializer(serializers.ModelSerializer):
             'internal_additional_cost',
             'vendor_additional_cost',
             'vendor_charge',
-            'comments_count'
+            'comments_count',
+            'arrival_formatted_date',
+            'departure_formatted_date',
+            'complete_before_formatted_date'
             )

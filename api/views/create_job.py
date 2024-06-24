@@ -87,9 +87,21 @@ class CreateJobView(APIView):
         
 
         estimated_arrival_date = data['estimated_arrival_date']
+        arrival_formatted_date = 'Not Specified'
+
         if estimated_arrival_date == 'null':
             estimated_arrival_date = None
         else :
+            # Remove the timezone name
+            date_str_cleaned = estimated_arrival_date.split(' (')[0]
+
+            # Define the format of the cleaned string
+            date_format = "%a %b %d %Y %H:%M:%S GMT%z"
+
+            dt = datetime.strptime(date_str_cleaned, date_format)
+            
+            arrival_formatted_date = dt.strftime("%m/%d/%y %H:%M") + " LT"
+
             try:
                 timestamp = mktime_tz(parsedate_tz(estimated_arrival_date))
                 # Now it is in UTC
@@ -100,9 +112,21 @@ class CreateJobView(APIView):
 
 
         estimated_departure_date = data['estimated_departure_date']
+        departure_formatted_date = 'Not Specified'
+
         if estimated_departure_date == 'null':
             estimated_departure_date = None
         else :
+            # Remove the timezone name
+            date_str_cleaned = estimated_departure_date.split(' (')[0]
+
+            # Define the format of the cleaned string
+            date_format = "%a %b %d %Y %H:%M:%S GMT%z"
+
+            dt = datetime.strptime(date_str_cleaned, date_format)
+
+            departure_formatted_date = dt.strftime("%m/%d/%y %H:%M") + " LT"
+
             try:
                 timestamp = mktime_tz(parsedate_tz(estimated_departure_date))
                 # Now it is in UTC
@@ -113,9 +137,21 @@ class CreateJobView(APIView):
 
 
         complete_by_date = data['complete_by_date']
+        complete_before_formatted_date = 'Not Specified'
+
         if complete_by_date == 'null':
             complete_by_date = None
         else:
+            # Remove the timezone name
+            date_str_cleaned = complete_by_date.split(' (')[0]
+
+            # Define the format of the cleaned string
+            date_format = "%a %b %d %Y %H:%M:%S GMT%z"
+
+            dt = datetime.strptime(date_str_cleaned, date_format)
+
+            complete_before_formatted_date = dt.strftime("%m/%d/%y %H:%M") + " LT"
+
             try:
                 timestamp = mktime_tz(parsedate_tz(complete_by_date))
                 # Now it is in UTC
@@ -154,7 +190,6 @@ class CreateJobView(APIView):
         today = datetime.now(newYorkTz).date()
         today_label = today.strftime("%Y%m%d")
 
-
         # Generate purchase order: current day + number of job received that day.
         #  So if today is 2019-01-01 and we have received 3 jobs today already, the purchase order will be 20190101-4
         jobs_created_today = Job.objects.filter(created_at__contains=today).count()
@@ -166,23 +201,8 @@ class CreateJobView(APIView):
         if requested_by == "":
             requested_by = None
 
-        arrival_formatted_date = 'Not Specified'
-        if estimated_arrival_date:
-            arrival_formatted_date = estimated_arrival_date.strftime('%m/%d/%y %H:%M')
-            arrival_formatted_date += ' LT'
-
         if on_site:
             arrival_formatted_date = 'On Site'
-
-        departure_formatted_date = 'Not Specified'
-        if estimated_departure_date:
-            departure_formatted_date = estimated_departure_date.strftime('%m/%d/%y %H:%M')
-            departure_formatted_date += ' LT'
-
-        complete_before_formatted_date = 'Not Specified'
-        if complete_by_date:
-            complete_before_formatted_date = complete_by_date.strftime('%m/%d/%y %H:%M')
-            complete_before_formatted_date += ' LT'
 
         job = Job(purchase_order=purchase_order,
                   customer=customer,
