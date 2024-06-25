@@ -24,6 +24,7 @@ class InventoryCurrentStatsView(APIView):
 
         # get locationItems get where the quantity is greater than zero and multiply item__cost_per_unit by locationItem__quantity in the same query
         total_value_in_stock = LocationItem.objects.filter(quantity__gt=0) \
+                                                  .filter(location__active=True) \
                                 .aggregate(total_value_out_of_stock=Sum(F('item__cost_per_unit') * F('quantity')))['total_value_out_of_stock']
 
         if total_value_in_stock is None:
@@ -31,22 +32,25 @@ class InventoryCurrentStatsView(APIView):
 
         # sum up the quantities of all locationItems
         total_quantity_in_stock = LocationItem.objects.filter(quantity__gt=0) \
+                                             .filter(location__active=True) \
                                             .aggregate(total_quantity_in_stock=Sum('quantity'))['total_quantity_in_stock']
         
         if total_quantity_in_stock is None:
             total_quantity_in_stock = 0
 
-        total_out_of_stock = LocationItem.objects.filter(quantity=0, on_hold=False).count()
+        total_out_of_stock = LocationItem.objects.filter(quantity=0, on_hold=False, location__active=True).count()
 
         # minimum_required is not null, quantity is less than or equal to minimum_required, quantity is greater than zero
-        total_low_stock = LocationItem.objects.filter(minimum_required__isnull=False, quantity__lte=F('minimum_required'), quantity__gt=0, minimum_required__gt=1).count()
+        total_low_stock = LocationItem.objects.filter(minimum_required__isnull=False, quantity__lte=F('minimum_required'), quantity__gt=0, minimum_required__gt=1, location__active=True).count()
         
         # sum up the quantities of all locationItems_quantity where the status = 'C'
         total_confirmed = LocationItem.objects.filter(status='C') \
+                        .filter(location__active=True) \
                         .aggregate(total_confirmed=Sum('quantity'))['total_confirmed']
 
         # sum up the quantities of all locationItems_quantity where the status = 'U'
         total_unconfirmed = LocationItem.objects.filter(status='U') \
+                            .filter(location__active=True) \
                         .aggregate(total_unconfirmed=Sum('quantity'))['total_unconfirmed']
         
         if total_confirmed is None:
@@ -64,6 +68,7 @@ class InventoryCurrentStatsView(APIView):
         # sum up the locationItem_quantities per locationItem_location__name. The resultset should include location name, total_quantity
         # also include the total cost per location. The total cost is calculated by locationItem_quantity * item_cost_per_unit
         qs = LocationItem.objects.filter(quantity__gt=0) \
+                                .filter(location__active=True) \
                                 .values('location__name') \
                                 .annotate(total_quantity=Sum('quantity')) \
                                 .annotate(total_cost=Sum(F('item__cost_per_unit') * F('quantity'))) \
@@ -90,6 +95,7 @@ class InventoryCurrentStatsView(APIView):
         # sum up the locationItem_quantities per locationItem__item_area. The resultset should include area name, total_quantity
         # also include the total cost per area. The total cost is calculated by locationItem_quantity * item_cost_per_unit
         qs = LocationItem.objects.filter(quantity__gt=0) \
+                                .filter(location__active=True) \
                                 .values('item__area') \
                                 .annotate(total_quantity=Sum('quantity')) \
                                 .annotate(total_cost=Sum(F('item__cost_per_unit') * F('quantity'))) \
@@ -116,6 +122,7 @@ class InventoryCurrentStatsView(APIView):
         # sum up the locationItem_quantities per locationItem__status per locationItem__location_name. The resultset should include location name, total_confirmed, total_unconfirmed
         # where total_confirmed is the sum of all locationItem_quantities where status = 'C' and total_unconfirmed is the sum of all locationItem_quantities where status = 'U'
         qs = LocationItem.objects.values('location__name') \
+                                .filter(location__active=True) \
                                 .annotate(total_confirmed=Sum('quantity', filter=Q(status='C'))) \
                                 .annotate(total_unconfirmed=Sum('quantity', filter=Q(status='U'))) \
                                 .order_by('location__name')
