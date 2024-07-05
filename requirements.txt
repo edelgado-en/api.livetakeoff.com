@@ -23,7 +23,6 @@ Pillow==9.2.0
 psycopg2-binary==2.9.3
 PyJWT==2.5.0
 python-http-client==3.3.7
-python-quickbooks==0.9.3
 pytz==2022.2.1
 requests==2.28.1
 sendgrid==6.9.7

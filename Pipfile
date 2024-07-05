@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 asgiref = "==3.5.2"
+"backports.zoneinfo" = "*"
 certifi = "==2022.9.24"
 charset-normalizer = "==2.1.1"
 cloudinary = "==1.30.0"
@@ -37,7 +38,6 @@ urllib3 = "==1.26.12"
 whitenoise = "==6.2.0"
 apscheduler = "==3.10.1"
 django-apscheduler = "==0.6.2"
-python-quickbooks = "==0.9.3"
 
 [dev-packages]
 
