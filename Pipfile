@@ -5,7 +5,6 @@ name = "pypi"
 
 [packages]
 asgiref = "==3.5.2"
-"backports.zoneinfo" = "*"
 certifi = "==2022.9.24"
 charset-normalizer = "==2.1.1"
 cloudinary = "==1.30.0"
