@@ -218,7 +218,9 @@ class InventoryHistoryStatsView(APIView):
 
 
     def can_view_dashboard(self, user):
-        if user.is_superuser or user.is_staff or user.groups.filter(name='Account Managers').exists():
+        if user.is_superuser or user.is_staff \
+              or user.groups.filter(name='Internal Coordinators').exists() \
+              or user.groups.filter(name='Account Managers').exists():
             return True
         
         return False
