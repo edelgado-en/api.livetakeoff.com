@@ -247,7 +247,7 @@ class ServiceReportView(APIView):
 
         total_labor_time_only_services = 0
 
-        if not is_project_manager and not is_external_project_manager:
+        if not is_external_project_manager:
             qs = JobStatusActivity.objects.filter(
                 Q(status__in=['I']) &
                 Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date)
