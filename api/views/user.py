@@ -88,6 +88,8 @@ class UserView(APIView):
                 showSpendingInfo = True
 
 
+        canSeeInventoryDashboard = False
+
         if user.is_superuser:
             access_level_label = 'Super User'
             canSeePrice = True
@@ -109,6 +111,7 @@ class UserView(APIView):
         elif is_internal_coordinator:
             access_level_label = 'Internal Coordinator'
             canSeePrice = user_profile.show_job_price
+            canSeeInventoryDashboard = user_profile.enable_inventory_dashboard
 
         elif is_project_manager:
             access_level_label = 'Project Manager'
@@ -151,6 +154,7 @@ class UserView(APIView):
             "canSeePrice": canSeePrice,
             'canConfirmJobs': canConfirmJobs,
             'canAcceptJobs': canAcceptJobs,
+            "canSeeInventoryDashboard": canSeeInventoryDashboard,
             "receive_sms_notifications": user_profile.sms_notifications,
             "receive_email_notifications": user_profile.email_notifications,
             'showSpendingInfo': showSpendingInfo,

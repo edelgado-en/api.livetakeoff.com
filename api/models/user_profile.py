@@ -33,6 +33,8 @@ class UserProfile(models.Model):
 
     enable_all_airports = models.BooleanField(default=False, help_text='If enabled, the user will be able to see all airports in the system. If disabled, the user will only see the airports that are associated with the user.')
 
+    enable_inventory_dashboard = models.BooleanField(default=False, help_text='If enabled, the user will be able to see the inventory dashboard. Applicable to Internal Coordinators. Admins can always see the inventory dashboard.')
+
     ########################
 
     enable_email_notification_job_created = models.BooleanField(default=False, help_text='If enabled, the user will receive an email notification when a job is created.')
