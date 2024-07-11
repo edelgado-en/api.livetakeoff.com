@@ -324,7 +324,7 @@ class TeamProductivityView(APIView):
             ) """
 
             total_revenue = JobStatusActivity.objects.filter(
-             Q(status__in=['I']) &
+             Q(status__in=['C']) &
              Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date) &
              Q(user_id=item['project_manager__id'])
             )
