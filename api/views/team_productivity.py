@@ -317,10 +317,16 @@ class TeamProductivityView(APIView):
 
 
             # Sum the price of each service completed by this user in the last 30 days
-            total_revenue = ServiceActivity.objects.filter(
+            """ total_revenue = ServiceActivity.objects.filter(
                 Q(status='C') &
                 Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date) &
                 Q(project_manager_id=item['project_manager__id'])
+            ) """
+
+            total_revenue = JobStatusActivity.objects.filter(
+             Q(status__in=['I']) &
+             Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date) &
+             Q(user_id=item['project_manager__id'])
             )
 
             if customer_id:
@@ -329,7 +335,7 @@ class TeamProductivityView(APIView):
             if tailNumber:
                 total_revenue = total_revenue.filter(Q(job__tailNumber__icontains=tailNumber))
 
-            total_revenue = total_revenue.aggregate(Sum('price'))['price__sum']
+            total_revenue = total_revenue.aggregate(Sum('job__price'))['job__price__sum']
 
             if total_revenue is None:
                 total_revenue = 0
