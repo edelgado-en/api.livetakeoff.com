@@ -177,6 +177,7 @@ class TeamProductivityView(APIView):
         # Sum the total price from JobStatusActivity where the status = 'I' 
         total_jobs_revenue = JobStatusActivity.objects.filter(
              Q(status__in=['I']) &
+             Q(activity_type='S') &
              Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date)
         )
 
@@ -315,16 +316,9 @@ class TeamProductivityView(APIView):
             if tailNumber:
                 qs_retainer = qs_retainer.filter(Q(job__tailNumber__icontains=tailNumber))
 
-
-            # Sum the price of each service completed by this user in the last 30 days
-            """ total_revenue = ServiceActivity.objects.filter(
-                Q(status='C') &
-                Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date) &
-                Q(project_manager_id=item['project_manager__id'])
-            ) """
-
             total_revenue = JobStatusActivity.objects.filter(
              Q(status__in=['C']) &
+             Q(activity_type='S') &
              Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date) &
              Q(user_id=item['project_manager__id'])
             )
