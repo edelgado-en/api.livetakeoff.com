@@ -568,6 +568,79 @@ class EmailNotificationService():
                     JobAcceptanceNotification.objects.create(job=job, project_manager=project_manager, attempt=attempt)
     
 
+    def build_email_body_for_recurrent_acceptance(self, job):
+        message = str(job.id) + '-' + job.tailNumber
+        message_bytes = message.encode('ascii')
+        base64_bytes = base64.b64encode(message_bytes)
+        base64_message = base64_bytes.decode('ascii')
+
+        # Fetch the service assignments associated with this job
+        service_names = ''
+
+        for service in job.job_service_assignments.all():
+            service_names += service.service.name + ', '
+
+        if service_names:
+            service_names = service_names[:-2]
+
+        # Fetch the retainer service assignments associated with this job
+        retainer_service_names = ''
+
+        for retainer_service in job.job_retainer_service_assignments.all():
+            retainer_service_names += retainer_service.retainer_service.name + ', '
+
+        if retainer_service_names:
+            retainer_service_names = retainer_service_names[:-2]
+
+        body = f'''
+                <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">Job Assignment</div>
+                <a href="http://livetakeoff.com/shared/jobs/{base64_message}/accept" style="display: inline-block; padding: 0.5625rem 1.125rem; margin: 0 5px; font-size: 1.5rem; font-weight: 400; line-height: 1.5; text-align: center; vertical-align: middle; cursor: pointer; border: 1px solid transparent; border-radius: 0.375rem; transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; text-decoration: none; color: #fff; background-color: #007bff; border-color: #007bff;">ACCEPT</a>
+                <a href="http://livetakeoff.com/shared/jobs/{base64_message}/accept" style="display: inline-block; padding: 0.5625rem 1.125rem; margin: 0 5px; font-size: 1.5rem; font-weight: 400; line-height: 1.5; text-align: center; vertical-align: middle; cursor: pointer; border: 1px solid transparent; border-radius: 0.375rem; transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; text-decoration: none; color: #212529; background-color: #f8f9fa; border-color: #f8f9fa;">RETURN</a>
+
+                <div style="margin-bottom:20px"></div>
+                <table style="border-collapse: collapse">
+                    <tr>
+                        <td style="padding:15px">Job PO</td>
+                        <td style="padding:15px">{job.purchase_order}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:15px">Tail</td>
+                        <td style="padding:15px">{job.tailNumber}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:15px">Airport</td>
+                        <td style="padding:15px">{job.airport.name}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:15px">FBO</td>
+                        <td style="padding:15px">{job.fbo.name}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:15px">Arrival</td>
+                        <td style="padding:15px">{job.arrival_formatted_date}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:15px">Departure</td>
+                        <td style="padding:15px">{job.departure_formatted_date}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:15px">Complete Before</td>
+                        <td style="padding:15px">{job.complete_before_formatted_date}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:15px">Services</td>
+                        <td style="padding:15px">{service_names}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:15px">Retainer Services</td>
+                        <td style="padding:15px">{retainer_service_names}</td>
+                    </tr>
+                </table>
+                <div style="margin-top:20px;padding:5px;font-weight: 700;"></div>
+                '''
+        
+        return body
+
     def build_email_body(self, job: Job,
                          title: str,
                          comment: str,
