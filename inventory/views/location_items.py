@@ -26,6 +26,7 @@ class LocationItemsListView(ListAPIView):
         minimum_required_met = self.request.data.get('minimumRequiredMet', None)
         out_of_stock_met = self.request.data.get('outOfStockMet', None)
         on_hold = self.request.data.get('onHold', None)
+        in_stock = self.request.data.get('inStock', None)
 
         # search by item name contains
         qs = LocationItem.objects \
@@ -50,6 +51,9 @@ class LocationItemsListView(ListAPIView):
 
             if out_of_stock_met:
                 qs = qs.filter(location_id=location_id, quantity=0, on_hold=False)
+
+            if in_stock:
+                qs = qs.filter(location_id=location_id, quantity__gt=0)
 
         if measure_by_id:
             qs = qs.filter(item__measure_by=measure_by_id)
