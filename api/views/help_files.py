@@ -30,7 +30,7 @@ class HelpFileListView(ListAPIView):
                 qs = qs.filter(Q(access_level='P') | Q(access_level='A'))
 
         elif self.request.user.groups.filter(name='Project Managers').exists():
-            if self.request.user.profile.vendor:
+            if self.request.user.profile.vendor and self.request.user.profile.vendor.is_external:
                 qs = qs.filter(Q(access_level='E') | Q(access_level='A'))
             else:
                 qs = qs.filter(Q(access_level='P') | Q(access_level='A'))
