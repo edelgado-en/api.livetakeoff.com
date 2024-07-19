@@ -54,3 +54,4 @@ from .job_schedule_tag import JobScheduleTag
 from .customer_additional_fee_vendor import CustomerAdditionalFeeVendor
 from .last_project_managers_notified import LastProjectManagersNotified
 from .job_acceptance_notification import JobAcceptanceNotification
+from .help import Help

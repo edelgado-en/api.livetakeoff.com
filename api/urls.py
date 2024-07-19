@@ -99,7 +99,9 @@ from .views import (
         RemoveAirportAvailableUsersView,
         PriceListExportView,
         PriceListEntriesView,
-        PriceListingByServiceView
+        PriceListingByServiceView,
+        CreateHelpFileView,
+        HelpFileListView
     )
 
 urlpatterns = [
@@ -240,4 +242,8 @@ urlpatterns = [
     path('tags', TagListView.as_view()),
     
     path('jobs/total-labor-time', JobTotalLaborTimeDetail.as_view()),
+
+    path('help-file/create', CreateHelpFileView.as_view()),
+
+    path('help-files', HelpFileListView.as_view())
 ]

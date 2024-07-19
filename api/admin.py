@@ -42,7 +42,8 @@ from api.models import (
     JobSchedule,
     TailAlert,
     LastProjectManagersNotified,
-    JobAcceptanceNotification
+    JobAcceptanceNotification,
+    Help
 )
 
 class UserProfileInline(admin.StackedInline):
@@ -343,3 +344,8 @@ class JobAcceptanceNotificationAdmin(admin.ModelAdmin):
     list_display = ['id', 'job', 'project_manager', 'attempt', 'timestamp']
     list_per_page = 100
     search_fields = ['job']
+
+@admin.register(Help)
+class HelpAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name', 'file', 'photo', 'url', 'access_level']
+    list_per_page = 100

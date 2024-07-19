@@ -6,10 +6,6 @@ from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 
-from datetime import datetime
-
-import cloudinary
-
 from api.models import (JobFiles, Job)
 
 from api.serializers import (JobFileSerializer)

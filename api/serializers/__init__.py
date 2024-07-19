@@ -40,3 +40,4 @@ from .job_file import JobFileSerializer
 from .tail_file import TailFileSerializer
 from .job_schedule import JobScheduleSerializer
 from .user_profile import UserProfileSerializer
+from .help_file import HelpFileSerializer
