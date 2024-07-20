@@ -41,3 +41,14 @@ class CreateHelpFileView(APIView):
         helpFile = Help.objects.get(pk=id)
         helpFile.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    def patch(self, request, id):
+        helpFile = Help.objects.get(pk=id)
+        helpFile.name = request.data.get('name')
+        helpFile.description = request.data.get('description')
+        helpFile.access_level = request.data.get('access_level', 'A')
+        helpFile.save()
+        
+        serializer = HelpFileSerializer(helpFile)
+       
+        return Response(serializer.data, status=status.HTTP_200_OK)
