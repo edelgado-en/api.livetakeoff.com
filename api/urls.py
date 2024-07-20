@@ -245,5 +245,7 @@ urlpatterns = [
 
     path('help-file/create', CreateHelpFileView.as_view()),
 
+    path('help-file/<int:id>/', CreateHelpFileView.as_view()),
+
     path('help-files', HelpFileListView.as_view())
 ]

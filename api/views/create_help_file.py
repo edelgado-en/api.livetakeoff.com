@@ -35,3 +35,9 @@ class CreateHelpFileView(APIView):
         serializer = HelpFileSerializer(p)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+
+    def delete(self, request, id):
+        helpFile = Help.objects.get(pk=id)
+        helpFile.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
