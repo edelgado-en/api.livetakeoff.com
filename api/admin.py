@@ -229,7 +229,7 @@ class AirportAdmin(admin.ModelAdmin):
 
 @admin.register(FBO)
 class FBOAdmin(admin.ModelAdmin):
-    list_display = ['name', 'active', 'public']
+    list_display = ['name', 'active', 'public', 'hours_of_operation']
     list_per_page = 100 
     ordering = ['name', 'active']
     search_fields = ['name', 'active']

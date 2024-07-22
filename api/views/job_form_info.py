@@ -102,6 +102,7 @@ class JobFormInfoView(APIView):
             f = {
                 'id': fbo.id,
                 'name': fbo.name,
+                'hours_of_operation': fbo.hours_of_operation,
             }
 
             fbo_dtos.append(f)

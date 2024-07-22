@@ -5,6 +5,7 @@ class FBO(models.Model):
     # when a fbo is public it will be shown to customers and it will included in the create estimate view
     public = models.BooleanField(default=False)
     active = models.BooleanField(default=True)
+    hours_of_operation = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self) -> str:
         return self.name
