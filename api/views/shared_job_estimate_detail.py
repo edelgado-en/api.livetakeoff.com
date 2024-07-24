@@ -34,6 +34,7 @@ class SharedJobEstimateDetailView(APIView):
             job_service_estimates.append({
                 'id': job_service_estimate.id,
                 'name': job_service_estimate.service.name,
+                'description': job_service_estimate.service.description,
                 'price': job_service_estimate.price,
                 'category': job_service_estimate.service.category
             })
