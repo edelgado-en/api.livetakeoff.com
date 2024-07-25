@@ -70,9 +70,15 @@ class SharedJobEstimateDetailView(APIView):
         if estimate.is_processed:
             return Response({'error': 'This estimate has already been processed'}, status=status.HTTP_400_BAD_REQUEST)
 
+        full_name = request.data.get('full_name')
+        email = request.data.get('email')
+        phone = request.data.get('phone')
 
         # update estimate status
         estimate.status = request.data.get('status')
+        estimate.accepted_full_name = full_name
+        estimate.accepted_email = email
+        estimate.accepted_phone_number = phone
         estimate.is_processed = True
         estimate.processed_at = datetime.now()
         

@@ -41,6 +41,9 @@ class JobEstimateDetailSerializer(serializers.ModelSerializer):
     job_estimate_discounts = JobEstimateDiscountSerializer(many=True, read_only=True)
     job_estimate_additional_fees = JobEstimateAdditionalFeeSerializer(many=True, read_only=True)
     encoded_id = serializers.CharField(max_length=100, read_only=True, required=False)
+    accepted_full_name = serializers.CharField(max_length=300, read_only=True, required=False)
+    accepted_email = serializers.CharField(max_length=320, read_only=True, required=False)
+    accepted_phone_number = serializers.CharField(max_length=255, read_only=True, required=False)
 
     class Meta:
         model = JobEstimate
@@ -64,5 +67,8 @@ class JobEstimateDetailSerializer(serializers.ModelSerializer):
             'job_estimate_discounts',
             'job_estimate_additional_fees',
             'encoded_id',
-            'show_totals'     
+            'show_totals',
+            'accepted_full_name',
+            'accepted_email',
+            'accepted_phone_number'     
         )

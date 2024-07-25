@@ -38,5 +38,11 @@ class JobEstimate(models.Model):
 
     show_totals = models.BooleanField(default=True)
 
+    accepted_full_name = models.CharField(max_length=300, blank=True, null=True)
+
+    accepted_email = models.CharField(max_length=320, blank=True, null=True)
+
+    accepted_phone_number = models.CharField(max_length=255, blank=True, null=True)
+
     def __str__(self) -> str:
         return str(self.id) + ' - ' + self.tailNumber + ' - ' + self.aircraftType.name
