@@ -48,6 +48,7 @@ class CustomerRetainersServicesView(APIView):
             s = {
                 'id': service.id,
                 'name': service.name,
+                'description': service.description,
                 'category': service.category
             }
 
@@ -71,6 +72,7 @@ class CustomerRetainersServicesView(APIView):
             r = {
                 'id': retainer_service.id,
                 'name': retainer_service.name,
+                'description': retainer_service.description,
                 'category': retainer_service.category
             }
 
