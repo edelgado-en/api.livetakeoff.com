@@ -667,6 +667,15 @@ class EmailNotificationService():
                 <div style="margin-bottom:20px"></div>
                 <table style="border-collapse: collapse">
                     <tr>
+                        <td style="padding:15px">Comment</td>
+                        <td style="padding:15px">{comment}</td>
+                    </tr>
+
+                </table>
+
+                <div style="margin-bottom:20px"></div>
+                <table style="border-collapse: collapse">
+                    <tr>
                         <td style="padding:15px">Customer</td>
                         <td style="padding:15px">{job.customer.name}</td>
                     </tr>
@@ -705,10 +714,6 @@ class EmailNotificationService():
                     <tr>
                         <td style="padding:15px">Retainer Services</td>
                         <td style="padding:15px">{retainer_service_names}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding:15px">Comment</td>
-                        <td style="padding:15px">{comment}</td>
                     </tr>
                 </table>
                 <div style="margin-top:20px;padding:5px;font-weight: 700;"></div>
