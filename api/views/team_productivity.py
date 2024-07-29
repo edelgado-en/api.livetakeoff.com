@@ -116,7 +116,6 @@ class TeamProductivityView(APIView):
         total_jobs = 0
         for item in qs:
             total_jobs += item['total']
-
         
         grand_total_labor_time = 0
         # Sum the Job.labor_time from JobStatusActivity where the status = 'I'
@@ -203,6 +202,46 @@ class TeamProductivityView(APIView):
 
         total_jobs_revenue_not_invoiced = total_jobs_revenue_not_invoiced.aggregate(Sum('job__price'))['job__price__sum']
 
+        # Sum total subcontractor_profit
+        total_subcontractor_profit = JobStatusActivity.objects.filter(
+             Q(status__in=['I']) &
+             Q(activity_type='S') &
+             Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date)
+        )
+
+        if customer_id:
+            total_subcontractor_profit = total_subcontractor_profit.filter(job__customer_id=customer_id)          
+
+        if tailNumber:
+            total_subcontractor_profit = total_subcontractor_profit.filter(Q(job__tailNumber__icontains=tailNumber))
+
+        total_subcontractor_profit = total_subcontractor_profit.aggregate(Sum('job__subcontractor_profit'))['job__subcontractor_profit__sum']
+
+        total_travel_fees_amount_applied = 0
+        total_fbo_fees_amount_applied = 0
+        total_vendor_higher_price_amount_applied = 0
+        total_management_fees_amount_applied = 0
+
+        # Sum total fees
+        total_fees_applied = JobStatusActivity.objects.filter(
+             Q(status__in=['I']) &
+             Q(activity_type='S') &
+             Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date)
+        )
+
+        if customer_id:
+            total_fees_applied = total_fees_applied.filter(job__customer_id=customer_id)          
+
+        if tailNumber:
+            total_fees_applied = total_fees_applied.filter(Q(job__tailNumber__icontains=tailNumber))
+
+        total_travel_fees_amount_applied = total_fees_applied.aggregate(Sum('job__travel_fees_amount_applied'))['job__travel_fees_amount_applied__sum']
+
+        total_fbo_fees_amount_applied = total_fees_applied.aggregate(Sum('job__fbo_fees_amount_applied'))['job__fbo_fees_amount_applied__sum']
+
+        total_vendor_higher_price_amount_applied = total_fees_applied.aggregate(Sum('job__vendor_higher_price_amount_applied'))['job__vendor_higher_price_amount_applied__sum']
+
+        total_management_fees_amount_applied = total_fees_applied.aggregate(Sum('job__management_fees_amount_applied'))['job__management_fees_amount_applied__sum']
 
         # Get the top 5 services in the last 30 days by querying the ServiceActivity table and join to Services Table to get the service name. The resulset should be service name with its corresponding times the service was completed in the last 30 days
         qs = ServiceActivity.objects.filter(
@@ -491,6 +530,11 @@ class TeamProductivityView(APIView):
             'total_retainer_services': grand_total_retainer_services,
             'total_jobs_price': total_jobs_revenue,
             'total_jobs_price_not_invoiced': total_jobs_revenue_not_invoiced,
+            'total_subcontractor_profit': total_subcontractor_profit,
+            'total_travel_fees_amount_applied': total_travel_fees_amount_applied,
+            'total_fbo_fees_amount_applied': total_fbo_fees_amount_applied,
+            'total_vendor_higher_price_amount_applied': total_vendor_higher_price_amount_applied,
+            'total_management_fees_amount_applied': total_management_fees_amount_applied,
             'total_labor_time': grand_total_labor_time,
             'top_services': top_services,
             'top_retainer_services': top_retainer_services,
