@@ -206,6 +206,8 @@ class TeamProductivityView(APIView):
         total_subcontractor_profit = JobStatusActivity.objects.filter(
              Q(status__in=['I']) &
              Q(activity_type='S') &
+            ~Q(job__vendor=None) &
+             Q(job__vendor__is_external=True) &
              Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date)
         )
 
