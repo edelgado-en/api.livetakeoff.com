@@ -370,6 +370,9 @@ class TeamProductivityView(APIView):
             if tailNumber:
                 total_revenue = total_revenue.filter(Q(job__tailNumber__icontains=tailNumber))
 
+            # job has to be invoice to be included in the total_revenue
+            total_revenue = total_revenue.filter(Q(job__status='I'))
+
             total_revenue = total_revenue.aggregate(Sum('job__price'))['job__price__sum']
 
             if total_revenue is None:
