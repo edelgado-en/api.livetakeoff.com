@@ -316,10 +316,14 @@ class TeamProductivityView(APIView):
         top_services = []
         # add a percentage value to each service which is calculated based on the top 5 services provided
         for item in qs:
+            percentage = 0
+
+            if grand_total_services > 0:
+                percentage = round((item['total'] / grand_total_services) * 100, 2)
             top_services.append({
                 'name': item['service__name'],
                 'total': item['total'],
-                'percentage': round((item['total'] / grand_total_services) * 100, 2)
+                'percentage': percentage
             })
 
         
@@ -342,10 +346,15 @@ class TeamProductivityView(APIView):
         top_retainer_services = []
         # add a percentage value to each retainer service which is calculated based on the top 5 retainer services provided
         for item in qs:
+            percentage = 0
+
+            if grand_total_retainer_services > 0:
+                percentage = round((item['total'] / grand_total_retainer_services) * 100, 2)
+
             top_retainer_services.append({
                 'name': item['retainer_service__name'],
                 'total': item['total'],
-                'percentage': round((item['total'] / grand_total_retainer_services) * 100, 2)
+                'percentage': percentage
             })
 
 
