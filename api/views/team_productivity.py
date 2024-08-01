@@ -27,6 +27,8 @@ class TeamProductivityView(APIView):
         dateSelected = request.data.get('dateSelected')
         customer_id = request.data.get('customer_id', None)
         tailNumber = request.data.get('tailNumber', None)
+        is_internal_report = request.data.get('is_internal_report', False)
+        is_external_report = request.data.get('is_external_report', False)
 
         # get start date and end date based on the dateSelected value provided
         if dateSelected == 'yesterday':
@@ -111,7 +113,13 @@ class TeamProductivityView(APIView):
 
         if tailNumber:
             qs = qs.filter(Q(job__tailNumber__icontains=tailNumber))
-            
+        
+        if is_internal_report:
+            qs = qs.filter(Q(job__vendor=None) | Q(job__vendor__is_external=False))
+
+        if is_external_report:
+            qs = qs.filter(~Q(job__vendor=None))
+            qs = qs.filter(Q(job__vendor__is_external=True))
 
         total_jobs = 0
         for item in qs:
@@ -129,6 +137,13 @@ class TeamProductivityView(APIView):
 
         if tailNumber:
             qs = qs.filter(Q(job__tailNumber__icontains=tailNumber))
+
+        if is_internal_report:
+            qs = qs.filter(Q(job__vendor=None) | Q(job__vendor__is_external=False))
+
+        if is_external_report:
+            qs = qs.filter(~Q(job__vendor=None))
+            qs = qs.filter(Q(job__vendor__is_external=True))
 
         qs = qs.aggregate(Sum('job__labor_time'))['job__labor_time__sum']
 
@@ -149,11 +164,17 @@ class TeamProductivityView(APIView):
         if tailNumber:
             qs = qs.filter(Q(job__tailNumber__icontains=tailNumber))
 
+        if is_internal_report:
+            qs = qs.filter(Q(job__vendor=None) | Q(job__vendor__is_external=False))
+
+        if is_external_report:
+            qs = qs.filter(~Q(job__vendor=None))
+            qs = qs.filter(Q(job__vendor__is_external=True))
+
         grand_total_services = 0
         for item in qs:
             grand_total_services += item['total']
 
-        
         # Get the total number of retainer services with status C in the last 30 days by querying at the retainerServiceActivity table
         qs = RetainerServiceActivity.objects.filter(
             Q(status='C') &
@@ -168,11 +189,17 @@ class TeamProductivityView(APIView):
         if tailNumber:
             qs = qs.filter(Q(job__tailNumber__icontains=tailNumber))
 
+        if is_internal_report:
+            qs = qs.filter(Q(job__vendor=None) | Q(job__vendor__is_external=False))
+
+        if is_external_report:
+            qs = qs.filter(~Q(job__vendor=None))
+            qs = qs.filter(Q(job__vendor__is_external=True))
+
         grand_total_retainer_services = 0
         for item in qs:
             grand_total_retainer_services += item['total']
 
-        
         # Sum the total price from JobStatusActivity where the status = 'I' 
         total_jobs_revenue = JobStatusActivity.objects.filter(
              Q(status__in=['I']) &
@@ -185,6 +212,13 @@ class TeamProductivityView(APIView):
 
         if tailNumber:
             total_jobs_revenue = total_jobs_revenue.filter(Q(job__tailNumber__icontains=tailNumber))
+
+        if is_internal_report:
+            total_jobs_revenue = total_jobs_revenue.filter(Q(job__vendor=None) | Q(job__vendor__is_external=False))
+
+        if is_external_report:
+            total_jobs_revenue = total_jobs_revenue.filter(~Q(job__vendor=None))
+            total_jobs_revenue = total_jobs_revenue.filter(Q(job__vendor__is_external=True))
 
         total_jobs_revenue = total_jobs_revenue.aggregate(Sum('job__price'))['job__price__sum']
 
@@ -199,6 +233,13 @@ class TeamProductivityView(APIView):
 
         if tailNumber:
             total_jobs_revenue_not_invoiced = total_jobs_revenue_not_invoiced.filter(Q(job__tailNumber__icontains=tailNumber))
+
+        if is_internal_report:
+            total_jobs_revenue_not_invoiced = total_jobs_revenue_not_invoiced.filter(Q(job__vendor=None) | Q(job__vendor__is_external=False))
+
+        if is_external_report:
+            total_jobs_revenue_not_invoiced = total_jobs_revenue_not_invoiced.filter(~Q(job__vendor=None))
+            total_jobs_revenue_not_invoiced = total_jobs_revenue_not_invoiced.filter(Q(job__vendor__is_external=True))
 
         total_jobs_revenue_not_invoiced = total_jobs_revenue_not_invoiced.aggregate(Sum('job__price'))['job__price__sum']
 
@@ -216,6 +257,10 @@ class TeamProductivityView(APIView):
 
         if tailNumber:
             total_subcontractor_profit = total_subcontractor_profit.filter(Q(job__tailNumber__icontains=tailNumber))
+
+        if is_external_report:
+            total_subcontractor_profit = total_subcontractor_profit.filter(~Q(job__vendor=None))
+            total_subcontractor_profit = total_subcontractor_profit.filter(Q(job__vendor__is_external=True))
 
         total_subcontractor_profit = total_subcontractor_profit.aggregate(Sum('job__subcontractor_profit'))['job__subcontractor_profit__sum']
 
@@ -236,6 +281,13 @@ class TeamProductivityView(APIView):
 
         if tailNumber:
             total_fees_applied = total_fees_applied.filter(Q(job__tailNumber__icontains=tailNumber))
+
+        if is_internal_report:
+            total_fees_applied = total_fees_applied.filter(Q(job__vendor=None) | Q(job__vendor__is_external=False))
+
+        if is_external_report:
+            total_fees_applied = total_fees_applied.filter(~Q(job__vendor=None))
+            total_fees_applied = total_fees_applied.filter(Q(job__vendor__is_external=True))
 
         total_travel_fees_amount_applied = total_fees_applied.aggregate(Sum('job__travel_fees_amount_applied'))['job__travel_fees_amount_applied__sum']
 
