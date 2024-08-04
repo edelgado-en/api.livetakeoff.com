@@ -621,7 +621,7 @@ class TeamProductivityView(APIView):
                     total_services += service['total']
 
                 # Get the total number of retainer services with status C for this vendor_id
-                qs = RetainerServiceActivity.objects.filter(
+                """ qs = RetainerServiceActivity.objects.filter(
                     Q(status='C') &
                     Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date) &
                     Q(job__vendor_id=vendor_id)
@@ -631,7 +631,7 @@ class TeamProductivityView(APIView):
 
                 total_retainer_services = 0
                 for service in qs:
-                    total_retainer_services += service['total'] 
+                    total_retainer_services += service['total']  """
 
                 processed_vendors.append({
                     'id': vendor_id,
@@ -640,7 +640,7 @@ class TeamProductivityView(APIView):
                     'revenue': item['total_price'],
                     'subcontractor_profit': item['total_subcontractor_profit'],
                     'total_services': total_services,
-                    'total_retainer_services': total_retainer_services
+                    #'total_retainer_services': total_retainer_services
                 })
 
             # sort by highest revenue first
