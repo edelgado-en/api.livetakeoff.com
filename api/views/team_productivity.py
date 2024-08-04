@@ -13,7 +13,8 @@ from api.models import (
     Job,
     JobStatusActivity,
     UserProfile,
-    PriceListEntries
+    PriceListEntries,
+    Vendor
 )
 
 class TeamProductivityView(APIView):
@@ -588,8 +589,63 @@ class TeamProductivityView(APIView):
 
         # sort users by highest total_revenue
         users = sorted(users, key=lambda k: k['total_revenue'], reverse=True)
-           
-        
+
+        processed_vendors = []
+        if not is_internal_report and not is_external_report:
+            # Fetch Vendors that have at least one job invoiced in the last 30 days
+            qs = JobStatusActivity.objects.filter(
+                Q(status__in=['I']) &
+                Q(activity_type='S') &
+                Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date)
+            ).values('job__vendor__id', 'job__vendor__name').annotate(
+                total_jobs=Count('job__id'),
+                total_price=Sum('job__price'),
+                total_subcontractor_profit=Sum('job__subcontractor_profit'),
+            ).values('job__vendor__id', 'job__vendor__name', 'total_jobs', 'total_price', 'total_subcontractor_profit')
+            
+            for item in qs:
+                vendor_id = item['job__vendor__id']
+                vendor_name = item['job__vendor__name']
+
+                # Get the total number of services with statuc C for this vendor_id
+                qs = ServiceActivity.objects.filter(
+                    Q(status='C') &
+                    Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date) &
+                    Q(job__vendor_id=vendor_id)
+                ).values('service__id').annotate(
+                    total=Count('service__id')
+                ).values('total')
+
+                total_services = 0
+                for service in qs:
+                    total_services += service['total']
+
+                # Get the total number of retainer services with status C for this vendor_id
+                qs = RetainerServiceActivity.objects.filter(
+                    Q(status='C') &
+                    Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date) &
+                    Q(job__vendor_id=vendor_id)
+                ).values('retainer_service__id').annotate(
+                    total=Count('retainer_service__id')
+                ).values('total')
+
+                total_retainer_services = 0
+                for service in qs:
+                    total_retainer_services += service['total'] 
+
+                processed_vendors.append({
+                    'id': vendor_id,
+                    'name': vendor_name,
+                    'total_jobs': item['total_jobs'],
+                    'revenue': item['total_price'],
+                    'subcontractor_profit': item['total_subcontractor_profit'],
+                    'total_services': total_services,
+                    'total_retainer_services': total_retainer_services
+                })
+
+            # sort by highest revenue first
+            processed_vendors = sorted(processed_vendors, key=lambda k: k['revenue'], reverse=True)
+
         return Response({
             'total_jobs': total_jobs,
             'total_services': grand_total_services,
@@ -604,7 +660,8 @@ class TeamProductivityView(APIView):
             'total_labor_time': grand_total_labor_time,
             'top_services': top_services,
             'top_retainer_services': top_retainer_services,
-            'users': users
+            'users': users,
+            'vendors': processed_vendors
         }, status=status.HTTP_200_OK)
 
 
