@@ -602,6 +602,12 @@ class TeamProductivityView(APIView):
                 total_price=Sum('job__price'),
                 total_subcontractor_profit=Sum('job__subcontractor_profit'),
             ).values('job__vendor__id', 'job__vendor__name', 'total_jobs', 'total_price', 'total_subcontractor_profit')
+
+            if customer_id:
+                qs = qs.filter(job__customer_id=customer_id)
+
+            if tailNumber:
+                qs = qs.filter(Q(job__tailNumber__icontains=tailNumber))
             
             for item in qs:
                 vendor_id = item['job__vendor__id']
