@@ -159,8 +159,12 @@ class CreateEstimateView(APIView):
             
             else:
                 dollar_amount = additional_fee['fee']
-                
-                additional_fee['additional_fee_dollar_amount'] = dollar_amount
+
+                if additional_fee['name'] == 'M':
+                    dollar_amount = additional_fee['fee'] * len(services_with_prices)
+                    additional_fee['additional_fee_dollar_amount'] = dollar_amount
+                else:
+                    additional_fee['additional_fee_dollar_amount'] = dollar_amount
                 
                 total_price += dollar_amount
 
