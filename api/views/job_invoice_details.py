@@ -18,8 +18,7 @@ class JobInvoiceDetailsView(APIView):
 
         invoice_details = {
             'job_id': job.id,
-            'internal_additional_cost': job.internal_additional_cost if job.internal_additional_cost else 0,
-            'subcontractor_profit': job.subcontractor_profit if job.subcontractor_profit else 0,
+            'internal_additional_cost': job.internal_additional_cost if job.internal_additional_cost else 0
         }
 
         if job.vendor:
@@ -29,6 +28,9 @@ class JobInvoiceDetailsView(APIView):
                 'charge': job.vendor_charge if job.vendor_charge else 0,
                 'additional_cost': job.vendor_additional_cost if job.vendor_additional_cost else 0
             }
+
+            if job.vendor_charge:
+                invoice_details['subcontractor_profit'] = job.subcontractor_profit if job.subcontractor_profit else 0,
 
         return Response(invoice_details, status=status.HTTP_200_OK)
 

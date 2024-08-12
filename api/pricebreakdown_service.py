@@ -137,22 +137,14 @@ class PriceBreakdownService():
                 if additional_fee['fee'] > 0:
                     dollar_amount = total_price * additional_fee['fee'] / 100
                     
-                    if additional_fee['name'] == 'M':
-                        # multiple dollar_amount by the number of services
-                        additional_fee['additional_fee_dollar_amount'] = dollar_amount * (len(assigned_services) + retainer_services_count)
-
-                    else:
-                        additional_fee['additional_fee_dollar_amount'] = dollar_amount
+                    additional_fee['additional_fee_dollar_amount'] = dollar_amount
 
                     total_price += dollar_amount
             
             else:
                 dollar_amount = additional_fee['fee']
-                if additional_fee['name'] == 'M':
-                        dollar_amount = additional_fee['fee'] * (len(assigned_services) + retainer_services_count)
-                        additional_fee['additional_fee_dollar_amount'] = dollar_amount
-                else:
-                    additional_fee['additional_fee_dollar_amount'] = dollar_amount
+                
+                additional_fee['additional_fee_dollar_amount'] = dollar_amount
                 
                 total_price += dollar_amount
 
