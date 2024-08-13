@@ -101,7 +101,8 @@ from .views import (
         PriceListEntriesView,
         PriceListingByServiceView,
         CreateHelpFileView,
-        HelpFileListView
+        HelpFileListView,
+        UsersProductivityView
     )
 
 urlpatterns = [
@@ -230,6 +231,7 @@ urlpatterns = [
 
     path('services-by-airport', ServiceByAirportView.as_view()),
     path('team-productivity', TeamProductivityView.as_view()),
+    path('users-productivity', UsersProductivityView.as_view()),
     path('user-productivity/<int:id>/', UserProductivityView.as_view()),
     path('premium/contact', PremiumContactView.as_view()),
 
