@@ -218,7 +218,7 @@ class AircraftTypeAdmin(admin.ModelAdmin):
 
 @admin.register(Airport)
 class AirportAdmin(admin.ModelAdmin):
-    list_display = ['initials', 'name', 'active', 'public', 'preferred_project_manager']
+    list_display = ['initials', 'name', 'active', 'public', 'airport_type', 'preferred_project_manager']
     list_per_page = 100
     ordering = ['initials', 'name', 'active']
     search_fields = ['initials', 'name', 'active']
