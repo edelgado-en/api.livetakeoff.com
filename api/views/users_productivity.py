@@ -241,6 +241,9 @@ class UsersProductivityView(APIView):
         if tailNumber:
             qs = qs.filter(Q(job__tailNumber__icontains=tailNumber))
 
+        if vendor_id:
+            qs = qs.filter(Q(job__vendor_id=vendor_id))
+
         for item in qs:
             user_id = item['project_manager__id']
             if item['project_manager__id'] not in processed_user_ids:
@@ -266,6 +269,9 @@ class UsersProductivityView(APIView):
                 if tailNumber:
                     qs = qs.filter(Q(job__tailNumber__icontains=tailNumber))
 
+                if vendor_id:
+                    qs = qs.filter(Q(job__vendor_id=vendor_id))
+
                 total_services = 0
                 for service in qs:
                     total_services += service['total']
@@ -285,6 +291,9 @@ class UsersProductivityView(APIView):
                 if tailNumber:
                     qs_retainer = qs_retainer.filter(Q(job__tailNumber__icontains=tailNumber))
 
+                if vendor_id:
+                    qs_retainer = qs_retainer.filter(Q(job__vendor_id=vendor_id))
+
                 # Sum the price of each service completed by this user in the last 30 days
                 total_revenue = ServiceActivity.objects.filter(
                     Q(status='C') &
@@ -297,6 +306,9 @@ class UsersProductivityView(APIView):
 
                 if tailNumber:
                     total_revenue = total_revenue.filter(Q(job__tailNumber__icontains=tailNumber))
+
+                if vendor_id:
+                    total_revenue = total_revenue.filter(Q(job__vendor_id=vendor_id))
 
                 total_revenue = total_revenue.aggregate(Sum('price'))['price__sum']
 
@@ -321,6 +333,9 @@ class UsersProductivityView(APIView):
 
                 if tailNumber:
                     r_total_labor_time = r_total_labor_time.filter(Q(job__tailNumber__icontains=tailNumber))
+
+                if vendor_id:
+                    r_total_labor_time = r_total_labor_time.filter(Q(job__vendor_id=vendor_id))
 
                 r_total_labor_time = r_total_labor_time.aggregate(Sum('job__labor_time'))['job__labor_time__sum']
 
