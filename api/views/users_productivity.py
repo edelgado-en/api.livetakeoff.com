@@ -24,6 +24,7 @@ class UsersProductivityView(APIView):
         dateSelected = request.data.get('dateSelected')
         customer_id = request.data.get('customer_id', None)
         tailNumber = request.data.get('tailNumber', None)
+        vendor_id = request.data.get('vendor_id', None)
 
         # get start date and end date based on the dateSelected value provided
         if dateSelected == 'yesterday':
@@ -108,6 +109,9 @@ class UsersProductivityView(APIView):
         if tailNumber:
             qs = qs.filter(Q(job__tailNumber__icontains=tailNumber))
 
+        if vendor_id:
+            qs = qs.filter(Q(job__vendor_id=vendor_id))
+
         processed_user_ids = []
 
         users = []
@@ -135,6 +139,9 @@ class UsersProductivityView(APIView):
             if tailNumber:
                 qs = qs.filter(Q(job__tailNumber__icontains=tailNumber))
 
+            if vendor_id:
+                qs = qs.filter(Q(job__vendor_id=vendor_id))
+
             total_services = 0
             for service in qs:
                 total_services += service['total']
@@ -154,6 +161,9 @@ class UsersProductivityView(APIView):
             if tailNumber:
                 qs_retainer = qs_retainer.filter(Q(job__tailNumber__icontains=tailNumber))
 
+            if vendor_id:
+                qs_retainer = qs_retainer.filter(Q(job__vendor_id=vendor_id))
+
             total_revenue = JobStatusActivity.objects.filter(
              Q(status__in=['C']) &
              Q(activity_type='S') &
@@ -166,6 +176,9 @@ class UsersProductivityView(APIView):
 
             if tailNumber:
                 total_revenue = total_revenue.filter(Q(job__tailNumber__icontains=tailNumber))
+
+            if vendor_id:
+                total_revenue = total_revenue.filter(Q(job__vendor_id=vendor_id))
 
             # job has to be invoice to be included in the total_revenue
             total_revenue = total_revenue.filter(Q(job__status='I'))
@@ -193,6 +206,9 @@ class UsersProductivityView(APIView):
 
             if tailNumber:
                 s_total_labor_time = s_total_labor_time.filter(Q(job__tailNumber__icontains=tailNumber))
+
+            if vendor_id:
+                s_total_labor_time = s_total_labor_time.filter(Q(job__vendor_id=vendor_id))
 
             s_total_labor_time = s_total_labor_time.aggregate(Sum('job__labor_time'))['job__labor_time__sum']
 
