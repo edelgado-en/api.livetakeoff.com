@@ -45,6 +45,7 @@ class JobListView(ListAPIView):
             project_manager = self.request.data.get('project_manager')
             tags = self.request.data.get('tags')
             vendor = self.request.data.get('vendor')
+            airport_type = self.request.data.get('airport_type', 'All')
 
             qs = Job.objects.prefetch_related('job_service_assignments') \
                              .prefetch_related('job_retainer_service_assignments') \
@@ -85,6 +86,9 @@ class JobListView(ListAPIView):
             if vendor != 'All':
                 qs = qs.filter(vendor_id=vendor)
 
+            if airport_type != 'All':
+                qs = qs.filter(airport__airport_type=airport_type)
+
 
             sortField = self.request.data.get('sortField')
             # nulls last
@@ -108,6 +112,7 @@ class JobListView(ListAPIView):
             airport = self.request.data.get('airport')
             project_manager = self.request.data.get('project_manager')
             tags = self.request.data.get('tags')
+            airport_type = self.request.data.get('airport_type', 'All')
 
             qs = Job.objects.prefetch_related('job_service_assignments') \
                                 .prefetch_related('job_retainer_service_assignments') \
@@ -164,6 +169,9 @@ class JobListView(ListAPIView):
 
             if customer != 'All':
                 qs = qs.filter(customer_id=customer)
+
+            if airport_type != 'All':
+                qs = qs.filter(airport__airport_type=airport_type)
 
             sortField = self.request.data.get('sortField')
             if sortField == 'requestDate':
