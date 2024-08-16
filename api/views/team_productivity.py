@@ -386,7 +386,7 @@ class TeamProductivityView(APIView):
                 for service in qs:
                     total_services += service['total']
 
-
+                # test
                 t_subcontractor_profit = 0
                 if item['total_subcontractor_profit']:
                     t_subcontractor_profit = item['total_subcontractor_profit']
