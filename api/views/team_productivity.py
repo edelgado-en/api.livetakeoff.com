@@ -255,10 +255,6 @@ class TeamProductivityView(APIView):
         if tailNumber:
             total_subcontractor_profit = total_subcontractor_profit.filter(Q(job__tailNumber__icontains=tailNumber))
 
-        if is_external_report:
-            total_subcontractor_profit = total_subcontractor_profit.filter(~Q(job__vendor=None))
-            total_subcontractor_profit = total_subcontractor_profit.filter(Q(job__vendor__is_external=True))
-
         total_subcontractor_profit = total_subcontractor_profit.aggregate(Sum('job__subcontractor_profit'))['job__subcontractor_profit__sum']
 
         total_travel_fees_amount_applied = 0
@@ -391,21 +387,21 @@ class TeamProductivityView(APIView):
                     total_services += service['total']
 
 
-                total_subcontractor_profit = 0
+                t_subcontractor_profit = 0
                 if item['total_subcontractor_profit']:
-                    total_subcontractor_profit = item['total_subcontractor_profit']
+                    t_subcontractor_profit = item['total_subcontractor_profit']
                 
                 subcontractor_profit_percentage = 0
 
-                if item['total_price'] > 0 and total_subcontractor_profit > 0:
-                    subcontractor_profit_percentage = round((total_subcontractor_profit / item['total_price']) * 100, 2)
+                if item['total_price'] > 0 and t_subcontractor_profit > 0:
+                    subcontractor_profit_percentage = round((t_subcontractor_profit / item['total_price']) * 100, 2)
 
                 processed_vendors.append({
                     'id': vendor_id,
                     'name': vendor_name,
                     'total_jobs': item['total_jobs'],
                     'revenue': item['total_price'],
-                    'subcontractor_profit': item['total_subcontractor_profit'],
+                    'subcontractor_profit': t_subcontractor_profit,
                     'total_services': total_services,
                     'subcontractor_profit_percentage': subcontractor_profit_percentage
                 })
