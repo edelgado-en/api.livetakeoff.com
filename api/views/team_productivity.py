@@ -390,6 +390,16 @@ class TeamProductivityView(APIView):
                 for service in qs:
                     total_services += service['total']
 
+
+                total_subcontractor_profit = 0
+                if item['total_subcontractor_profit']:
+                    total_subcontractor_profit = item['total_subcontractor_profit']
+                
+                subcontractor_profit_percentage = 0
+
+                if item['total_price'] > 0 and total_subcontractor_profit > 0:
+                    subcontractor_profit_percentage = round((total_subcontractor_profit / item['total_price']) * 100, 2)
+
                 processed_vendors.append({
                     'id': vendor_id,
                     'name': vendor_name,
@@ -397,6 +407,7 @@ class TeamProductivityView(APIView):
                     'revenue': item['total_price'],
                     'subcontractor_profit': item['total_subcontractor_profit'],
                     'total_services': total_services,
+                    'subcontractor_profit_percentage': subcontractor_profit_percentage
                 })
 
             # sort by highest revenue first
