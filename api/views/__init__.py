@@ -103,3 +103,4 @@ from .price_listing_by_service import PriceListingByServiceView
 from .create_help_file import CreateHelpFileView
 from .help_files import HelpFileListView
 from .users_productivity import UsersProductivityView
+from .apply_fee_changes import ApplyFeeChangesView

@@ -15,6 +15,8 @@ class Airport(models.Model):
     active = models.BooleanField(default=True)
     preferred_project_manager = models.ForeignKey('auth.User', on_delete=models.PROTECT, related_name='preferred_airports', null=True, blank=True)
     airport_type = models.CharField(max_length=1, choices=TYPE_CHOICES, default='E')
+    fee = models.DecimalField(max_digits=9, decimal_places=2, null=True, blank=True)
+    fee_percentage = models.BooleanField(default=False, help_text='If true, the fee is of type percentage, otherwise it is a fixed fee.')
 
     def __str__(self) -> str:
         return self.name

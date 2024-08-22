@@ -102,7 +102,8 @@ from .views import (
         PriceListingByServiceView,
         CreateHelpFileView,
         HelpFileListView,
-        UsersProductivityView
+        UsersProductivityView,
+        ApplyFeeChangesView
     )
 
 urlpatterns = [
@@ -150,6 +151,8 @@ urlpatterns = [
     path('airports/customer-fees', AirportCustomerFeesView.as_view()),
 
     path('fbos/customer-fees', FBOCustomerFeesView.as_view()),
+
+    path('apply-fee-changes', ApplyFeeChangesView.as_view()),
 
     path('vendors', VendorsView.as_view()),
 

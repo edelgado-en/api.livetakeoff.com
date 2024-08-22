@@ -6,4 +6,4 @@ class AirportSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Airport
-        fields = ('id', 'name', 'initials', 'active')
+        fields = ('id', 'name', 'initials', 'active', 'fee', 'fee_percentage')
