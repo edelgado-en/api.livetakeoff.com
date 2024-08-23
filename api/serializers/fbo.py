@@ -6,4 +6,4 @@ class FBOSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FBO
-        fields = ('id', 'name', 'hours_of_operation')
+        fields = ('id', 'name', 'hours_of_operation', 'fee', 'fee_percentage')
