@@ -116,8 +116,9 @@ class PriceBreakdownService():
                 break
         
         # if at_least_one_travel_fee is False, then add a travel fee to the additional_fees list using the job.airport.fee
-        if not at_least_one_travel_fee and job.airport.fee > 0:
-            additional_fees.append({'id': -1, 'name': 'A', 'fee': job.airport.fee, 'isPercentage': job.airport.fee_percentage})
+        if not at_least_one_travel_fee and job.airport.fee:
+            if job.airport.fee > 0:
+                additional_fees.append({'id': -1, 'name': 'A', 'fee': job.airport.fee, 'isPercentage': job.airport.fee_percentage})
 
         at_least_one_fbo_fee = False
         for additional_fee in additional_fees:
@@ -125,8 +126,9 @@ class PriceBreakdownService():
                 at_least_one_fbo_fee = True
                 break
 
-        if not at_least_one_fbo_fee and job.fbo.fee > 0:
-            additional_fees.append({'id': -2, 'name': 'F', 'fee': job.fbo.fee, 'isPercentage': job.fbo.fee_percentage})
+        if not at_least_one_fbo_fee and job.fbo.fee:
+            if job.fbo.fee > 0:
+                additional_fees.append({'id': -2, 'name': 'F', 'fee': job.fbo.fee, 'isPercentage': job.fbo.fee_percentage})
 
         # calculate total price discounts first, then additional fees
         total_price = services_price
