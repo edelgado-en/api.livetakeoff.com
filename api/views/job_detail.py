@@ -355,7 +355,7 @@ class JobDetail(APIView):
             return False
         
         # increase security to only see the job have at least one assignment for the same vendor
-        if user.profile.master_vendor_pm:
+        if user.profile.master_vendor_pm and JobServiceAssignment.objects.filter(project_manager__profile__vendor=user.profile.vendor, job=job).exists():
             return True
         
         if JobServiceAssignment.objects.filter(project_manager=user.id, job=job).exists() \
