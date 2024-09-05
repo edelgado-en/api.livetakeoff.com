@@ -4,7 +4,8 @@ from rest_framework .response import Response
 from rest_framework.generics import ListAPIView
 from ..serializers import (
         JobSerializer,
-        JobAdminSerializer
+        JobAdminSerializer,
+        JobMasterPmSerializer
     )
 
 from ..pagination import CustomPageNumberPagination
@@ -29,6 +30,9 @@ class JobListView(ListAPIView):
           or self.request.user.groups.filter(name='Account Managers').exists() \
           or self.request.user.groups.filter(name='Internal Coordinators').exists():
             return JobAdminSerializer
+        
+        elif self.request.user.profile.master_vendor_pm:
+            return JobMasterPmSerializer
 
         return JobSerializer
 
@@ -190,25 +194,41 @@ class JobListView(ListAPIView):
         if self.request.user.groups.filter(name='Project Managers').exists():
             job_ids = set()
 
-            # Get job ids from pending services/retainer_services assigned to the current user
-            # If you have at least one pending service assigned to you, you can see the job
-            assignments = JobServiceAssignment.objects \
-                                            .select_related('job') \
-                                            .filter(project_manager=self.request.user.id) \
-                                            .all()
+            is_master_vendor_pm = self.request.user.profile.master_vendor_pm
 
-            for assignment in assignments:
-                if assignment.status != 'C':
-                    job_ids.add(assignment.job.id)
-            
-            retainer_assignment = JobRetainerServiceAssignment.objects \
-                                                            .select_related('job') \
-                                                            .filter(project_manager=self.request.user.id) \
-                                                            .all()
+            if is_master_vendor_pm:
+                # Get job ids from pending services/retainer_services assigned to the current user's vendor
+                # If you have at least one pending service assigned to your vendor, you can see the job
+                assignments = JobServiceAssignment.objects \
+                                                .select_related('job') \
+                                                .filter(project_manager__profile__vendor=self.request.user.profile.vendor) \
+                                                .all()
 
-            for assignment in retainer_assignment:
-                if assignment.status != 'C':
-                    job_ids.add(assignment.job.id)
+                for assignment in assignments:
+                    if assignment.status != 'C':
+                        job_ids.add(assignment.job.id)
+
+            else:
+                # Get job ids from pending services/retainer_services assigned to the current user
+                # If you have at least one pending service assigned to you, you can see the job
+                assignments = JobServiceAssignment.objects \
+                                                .select_related('job') \
+                                                .filter(project_manager=self.request.user.id) \
+                                                .all()
+
+                for assignment in assignments:
+                    if assignment.status != 'C':
+                        job_ids.add(assignment.job.id)
+                
+                retainer_assignment = JobRetainerServiceAssignment.objects \
+                                                                .select_related('job') \
+                                                                .filter(project_manager=self.request.user.id) \
+                                                                .all()
+
+                for assignment in retainer_assignment:
+                    if assignment.status != 'C':
+                        job_ids.add(assignment.job.id)
+
 
             # the only statuses that a PM can see is Assigned and WIP
             return Job.objects \

@@ -62,7 +62,13 @@ class JobServiceAssignmentView(APIView):
         airport = job.airport
 
         # get project managers and their availability
-        project_managers = User.objects.filter(groups__name='Project Managers', is_active=True)
+        is_master_vendor_pm = self.request.user.profile.master_vendor_pm
+
+        if is_master_vendor_pm:
+            # only get the project managers that are part of the same vendor id as the self.request.user.profile.vendor
+            project_managers = User.objects.filter(groups__name='Project Managers', is_active=True, profile__vendor=self.request.user.profile.vendor)
+        else:
+            project_managers = User.objects.filter(groups__name='Project Managers', is_active=True)
 
         for project_manager in project_managers:
             # Check if this project_manager has any entries in UserAvailableAirport table. If there are entries, then check if the airport for this job is in the list of available airports for this project manager

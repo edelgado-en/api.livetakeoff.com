@@ -60,7 +60,8 @@ class JobDetail(APIView):
             or request.user.is_staff \
             or (request.user.profile.customer and request.user.profile.customer == job.customer) \
             or request.user.groups.filter(name='Account Managers').exists() \
-            or request.user.groups.filter(name='Internal Coordinators').exists():
+            or request.user.groups.filter(name='Internal Coordinators').exists() \
+            or request.user.profile.master_vendor_pm:
                 
                 # return all services attached to this job
                 service_assignments = job.job_service_assignments \
@@ -346,14 +347,16 @@ class JobDetail(APIView):
         if user.profile.customer and user.profile.customer == job.customer:
             return True
 
-
-
         # You are a Project Manager
         # Because the PM needs to be able to complete job after completing all the services
         # we allow them if they have at least one service associated with the job
 
         if job.status == 'I':
             return False
+        
+        # increase security to only see the job have at least one assignment for the same vendor
+        if user.profile.master_vendor_pm:
+            return True
         
         if JobServiceAssignment.objects.filter(project_manager=user.id, job=job).exists() \
             or JobRetainerServiceAssignment.objects.filter(project_manager=user.id, job=job).exists():

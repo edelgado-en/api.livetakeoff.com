@@ -19,8 +19,8 @@ class UserProfile(models.Model):
     enable_estimates = models.BooleanField(default=False)
     enable_invoice = models.BooleanField(default=False)
     show_job_price = models.BooleanField(default=False)
-    show_all_services_report = models.BooleanField(default=False,
-                                                    help_text='If enabled, the external project manager will see all services completed by its vendor in the service report. If disabled, the external project manager will only see what its been completed by him/her')
+    master_vendor_pm = models.BooleanField(default=False,
+                                                    help_text='If enabled, the external project manager will see all services completed by its vendor in the service report. If disabled, the external project manager will only see what its been completed by him/her. Additionally, the master vendor PM can see all jobs assigned to any PM in the vendor, and it can re-assign jobs to any PM in the vendor.')
     prompt_requested_by = models.BooleanField(default=False, help_text='For customers users that use generic profiles, this will prompt them to enter their name when creating a job.')
 
     show_airport_fees = models.BooleanField(default=False, help_text='If enabled, the user will be able to see airport and fbo additional fees when creating a job. The information will be shown when selecting an airport or fbo.')

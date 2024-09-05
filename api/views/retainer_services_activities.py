@@ -130,7 +130,7 @@ class RetainerServiceActivityListView(ListAPIView):
         if is_customer:
             qs = qs.filter(job__customer=user_profile.customer)
 
-        if is_external_project_manager and user_profile.show_all_services_report:
+        if is_external_project_manager and user_profile.master_vendor_pm:
             qs = qs.filter(job__vendor_id=user_profile.vendor.id)
         elif is_external_project_manager:
             qs = qs.filter(project_manager=self.request.user)

@@ -128,6 +128,10 @@ class UserView(APIView):
         else:
             if LocationUser.objects.filter(user=user).exists():
                 showInventory = True
+
+        isMasterPM = False
+        if user_profile and user_profile.master_vendor_pm:
+            isMasterPM = True
         
         content = {
             "initials": first_name[0] + last_name[0],
@@ -162,7 +166,8 @@ class UserView(APIView):
             'enableInvoices': user_profile.enable_invoice,
             'promptRequestedBy': user_profile.prompt_requested_by,
             'showInventory': showInventory,
-            'showAirportFees': canSeeAirportAdditionalFees
+            'showAirportFees': canSeeAirportAdditionalFees,
+            'isMasterPM': isMasterPM,
         }
 
         return Response(content)

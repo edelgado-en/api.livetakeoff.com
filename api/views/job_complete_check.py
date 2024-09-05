@@ -50,6 +50,10 @@ class JobCompleteCheck(APIView):
                  or request.user.groups.filter(name='Account Managers').exists():
             is_admin = True
 
+        is_master_pm = False
+        if request.user.profile.master_vendor_pm:
+            is_master_pm = True
+
         # Get the JobStatusActivity for this job where the activity is 'S' and the status is 'W'
         job_status_activity = JobStatusActivity.objects.filter(job=job, activity_type='S', status='W').first()
 
@@ -82,6 +86,7 @@ class JobCompleteCheck(APIView):
                          'photos_count': photos_count,
                          'other_pms_working_on_it': other_pms_working_on_it,
                          'is_admin': is_admin,
+                         'is_master_pm': is_master_pm,
                          'minutes': minutes,
                          'hours': hours
                         },
