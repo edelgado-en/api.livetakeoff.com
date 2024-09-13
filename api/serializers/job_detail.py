@@ -28,6 +28,7 @@ class JobDetailSerializer(serializers.ModelSerializer):
     created_by = BasicUserSerializer(read_only=True)
     encoded_id = serializers.CharField(max_length=100, read_only=True, required=False)
     tags = JobTagSerializer(many=True)
+    discounted_price = serializers.DecimalField(max_digits=9, decimal_places=2, read_only=True, required=False)
 
     files = serializers.SerializerMethodField()
 
@@ -84,7 +85,8 @@ class JobDetailSerializer(serializers.ModelSerializer):
             'confirmed_phone_number',
             'arrival_formatted_date',
             'departure_formatted_date',
-            'complete_before_formatted_date'
+            'complete_before_formatted_date',
+            'discounted_price'
         )
 
 

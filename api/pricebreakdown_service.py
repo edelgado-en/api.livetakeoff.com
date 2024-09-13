@@ -197,6 +197,7 @@ class PriceBreakdownService():
             'servicesPrice': f'{services_price:,.2f}',
             'discounts': discounts,
             'discountedPrice': f'{discounted_price:,.2f}',
+            'discountedPriceNoFormat': discounted_price,
             'additionalFees': additional_fees,
             'totalPrice': total_price,
             'manuallySet': not job.is_auto_priced,

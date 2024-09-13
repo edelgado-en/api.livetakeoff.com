@@ -6,7 +6,10 @@ from rest_framework.views import APIView
 from django.contrib.auth.models import User
 from api.pricebreakdown_service import PriceBreakdownService
 
-from api.models import (Job, CustomerSettings)
+from api.models import (Job,
+                        InvoicedService,
+                        InvoicedDiscount,
+                        InvoicedFee)
 
 class JobPriceBreakdownView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
@@ -19,14 +22,42 @@ class JobPriceBreakdownView(APIView):
 
         if not self.can_see_price_breakdown(request.user, job):
             return Response({'error': 'You do not have permission to see the price breakdown'}, status=status.HTTP_403_FORBIDDEN)
+        
+        invoiced_services = InvoicedService.objects.filter(job=job)
+
+        if job.status == 'I' and invoiced_services.exists():
+            aircraftType = job.aircraftType
+            priceListType = job.invoiced_price_list
+
+            invoice_fees = InvoicedFee.objects.filter(job=job)
+            invoice_discounts = InvoicedDiscount.objects.filter(job=job)
+
+            price_breakdown = {
+                'priceListType': priceListType.name.upper(),
+                'aircraftType': aircraftType.name,
+                'services': [{'name': service.name, 'price': service.price} for service in invoiced_services],
+                'servicesPrice': sum([service.price for service in invoiced_services]),
+                'discounts': [{'name': discount.type,
+                               'discount': discount.discount,
+                               'isPercentage': discount.percentage,
+                               'discount_dollar_amount': discount.discount_dollar_amount} for discount in invoice_discounts],
+                'discountedPrice': job.discounted_price,
+                'additionalFees': [{'name': fee.type,
+                                    'fee': fee.fee,
+                                    'isPercentage': fee.percentage,
+                                    'additional_fee_dollar_amount': fee.fee_dollar_amount} for fee in invoice_fees],
+                'totalPrice': job.price
+            }
+
+            price_breakdown['totalPrice'] = f"{price_breakdown['totalPrice']:,.2f}"
+
+            return Response(price_breakdown, status=status.HTTP_200_OK)
 
 
         price_breakdown = PriceBreakdownService().get_price_breakdown(job)
-
         price_breakdown['totalPrice'] = f"{price_breakdown['totalPrice']:,.2f}"
 
         return Response(price_breakdown, status=status.HTTP_200_OK)
-
 
     def can_see_price_breakdown(self, user, job):
         # if user is customer and it matches the job customer, user should have permission to see price breakdown

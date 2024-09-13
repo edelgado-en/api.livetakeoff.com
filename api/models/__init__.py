@@ -55,3 +55,6 @@ from .customer_additional_fee_vendor import CustomerAdditionalFeeVendor
 from .last_project_managers_notified import LastProjectManagersNotified
 from .job_acceptance_notification import JobAcceptanceNotification
 from .help import Help
+from .invoiced_service import InvoicedService
+from .invoiced_discount import InvoicedDiscount
+from .invoiced_fee import InvoicedFee

@@ -5,7 +5,20 @@ from rest_framework .response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from ..pagination import CustomPageNumberPagination
-from api.models import (Job, JobStatusActivity, PriceListEntries, ServiceActivity, UserCustomer, UserAvailableAirport)
+
+from api.pricebreakdown_service import PriceBreakdownService
+
+from api.models import (Job,
+                        JobStatusActivity,
+                        PriceListEntries,
+                        ServiceActivity,
+                        UserCustomer,
+                        UserAvailableAirport,
+                        InvoicedDiscount,
+                        InvoicedFee,
+                        InvoicedService
+                        )
+
 from ..serializers import (
         JobCompletedSerializer,
         JobAdminSerializer
@@ -197,6 +210,8 @@ class CompletedJobsListView(ListAPIView):
         if serializer.is_valid():
             serializer.save()
 
+            new_status = request.data['status']
+
             if job.vendor:
                 vendor_charge = job.vendor_charge if job.vendor_charge else 0
                 vendor_additional_cost = job.vendor_additional_cost if job.vendor_additional_cost else 0
@@ -204,7 +219,7 @@ class CompletedJobsListView(ListAPIView):
 
                 job.save(update_fields=['subcontractor_profit'])
             
-            JobStatusActivity.objects.create(job=job, user=request.user, status=request.data['status'])
+            JobStatusActivity.objects.create(job=job, user=request.user, status=new_status)
 
             for service in job.job_service_assignments.all():
                 service_price = 0
@@ -231,6 +246,35 @@ class CompletedJobsListView(ListAPIView):
                 except PriceListEntries.DoesNotExist:
                     continue
 
+            price_breakdown = PriceBreakdownService().get_price_breakdown(job)
+
+            InvoicedService.objects.filter(job=job).delete()
+            InvoicedDiscount.objects.filter(job=job).delete()
+            InvoicedFee.objects.filter(job=job).delete()
+
+            job.invoiced_price_list = job.customer.customer_settings.price_list
+            job.discounted_price = price_breakdown['discountedPriceNoFormat']
+
+            job.save(update_fields=['invoiced_price_list', 'discounted_price'])
+
+            for service in price_breakdown['services']:
+                InvoicedService.objects.create(job=job, name=service['name'], price=service['price'])
+
+            for discount in price_breakdown['discounts']:
+                InvoicedDiscount.objects.create(job=job,
+                                                type=discount['name'],
+                                                discount=discount['discount'],
+                                                discount_dollar_amount=discount['discount_dollar_amount'],
+                                                percentage=discount['isPercentage'])
+                
+            for fee in price_breakdown['additionalFees']:
+                InvoicedFee.objects.create(job=job,
+                                        type=fee['name'],
+                                        fee=fee['fee'],
+                                        fee_dollar_amount=fee['additional_fee_dollar_amount'],
+                                        percentage=fee['isPercentage']
+                                        )
+            
             return Response(serializer.data, status.HTTP_200_OK)
         
         return Response({'error': 'Missing Required Fields'}, status.HTTP_400_BAD_REQUEST)

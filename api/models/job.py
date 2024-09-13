@@ -7,6 +7,7 @@ from .service import Service
 from .retainer_service import RetainerService
 from .job_schedule import JobSchedule
 from .vendor import Vendor
+from .price_list import PriceList
 
 class Job(models.Model):
     STATUS_CHOICES = [
@@ -111,6 +112,10 @@ class Job(models.Model):
     departure_formatted_date = models.CharField(max_length=255, blank=True, null=True)
 
     complete_before_formatted_date = models.CharField(max_length=255, blank=True, null=True)
+
+    invoiced_price_list = models.ForeignKey(PriceList, on_delete=models.CASCADE, related_name='jobs', blank=True, null=True)
+
+    discounted_price = models.DecimalField(max_digits=9, decimal_places=2, blank=True, null=True)
 
     def __str__(self) -> str:
         return str(self.id) + ' - ' + self.tailNumber + ' - ' + self.airport.initials + ' - ' + self.aircraftType.name

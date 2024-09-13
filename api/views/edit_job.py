@@ -18,11 +18,14 @@ from ..models import (
     Tag,
     JobTag,
     PriceListEntries,
-    UserEmail
+    InvoicedService,
+    InvoicedDiscount,
+    InvoicedFee
     )
 
 from api.email_notification_service import EmailNotificationService
 from api.sms_notification_service import SMSNotificationService
+from api.pricebreakdown_service import PriceBreakdownService
 
 class EditJobView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
@@ -236,8 +239,14 @@ class EditJobView(APIView):
                     job.fbo_fees_amount_applied = 0
                     job.vendor_higher_price_amount_applied = 0
                     job.management_fees_amount_applied = 0
+                    job.discounted_price = 0
+                    job.invoiced_price_list = None
 
                     job.save()
+
+                    InvoicedService.objects.filter(job=job).delete()
+                    InvoicedFee.objects.filter(job=job).delete()
+                    InvoicedDiscount.objects.filter(job=job).delete()
 
                     JobStatusActivity.objects.create(job=job, user=request.user, status='P', activity_type='P', price=serializer.data['price'])
 

@@ -30,6 +30,7 @@ class JobAdminSerializer(serializers.ModelSerializer):
     created_by = BasicUserSerializer(read_only=True)
     completion_date = serializers.DateTimeField(format="%m/%d %H:%M", read_only=True)
     comments_count = serializers.SerializerMethodField()
+    discounted_price = serializers.DecimalField(max_digits=9, decimal_places=2, read_only=True, required=False)
 
     def get_comments_count(self, obj):
         comments_count = 0
@@ -83,5 +84,6 @@ class JobAdminSerializer(serializers.ModelSerializer):
             'comments_count',
             'arrival_formatted_date',
             'departure_formatted_date',
-            'complete_before_formatted_date'
+            'complete_before_formatted_date',
+            'discounted_price'
             )
