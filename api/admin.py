@@ -17,6 +17,7 @@ from api.models import (
     JobPhotos,
     JobComments,
     Vendor,
+    VendorFile,
     UserProfile,
     CustomerProjectManager,
     CustomerDiscount,
@@ -306,9 +307,14 @@ class JobRetainerServiceAssignmentAdmin(admin.ModelAdmin):
 
 @admin.register(Vendor)
 class VendorAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'active', 'is_external']
+    list_display = ['id', 'name','billing_address', 'emails', 'phone_numbers', 'logo', 'active', 'is_external']
     list_per_page = 100
     search_fields = ['name']
+
+@admin.register(VendorFile)
+class VendorFileAdmin(admin.ModelAdmin):
+    list_display = ['id', 'vendor', 'name', 'file', 'created_at', 'uploaded_by', 'size']
+    list_per_page = 100
 
 
 @admin.register(Tag)

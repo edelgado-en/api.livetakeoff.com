@@ -6,4 +6,11 @@ class VendorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Vendor
-        fields = ['id', 'name', 'is_external', 'active']
+        fields = ['id',
+                  'name',
+                  'billing_address',
+                  'emails',
+                  'phone_numbers',
+                  'logo',
+                  'is_external',
+                  'active']
