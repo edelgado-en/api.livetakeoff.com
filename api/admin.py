@@ -307,7 +307,7 @@ class JobRetainerServiceAssignmentAdmin(admin.ModelAdmin):
 
 @admin.register(Vendor)
 class VendorAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name','billing_address', 'emails', 'phone_numbers', 'logo', 'active', 'is_external']
+    list_display = ['id', 'name','billing_address', 'emails', 'phone_numbers', 'logo', 'notes', 'active', 'is_external']
     list_per_page = 100
     search_fields = ['name']
 

@@ -87,6 +87,8 @@ from .views import (
         CustomerAvailableRetainerView,
         UserJobEmailView,
         VendorsView,
+        CreateVendorView,
+        VendorDetailView,
         JobInvoiceDetailsView,
         AirportAvailableUsersView,
         AirportCustomerFeesView,
@@ -155,6 +157,8 @@ urlpatterns = [
     path('apply-fee-changes', ApplyFeeChangesView.as_view()),
 
     path('vendors', VendorsView.as_view()),
+    path('vendors/<int:id>/', VendorDetailView.as_view()),
+    path('vendors/create', CreateVendorView.as_view()),
 
     path('service-report', ServiceReportView.as_view()),
     path('retainer-service-report', RetainerServiceReportView.as_view()),

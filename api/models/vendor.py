@@ -1,4 +1,3 @@
-from unicodedata import name
 from django.db import models
 
 class Vendor(models.Model):
@@ -9,6 +8,7 @@ class Vendor(models.Model):
     logo = models.ImageField(upload_to='vendors/', blank=True)
     active = models.BooleanField(default=True)
     is_external = models.BooleanField(default=True)
+    notes = models.TextField(blank=True, null=True)
 
     def __str__(self) -> str:
         return self.name

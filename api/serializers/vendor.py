@@ -13,4 +13,5 @@ class VendorSerializer(serializers.ModelSerializer):
                   'phone_numbers',
                   'logo',
                   'is_external',
+                  'notes',
                   'active']

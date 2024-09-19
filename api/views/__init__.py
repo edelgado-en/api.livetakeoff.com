@@ -104,3 +104,5 @@ from .create_help_file import CreateHelpFileView
 from .help_files import HelpFileListView
 from .users_productivity import UsersProductivityView
 from .apply_fee_changes import ApplyFeeChangesView
+from .vendor_detail import VendorDetailView
+from .create_vendor import CreateVendorView

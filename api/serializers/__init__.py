@@ -42,3 +42,4 @@ from .job_schedule import JobScheduleSerializer
 from .user_profile import UserProfileSerializer
 from .help_file import HelpFileSerializer
 from .job_master_pm import JobMasterPmSerializer
+from .vendor_detail import VendorDetailSerializer
