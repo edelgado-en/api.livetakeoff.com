@@ -38,12 +38,16 @@ class VendorDetailView(APIView):
         billingAddress = request.data.get('billingAddress')
         emails = request.data.get('emails')
         notes = request.data.get('notes')
+        active = request.data.get('active')
 
         vendor.name = name
         vendor.billing_address = billingAddress
         vendor.emails = emails
         vendor.phone_numbers = phoneNumbers
         vendor.notes = notes
+
+        if active is not None:
+            vendor.active = active
 
         vendor.save()
 
