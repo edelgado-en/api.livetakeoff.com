@@ -106,3 +106,5 @@ from .users_productivity import UsersProductivityView
 from .apply_fee_changes import ApplyFeeChangesView
 from .vendor_detail import VendorDetailView
 from .create_vendor import CreateVendorView
+from .vendor_file_upload import VendorFileUploadView
+from .vendor_files import VendorFilesView

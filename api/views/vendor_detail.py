@@ -16,7 +16,7 @@ class VendorDetailView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, id):
-        if not self.can_view_customer(request.user):
+        if not self.can_view_vendor(request.user):
             return Response({'error': 'You do not have permission to view this vendor'}, status=status.HTTP_403_FORBIDDEN)
         
         vendor = Vendor.objects.get(pk=id)
@@ -24,12 +24,22 @@ class VendorDetailView(APIView):
         serializer = VendorDetailSerializer(vendor)
         
         return Response(serializer.data)
+    
+    def delete(self, request, id):
+        vendor = Vendor.objects.get(pk=id)
+
+        if not self.can_view_vendor(request.user):
+            return Response({'error': 'You do not have permission to delete this vendor'}, status=status.HTTP_403_FORBIDDEN)
+
+        vendor.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
     def patch(self, request, id):
         vendor = Vendor.objects.get(pk=id)
 
-        if not self.can_view_customer(request.user):
+        if not self.can_view_vendor(request.user):
             return Response({'error': 'You do not have permission to edit this vendor'}, status=status.HTTP_403_FORBIDDEN)
 
 
@@ -54,7 +64,7 @@ class VendorDetailView(APIView):
         return Response(status=status.HTTP_200_OK)
 
 
-    def can_view_customer(self, user):
+    def can_view_vendor(self, user):
         if user.is_superuser \
           or user.is_staff \
           or user.groups.filter(name='Account Managers').exists():

@@ -43,3 +43,4 @@ from .user_profile import UserProfileSerializer
 from .help_file import HelpFileSerializer
 from .job_master_pm import JobMasterPmSerializer
 from .vendor_detail import VendorDetailSerializer
+from .vendor_file import VendorFileSerializer

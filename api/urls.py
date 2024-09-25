@@ -105,7 +105,9 @@ from .views import (
         CreateHelpFileView,
         HelpFileListView,
         UsersProductivityView,
-        ApplyFeeChangesView
+        ApplyFeeChangesView,
+        VendorFileUploadView,
+        VendorFilesView
     )
 
 urlpatterns = [
@@ -159,6 +161,8 @@ urlpatterns = [
     path('vendors', VendorsView.as_view()),
     path('vendors/<int:id>/', VendorDetailView.as_view()),
     path('vendors/create', CreateVendorView.as_view()),
+    path('vendor-files/upload/<int:vendorid>/', VendorFileUploadView.as_view()),
+    path('vendor-files/<int:vendorid>/', VendorFilesView.as_view()),
 
     path('service-report', ServiceReportView.as_view()),
     path('retainer-service-report', RetainerServiceReportView.as_view()),
