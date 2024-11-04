@@ -2,8 +2,13 @@ from rest_framework import serializers
 
 from api.models import UserProfile
 
+from api.serializers.vendor import VendorSerializer
+from api.serializers.customer import CustomerSerializer
+
 class UserProfileSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
+    vendor = VendorSerializer()
+    customer = CustomerSerializer()
 
     class Meta:
         model = UserProfile
@@ -25,4 +30,21 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'enable_sms_notification_job_completed',
             'enable_sms_notification_job_started',
             'enable_sms_notification_job_cancelled',
+            'show_airport_fees',
+            'enable_confirm_jobs',
+            'enable_accept_jobs',
+            'enable_all_customers',
+            'enable_all_airports',
+            'enable_inventory_dashboard',
+            'enable_estimates',
+            'enable_invoice',
+            'show_job_price',
+            'master_vendor_pm',
+            'prompt_requested_by',
+            'location',
+            'phone_number',
+            'avatar',
+            'about',
+            'vendor',
+            'customer',
         ]
