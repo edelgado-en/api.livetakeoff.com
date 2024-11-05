@@ -13,6 +13,7 @@ class UsersSerializer(serializers.Serializer):
     is_staff = serializers.BooleanField()
     is_superuser = serializers.BooleanField()
     is_project_manager = serializers.SerializerMethodField()
+    is_external_project_manager = serializers.SerializerMethodField()
     is_account_manager = serializers.SerializerMethodField()
     is_internal_coordinator = serializers.SerializerMethodField()
     is_customer_user = serializers.SerializerMethodField()
@@ -29,6 +30,9 @@ class UsersSerializer(serializers.Serializer):
 
     def get_is_project_manager(self, obj):
         return obj.groups.filter(name='Project Managers').exists()
+
+    def get_is_external_project_manager(self, obj):
+        return obj.groups.filter(name='Project Managers').exists() and obj.profile.vendor and obj.profile.vendor.is_external
 
     def get_is_account_manager(self, obj):
         return obj.groups.filter(name='Account Managers').exists()

@@ -75,7 +75,7 @@ class UserDetailView(APIView):
 
         user.profile.email_notifications = email_notifications
         user.profile.sms_notifications = sms_notifications
-        
+
 
         user.profile.show_airport_fees = request.data.get('show_airport_fees', user.profile.show_airport_fees)
         user.profile.show_job_price = request.data.get('show_job_price', user.profile.show_job_price)
@@ -83,6 +83,8 @@ class UserDetailView(APIView):
         user.profile.enable_all_airports = request.data.get('enable_all_airports', user.profile.enable_all_airports)
         user.profile.enable_inventory_dashboard = request.data.get('enable_inventory_dashboard', user.profile.enable_inventory_dashboard)
         user.profile.enable_estimates = request.data.get('enable_estimates', user.profile.enable_estimates)
+        user.profile.enable_accept_jobs = request.data.get('enable_accept_jobs', user.profile.enable_accept_jobs)
+        user.profile.master_vendor_pm = request.data.get('master_vendor_pm', user.profile.master_vendor_pm)
 
         # if user.profile.email_notifications is false, then disabled all email notificaitons for this user
         if not email_notifications:
