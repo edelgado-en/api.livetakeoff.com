@@ -59,3 +59,4 @@ from .invoiced_service import InvoicedService
 from .invoiced_discount import InvoicedDiscount
 from .invoiced_fee import InvoicedFee
 from .vendor_file import VendorFile
+from .vendor_customer_price_list import VendorCustomerPriceList
