@@ -53,8 +53,13 @@ class JobPriceBreakdownView(APIView):
 
             return Response(price_breakdown, status=status.HTTP_200_OK)
 
+        price_breakdown = {}
 
-        price_breakdown = PriceBreakdownService().get_price_breakdown(job)
+        if request.user.profile.show_job_price and request.user.groups.filter(name='Project Managers').exists():
+            price_breakdown = PriceBreakdownService().get_price_breakdown(job, True)
+        else:
+            price_breakdown = PriceBreakdownService().get_price_breakdown(job)
+        
         price_breakdown['totalPrice'] = f"{price_breakdown['totalPrice']:,.2f}"
 
         return Response(price_breakdown, status=status.HTTP_200_OK)

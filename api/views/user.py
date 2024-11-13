@@ -115,6 +115,7 @@ class UserView(APIView):
 
         elif is_project_manager:
             access_level_label = 'Project Manager'
+            canSeePrice = user_profile.show_job_price
 
         
         phone_number = ''
