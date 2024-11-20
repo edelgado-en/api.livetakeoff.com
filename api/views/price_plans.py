@@ -61,16 +61,21 @@ class PricePlansView(ListCreateAPIView):
         price_list_id = self.request.data.get('price_list_id')
         operator = self.request.data.get('operator')
         percentage = self.request.data.get('percentage')
+        price_list_type = self.request.data.get('price_list_type', 'C')
 
         if percentage:
             percentage = Decimal(percentage)
         else:
             percentage = Decimal(0.0)
 
+        is_vendor = price_list_type == 'V'
 
         # create a new price list with the given name and description and set the prices for all services with the given operator and percentage
         # for all aircrafts. A price is determine based on aircraft type and service
-        new_price_list = PriceList.objects.create(name=name, description=description, created_by=request.user)
+        new_price_list = PriceList.objects.create(name=name,
+                                                  description=description,
+                                                  created_by=request.user,
+                                                  is_vendor=is_vendor)
 
         # copy all of the prices from the provided price list into the new one, and adjust the price based on the operator and percentage
         for price_list_entry in PriceListEntries.objects \

@@ -9,4 +9,10 @@ class PriceListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PriceList
-        fields = ('id', 'name', 'description', 'created_at', 'created_by', 'num_customers')
+        fields = ('id',
+                  'name',
+                  'description',
+                  'created_at',
+                  'created_by',
+                  'is_vendor',
+                  'num_customers')
