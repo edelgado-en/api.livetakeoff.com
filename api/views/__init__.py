@@ -108,3 +108,4 @@ from .vendor_detail import VendorDetailView
 from .create_vendor import CreateVendorView
 from .vendor_file_upload import VendorFileUploadView
 from .vendor_files import VendorFilesView
+from .price_plan_details import PricePlanDetailView

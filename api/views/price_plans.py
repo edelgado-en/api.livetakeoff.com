@@ -42,6 +42,11 @@ class PricePlansView(ListCreateAPIView):
         price_list = PriceList.objects.get(pk=price_list_id)
 
         name = self.request.data.get('name')
+        
+        # if ANOTHER price list with this name already exists, return a 400
+        if PriceList.objects.filter(name=name).exclude(id=price_list_id).exists():
+            return Response({'name': 'A price list with this name already exists'}, status=status.HTTP_400_BAD_REQUEST)
+        
         description = self.request.data.get('description')
 
         price_list.name = name

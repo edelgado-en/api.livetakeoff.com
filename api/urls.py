@@ -107,7 +107,8 @@ from .views import (
         UsersProductivityView,
         ApplyFeeChangesView,
         VendorFileUploadView,
-        VendorFilesView
+        VendorFilesView,
+        PricePlanDetailView
     )
 
 urlpatterns = [
@@ -180,6 +181,7 @@ urlpatterns = [
     path('fbo-search', FboSearchView.as_view()),
     path('pricing-plans', PricePlansView.as_view()),
     path('pricing-plans/<int:id>/', PricePlansView.as_view()),
+    path('pricing-plans/details/<int:id>/', PricePlanDetailView.as_view()),
     path('price-listing/<int:id>/', PriceListingView.as_view()),
     path('price-listing-by-service/<int:id>/', PriceListingByServiceView.as_view()),
     path('price-listing/export', PriceListExportView.as_view()),
