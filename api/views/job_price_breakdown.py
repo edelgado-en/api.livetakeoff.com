@@ -55,7 +55,8 @@ class JobPriceBreakdownView(APIView):
 
         price_breakdown = {}
 
-        if request.user.profile.show_job_price and request.user.groups.filter(name='Project Managers').exists():
+        if request.user.groups.filter(name='Project Managers').exists() \
+            and not request.user.groups.filter(name='Internal Coordinators').exists():
             price_breakdown = PriceBreakdownService().get_price_breakdown(job, True)
         else:
             price_breakdown = PriceBreakdownService().get_price_breakdown(job)
