@@ -109,3 +109,5 @@ from .create_vendor import CreateVendorView
 from .vendor_file_upload import VendorFileUploadView
 from .vendor_files import VendorFilesView
 from .price_plan_details import PricePlanDetailView
+from .price_list_mappings import PriceListMappingsView
+from .price_list_available_vendors import PriceListAvailableVendorsView

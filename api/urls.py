@@ -108,7 +108,9 @@ from .views import (
         ApplyFeeChangesView,
         VendorFileUploadView,
         VendorFilesView,
-        PricePlanDetailView
+        PricePlanDetailView,
+        PriceListMappingsView,
+        PriceListAvailableVendorsView
     )
 
 urlpatterns = [
@@ -186,6 +188,9 @@ urlpatterns = [
     path('price-listing-by-service/<int:id>/', PriceListingByServiceView.as_view()),
     path('price-listing/export', PriceListExportView.as_view()),
     path('price-listing/entries/', PriceListEntriesView.as_view()),
+    path('price-list-mappings/<int:id>/', PriceListMappingsView.as_view()),
+    path('price-list-mappings', PriceListMappingsView.as_view()),
+    path('price-list-mappings/available-vendors', PriceListAvailableVendorsView.as_view()),
     path('customers', CustomersView.as_view()),
     path('customers/retainers', CustomerRetainersView.as_view()),
     path('customers/create', CreateCustomerView.as_view()),
