@@ -19,8 +19,7 @@ class PriceListMappingsView(APIView):
         price_list = PriceList.objects.get(pk=id)
         vendor_customer_price_list_mappings = price_list.vendor_customer_price_lists.all()
 
-        # Get the total number of vendors
-        total_vendors = Vendor.objects.count()
+        total_vendors = Vendor.objects.filter(active=True, is_external=True).count()
 
         data = []
         for mapping in vendor_customer_price_list_mappings:
