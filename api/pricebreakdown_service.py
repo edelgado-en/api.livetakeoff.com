@@ -8,7 +8,7 @@ from api.models import (
 
 class PriceBreakdownService():
 
-    def get_price_breakdown(self, job: Job, is_standard_vendor=False):
+    def get_price_breakdown(self, job: Job, is_standard_vendor=False, mapped_price_list=None):
         # get aircraftType name
         aircraftType = job.aircraftType
 
@@ -16,7 +16,10 @@ class PriceBreakdownService():
             # Fetch the price list with name - Standard - Vendor
             priceListType = PriceList.objects.get(name='Standard - Vendor')
         else:
-            priceListType = job.customer.customer_settings.price_list
+            if mapped_price_list:
+                priceListType = mapped_price_list
+            else:
+                priceListType = job.customer.customer_settings.price_list
 
         # calculate price
         services_price = 0

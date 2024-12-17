@@ -9,6 +9,7 @@ from api.pricebreakdown_service import PriceBreakdownService
 from api.models import (Job,
                         InvoicedService,
                         InvoicedDiscount,
+                        VendorCustomerPriceList,
                         InvoicedFee)
 
 class JobPriceBreakdownView(APIView):
@@ -57,7 +58,15 @@ class JobPriceBreakdownView(APIView):
 
         if request.user.groups.filter(name='Project Managers').exists() \
             and not request.user.groups.filter(name='Internal Coordinators').exists():
-            price_breakdown = PriceBreakdownService().get_price_breakdown(job, True)
+            
+            mapped_price_list = VendorCustomerPriceList.objects.filter(
+                Q(vendor=job.vendor) & Q(customer=job.customer)
+            ).first()
+
+            if mapped_price_list:
+                price_breakdown = PriceBreakdownService().get_price_breakdown(job, False, mapped_price_list.price_list)
+            else:
+                price_breakdown = PriceBreakdownService().get_price_breakdown(job, True)
         else:
             price_breakdown = PriceBreakdownService().get_price_breakdown(job)
         
