@@ -12,6 +12,7 @@ class VendorsView(ListAPIView):
 
     def get_queryset(self):
         name = self.request.data.get('name', '')
+        file_type = self.request.data.get('file_type', 'All')
         open_jobs = self.request.data.get('open_jobs', False)
 
         user_profile = UserProfile.objects.get(user=self.request.user)
@@ -27,6 +28,15 @@ class VendorsView(ListAPIView):
         
         if open_jobs:
             qs = qs.filter(jobs__status__in=['A', 'U', 'S', 'W']).distinct()
+
+        if file_type != 'All':
+            if file_type == 'I':
+                # Fetch the vendors where there are no vendor_files with file_type = 'I'
+                qs = qs.exclude(files__file_type='I').distinct()
+            elif file_type == 'W':
+                # Fetch the vendors where there are no vendor_files with file_type = 'W'
+                qs = qs.exclude(files__file_type='W').distinct()
+                
 
         return qs
 

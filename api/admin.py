@@ -314,7 +314,7 @@ class VendorAdmin(admin.ModelAdmin):
 
 @admin.register(VendorFile)
 class VendorFileAdmin(admin.ModelAdmin):
-    list_display = ['id', 'vendor', 'name', 'file', 'created_at', 'uploaded_by', 'size']
+    list_display = ['id', 'vendor', 'name', 'file', 'file_type', 'is_expired', 'is_approved', 'expiration_date', 'created_at', 'uploaded_by', 'size']
     list_per_page = 100
 
 

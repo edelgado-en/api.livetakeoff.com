@@ -6,6 +6,10 @@ from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 
+from datetime import (date, datetime, timedelta)
+import pytz
+from email.utils import parsedate_tz, mktime_tz
+
 from api.models import (VendorFile, Vendor)
 
 from api.serializers import (VendorFileSerializer)
@@ -20,12 +24,34 @@ class VendorFileUploadView(APIView):
         vendorId = self.kwargs.get(self.lookup_url_kwarg)
         vendor = get_object_or_404(Vendor, pk=vendorId)
         file = request.data.get('file')
+        file_type = request.data.get('file_type', 'O')
+        expiration_date = request.data.get('expiration_date', 'null')
+        is_approved = request.data.get('is_approved', True)
+
+        if expiration_date == 'null':
+            expiration_date = None
+        else :
+            try:
+                timestamp = mktime_tz(parsedate_tz(expiration_date))
+                # Now it is in UTC
+                expiration_date = datetime(1970, 1, 1) + timedelta(seconds=timestamp)
+            
+            except ValueError:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+            
+        if is_approved == 'true':
+            is_approved = True
+        else:
+            is_approved = False
 
         p = VendorFile(vendor=vendor,
                     uploaded_by=request.user,
                     file=file,
                     name=file.name,
                     size=file.size,
+                    file_type=file_type,
+                    expiration_date=expiration_date,
+                    is_approved=is_approved
                     )
         
         p.save()
