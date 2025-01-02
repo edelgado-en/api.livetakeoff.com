@@ -111,3 +111,5 @@ from .vendor_files import VendorFilesView
 from .price_plan_details import PricePlanDetailView
 from .price_list_mappings import PriceListMappingsView
 from .price_list_available_vendors import PriceListAvailableVendorsView
+from .prices_listing import PricesListingView
+from .prices_listing_by_service import PricesListingByServiceView

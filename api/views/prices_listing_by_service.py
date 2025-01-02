@@ -5,13 +5,14 @@ from rest_framework .response import Response
 from rest_framework.views import APIView
 from api.models import (PriceList, PriceListEntries, AircraftType, Service, Job)
 
-from ..pricebreakdown_service import PriceBreakdownService
-
-class PriceListingByServiceView(APIView):
+class PricesListingByServiceView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
-    def get(self, request, id):
-        service = Service.objects.get(pk=id)
+    def post(self, request):
+        service_id = self.request.data.get('service_id')
+        price_list_ids = self.request.data.get('price_list_ids', [])
+        
+        service = Service.objects.get(pk=service_id)
         # get the prices for each service for the provided service for all price lists
         price_list_entries = PriceListEntries.objects \
             .select_related('price_list') \
@@ -22,8 +23,11 @@ class PriceListingByServiceView(APIView):
         # get all the aircraft types
         aircraft_types = AircraftType.objects.all().order_by('id')
 
-        # get all the price lists
-        price_lists = PriceList.objects.all().order_by('id')
+        # get all the price lists for the provided price_list_ids
+        price_lists = PriceList.objects.filter(id__in=price_list_ids)
+
+        # price_lists has to be in the same order as price_list_ids
+        price_lists = sorted(price_lists, key=lambda price_list: price_list_ids.index(price_list.id))
 
         # create the dictionary
         price_list_entries_dict = {}
@@ -95,66 +99,11 @@ class PriceListingByServiceView(APIView):
             for price_list in price_lists:
                 price_list_entries_array[-1]["price_list_entries"].append({
                     "price_list": price_list.name,
+                    "price_list_id": price_list.id,
                     "price": price_list_entries_dict[aircraft_type.name][price_list.name]
                 })
     
 
         return Response(price_list_entries_array, status.HTTP_200_OK)
-
-
-    def post(self, request, id):
-        price_list_name = self.request.data.get('name')
-        price_list_entries = self.request.data.get('price_list_entries') # aircraft_type name, price
-        service_id = self.request.data.get('service_id')
-
-        # get price list by name
-        price_list = PriceList.objects.get(name=price_list_name)
-
-        # update the prices in PriceListEntries for the provided price list with the list of services and prices
-        for price_list_entry in price_list_entries:
-            aircraft_type_name = price_list_entry.get('aircraft_type')
-            price = price_list_entry.get('price')
-            
-            aircraft_type = AircraftType.objects.get(name=aircraft_type_name)
-
-            # if the price list entry does not exist, create a new one
-            try:
-                price_list_entry = PriceListEntries.objects.get(price_list=price_list,
-                                                                aircraft_type=aircraft_type,
-                                                                service_id=service_id)
-                price_list_entry.price = price
-                price_list_entry.save()
-
-            except PriceListEntries.DoesNotExist:
-                price_list_entry = PriceListEntries(price_list=price_list,
-                                                    aircraft_type=aircraft_type,
-                                                    service_id=service_id,
-                                                    price=price)
-                price_list_entry.save()
-
-
-        # update the price for all jobs with customer using a customer setting with the price list and aircraft type with is_auto_priced as true
-        # get all the jobs with customer using a customer setting with the price list and aircraft type with is_auto_priced as true
-        # not invoiced
-        jobs = Job.objects.filter(Q(customer__customer_settings__price_list=price_list) & 
-                                  Q(aircraftType_id=service_id) &
-                                  Q(is_auto_priced=True) &
-                                  ~Q(status='I')
-                                  )
-
-        # update the price for each job using the PriceBreakdownService
-        price_service = PriceBreakdownService()
-        for job in jobs:
-            price_breakdown = price_service.get_price_breakdown(job)
-            job.price = price_breakdown.get('totalPrice')
-            job.travel_fees_amount_applied = price_breakdown.get('total_travel_fees_amount_applied')
-            job.fbo_fees_amount_applied = price_breakdown.get('total_fbo_fees_amount_applied')
-            job.vendor_higher_price_amount_applied = price_breakdown.get('total_vendor_higher_price_amount_applied')
-            job.management_fees_amount_applied = price_breakdown.get('total_management_fees_amount_applied')
-
-            job.save()
-        
-
-        return Response(status=status.HTTP_200_OK)
             
 

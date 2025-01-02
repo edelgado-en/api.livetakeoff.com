@@ -110,7 +110,9 @@ from .views import (
         VendorFilesView,
         PricePlanDetailView,
         PriceListMappingsView,
-        PriceListAvailableVendorsView
+        PriceListAvailableVendorsView,
+        PricesListingView,
+        PricesListingByServiceView
     )
 
 urlpatterns = [
@@ -185,6 +187,8 @@ urlpatterns = [
     path('pricing-plans/<int:id>/', PricePlansView.as_view()),
     path('pricing-plans/details/<int:id>/', PricePlanDetailView.as_view()),
     path('price-listing/<int:id>/', PriceListingView.as_view()),
+    path('prices-listing', PricesListingView.as_view()),
+    path('prices-listing-by-service', PricesListingByServiceView.as_view()),
     path('price-listing-by-service/<int:id>/', PriceListingByServiceView.as_view()),
     path('price-listing/export', PriceListExportView.as_view()),
     path('price-listing/entries/', PriceListEntriesView.as_view()),
