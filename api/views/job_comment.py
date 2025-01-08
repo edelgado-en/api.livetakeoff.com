@@ -7,7 +7,7 @@ from datetime import datetime
 from ..serializers import (JobCommentSerializer)
 from rest_framework.generics import ListCreateAPIView
 from ..pagination import CustomPageNumberPagination
-from ..models import (JobComments, Job, JobCommentCheck)
+from ..models import (JobComments, Job, JobCommentCheck, JobFollowerEmail)
 
 from api.sms_notification_service import SMSNotificationService
 from api.email_notification_service import EmailNotificationService
@@ -97,9 +97,11 @@ class JobCommentView(ListCreateAPIView):
         send_sms = self.request.data.get('sendSMS', False)
         send_email = self.request.data.get('sendEmail', False)
         send_email_to_project_manager = self.request.data.get('sendEmailToProjectManager', False)
+        send_email_to_followers = self.request.data.get('sendEmailToFollowers', False)
         is_public = self.request.data.get('isPublic', False)
         emails = self.request.data.get('emails', [])
         projectManagerEmails = self.request.data.get('projectManagerEmails', [])
+        followerEmails = self.request.data.get('followerEmails', [])
 
         is_customer_user = False
         is_external_project_manager = False
@@ -129,6 +131,9 @@ class JobCommentView(ListCreateAPIView):
 
         if send_email_to_project_manager:
             EmailNotificationService().send_job_comment_added_notification(job, comment, projectManagerEmails)
+
+        if send_email_to_followers:
+            EmailNotificationService().send_job_comment_added_notification(job, comment, followerEmails)
 
 
         if is_customer_user or is_external_project_manager:

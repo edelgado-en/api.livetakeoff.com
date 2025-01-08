@@ -45,7 +45,9 @@ from api.models import (
     LastProjectManagersNotified,
     JobAcceptanceNotification,
     Help,
-    VendorCustomerPriceList
+    VendorCustomerPriceList,
+    CustomerFollowerEmail,
+    JobFollowerEmail
 )
 
 class UserProfileInline(admin.StackedInline):
@@ -360,4 +362,14 @@ class HelpAdmin(admin.ModelAdmin):
 @admin.register(VendorCustomerPriceList)
 class VendorCustomerPriceListAdmin(admin.ModelAdmin):
     list_display = ['id', 'vendor', 'customer', 'price_list']
+    list_per_page = 100
+
+@admin.register(CustomerFollowerEmail)
+class CustomerFollowerEmailAdmin(admin.ModelAdmin):
+    list_display = ['id', 'customer', 'email']
+    list_per_page = 100
+
+@admin.register(JobFollowerEmail)
+class JobFollowerEmailAdmin(admin.ModelAdmin):
+    list_display = ['id', 'job', 'email']
     list_per_page = 100

@@ -112,7 +112,8 @@ from .views import (
         PriceListMappingsView,
         PriceListAvailableVendorsView,
         PricesListingView,
-        PricesListingByServiceView
+        PricesListingByServiceView,
+        CustomerFollowerEmailView
     )
 
 urlpatterns = [
@@ -206,6 +207,7 @@ urlpatterns = [
     path('customers/fees/<int:id>/', CustomerFeesView.as_view()),
     path('customers/fees/update/<int:id>/', CustomerFeeUpdateView.as_view()),
     path('customers/retainers-services/<int:id>/', CustomerRetainersServicesView.as_view()),
+    path('customers/follower-emails', CustomerFollowerEmailView.as_view()),
     path('users', UsersView.as_view()),
     path('users/<int:id>/', UserDetailView.as_view()),
     path('users/me', UserView.as_view()),

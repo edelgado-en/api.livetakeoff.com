@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 
 from django.contrib.auth.models import User
 
-from api.models import (Job, UserEmail)
+from api.models import (Job, UserEmail, JobFollowerEmail)
 
 class UserJobEmailView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
@@ -17,6 +17,14 @@ class UserJobEmailView(APIView):
         user = job.created_by
 
         unique_emails = []
+
+        job_follower_emails = JobFollowerEmail.objects.filter(job=job).all()
+
+        follower_emails = []
+
+        for job_follower_email in job_follower_emails:
+            if job_follower_email.email not in [email['email'] for email in follower_emails]:
+                follower_emails.append({'id': job_follower_email.id, 'email': job_follower_email.email})
 
         email = user.email
 
@@ -60,7 +68,9 @@ class UserJobEmailView(APIView):
                         unique_project_manager_emails.append({'id': project_manager_email.id, 'email': project_manager_email.email})
 
         return Response({'emails': unique_emails,
-                         'project_manager_emails': unique_project_manager_emails}, status=status.HTTP_200_OK)
+                         'project_manager_emails': unique_project_manager_emails,
+                         'follower_emails': follower_emails
+                         }, status=status.HTTP_200_OK)
 
 
 

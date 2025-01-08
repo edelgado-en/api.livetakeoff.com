@@ -36,7 +36,9 @@ from ..models import (
         JobTag,
         UserEmail,
         LastProjectManagersNotified,
-        JobAcceptanceNotification
+        JobAcceptanceNotification,
+        CustomerFollowerEmail,
+        JobFollowerEmail
     )
 
 class CreateJobView(APIView):
@@ -62,6 +64,7 @@ class CreateJobView(APIView):
         estimate_id = data.get('estimate_id')
         customer_purchase_order = data.get('customer_purchase_order')
         priority = data.get('priority', 'N')
+        customer_follower_emails = data.get('customer_follower_emails', [])
 
         job_status = 'A'
 
@@ -166,6 +169,7 @@ class CreateJobView(APIView):
         s = data['services']
         r = data['retainer_services']
         t = data['tags']
+        follower_emails = data.get('follower_emails', None)
         services = []
         retainer_services = []
         tags = []
@@ -223,6 +227,16 @@ class CreateJobView(APIView):
                   complete_before_formatted_date=complete_before_formatted_date)
 
         job.save()
+
+        if follower_emails:
+            emails = follower_emails.split(',')
+            for email in emails:
+                if not CustomerFollowerEmail.objects.filter(email=email, customer=customer).exists():
+                    customer_follower_email = CustomerFollowerEmail(email=email, customer=customer)
+                    customer_follower_email.save()
+
+                job_follower_email = JobFollowerEmail(job=job, email=email)
+                job_follower_email.save()
 
 
         for service in services:
