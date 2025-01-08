@@ -157,6 +157,8 @@ class EditJobView(APIView):
 
                         EmailNotificationService().send_job_completed_notification(job, request.user)
 
+                        EmailNotificationService().send_job_completed_notification_to_followers(job)
+
                         #unassign all services and retainer services
                         for service in job.job_service_assignments.all():
                             service.status == 'U'

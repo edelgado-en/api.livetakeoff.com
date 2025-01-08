@@ -14,7 +14,8 @@ from api.models import (
     JobSchedule,
     UserCustomer,
     LastProjectManagersNotified,
-    JobAcceptanceNotification
+    JobAcceptanceNotification,
+    JobFollowerEmail
 )
 
 class EmailNotificationService():
@@ -57,6 +58,43 @@ class EmailNotificationService():
         email_util = EmailUtil()
         subject = f'{job.tailNumber} - Job SUBMITTED by {job.customer.name}'
         body = self.build_email_body_for_job_creation(job, services, retainer_services, email_util)
+
+        for email in unique_emails:
+            email_util.send_email(email, subject, body)
+
+
+    def send_create_job_notification_to_followers(self, job: Job,
+                                     services: [Service],
+                                     retainer_services: [RetainerService]):
+        
+        job_followers = JobFollowerEmail.objects.filter(job=job).all()
+        unique_emails = []
+
+        for job_follower in job_followers:
+            if job_follower.email not in unique_emails:
+                unique_emails.append(job_follower.email)
+
+        email_util = EmailUtil()
+
+        subject = f'{job.tailNumber} - Job SUBMITTED by {job.customer.name}'
+        body = self.build_email_body_for_job_creation_for_followers(job, services, retainer_services, email_util)
+
+        for email in unique_emails:
+            email_util.send_email(email, subject, body)
+
+
+    def send_job_completed_notification_to_followers(self, job: Job):
+        job_followers = JobFollowerEmail.objects.filter(job=job).all()
+        unique_emails = []
+
+        for job_follower in job_followers:
+            if job_follower.email not in unique_emails:
+                unique_emails.append(job_follower.email)
+
+        email_util = EmailUtil()
+
+        subject = f'{job.tailNumber} - Job COMPLETED'
+        body = self.build_email_body(job, 'Job Completed', '', email_util)
 
         for email in unique_emails:
             email_util.send_email(email, subject, body)
@@ -451,6 +489,94 @@ class EmailNotificationService():
                 <a href="http://livetakeoff.com/shared/jobs/{base64_message}/confirm" style="display: inline-block; padding: 0.5625rem 1.125rem; margin: 0 5px; font-size: 1.5rem; font-weight: 400; line-height: 1.5; text-align: center; vertical-align: middle; cursor: pointer; border: 1px solid transparent; border-radius: 0.375rem; transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; text-decoration: none; color: #fff; background-color: #007bff; border-color: #007bff;">CONFIRM</a>
                 <a href="http://livetakeoff.com/jobs/{job.id}/details" style="display: inline-block; padding: 0.5625rem 1.125rem; margin: 0 5px; font-size: 1.5rem; font-weight: 400; line-height: 1.5; text-align: center; vertical-align: middle; cursor: pointer; border: 1px solid transparent; border-radius: 0.375rem; transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; text-decoration: none; color: #212529; background-color: #f8f9fa; border-color: #f8f9fa;">EDIT</a>
 
+                <div style="margin-bottom:20px"></div>
+                <table style="border-collapse: collapse">
+                    <tr>
+                        <td style="padding:15px">Customer</td>
+                        <td style="padding:15px">{job.customer.name}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:15px">Job PO</td>
+                        <td style="padding:15px">{job.purchase_order}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:15px">Tail</td>
+                        <td style="padding:15px">{job.tailNumber}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:15px">Airport</td>
+                        <td style="padding:15px">{job.airport.name}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:15px">FBO</td>
+                        <td style="padding:15px">{job.fbo.name}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:15px">Arrival</td>
+                        <td style="padding:15px">{eta}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:15px">Departure</td>
+                        <td style="padding:15px">{etd}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:15px">Complete Before</td>
+                        <td style="padding:15px">{complete_before}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:15px">Services</td>
+                        <td style="padding:15px">{service_names}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:15px">Retainer Services</td>
+                        <td style="padding:15px">{retainer_service_names}</td>
+                    </tr>
+                </table>
+                <div style="margin-top:20px;padding:5px;font-weight: 700;"></div>
+                '''
+
+        body += email_util.getEmailSignature()
+
+        return body
+    
+    def build_email_body_for_job_creation_for_followers(self, job: Job,
+                         services: [Service],
+                         retainer_services: [RetainerService],
+                         email_util: EmailUtil):
+        
+        etd = 'Not Specified'
+        if job.estimatedETD:
+            etd = job.estimatedETD.strftime('%m/%d/%y %H:%M')
+
+        eta = 'Not Specified'
+        if job.estimatedETA:
+            eta = job.estimatedETA.strftime('%m/%d/%y %H:%M')
+        
+        complete_before = 'Not Specified'
+        if job.completeBy:
+            complete_before = job.completeBy.strftime('%m/%d/%y %H:%M')
+
+        if job.on_site:
+            eta = 'On Site'
+
+        service_names = ''
+        for service in services:
+            service_names += service.name + ', '
+
+        # remove the last comma from service_names if not empty
+        if service_names:
+            service_names = service_names[:-2]
+
+        retainer_service_names = ''
+        for retainer_service in retainer_services:
+            retainer_service_names += retainer_service.name + ', '
+
+        # remove the last comma from retainer_service_names if not empty
+        if retainer_service_names:
+            retainer_service_names = retainer_service_names[:-2]
+
+        body = f'''
+                <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">Job Created</div>
                 <div style="margin-bottom:20px"></div>
                 <table style="border-collapse: collapse">
                     <tr>

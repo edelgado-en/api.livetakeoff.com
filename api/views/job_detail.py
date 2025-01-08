@@ -266,6 +266,7 @@ class JobDetail(APIView):
                 
                 SMSNotificationService().send_job_completed_notification(job, user_selected)
                 EmailNotificationService().send_job_completed_notification(job, user_selected)
+                EmailNotificationService().send_job_completed_notification_to_followers(job)
 
                 # set the actual_completion_date to today
                 job.completion_date = datetime.now()

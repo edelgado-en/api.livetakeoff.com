@@ -64,7 +64,6 @@ class CreateJobView(APIView):
         estimate_id = data.get('estimate_id')
         customer_purchase_order = data.get('customer_purchase_order')
         priority = data.get('priority', 'N')
-        customer_follower_emails = data.get('customer_follower_emails', [])
 
         job_status = 'A'
 
@@ -173,6 +172,7 @@ class CreateJobView(APIView):
         services = []
         retainer_services = []
         tags = []
+        job_follower_emails = []
 
         if s: 
             service_ids = data['services'].split(',')
@@ -229,8 +229,8 @@ class CreateJobView(APIView):
         job.save()
 
         if follower_emails:
-            emails = follower_emails.split(',')
-            for email in emails:
+            job_follower_emails = follower_emails.split(',')
+            for email in job_follower_emails:
                 if not CustomerFollowerEmail.objects.filter(email=email, customer=customer).exists():
                     customer_follower_email = CustomerFollowerEmail(email=email, customer=customer)
                     customer_follower_email.save()
@@ -427,6 +427,10 @@ class CreateJobView(APIView):
             'id': job.id,
             'purchase_order': job.purchase_order
         }
+
+        # send email to job followers if job_follower_emails is not empty
+        if job_follower_emails:
+            EmailNotificationService().send_create_job_notification_to_followers(job, services, retainer_services)
 
         return Response(response, status.HTTP_201_CREATED)
 
