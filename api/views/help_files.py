@@ -24,10 +24,10 @@ class HelpFileListView(ListAPIView):
                         .order_by('-created_at')
         
         if self.request.user.groups.filter(name='Internal Coordinators').exists():
-            qs = qs.filter(Q(access_level='I') | Q(access_level='A'))
-
             if self.request.user.groups.filter(name='Project Managers').exists():
-                qs = qs.filter(Q(access_level='P') | Q(access_level='A'))
+                qs = qs.filter(Q(access_level='I') | Q(access_level='P') | Q(access_level='A'))
+            else:
+                qs = qs.filter(Q(access_level='I') | Q(access_level='A'))
 
         elif self.request.user.groups.filter(name='Project Managers').exists():
             if self.request.user.profile.vendor and self.request.user.profile.vendor.is_external:
