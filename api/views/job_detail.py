@@ -184,8 +184,9 @@ class JobDetail(APIView):
                 show_job_price = False
 
         
-        # if you are a project manager, set the job price to None
-        if request.user.groups.filter(name='Project Managers').exists():
+        # if you are a project manager AND you are not an internal coordinator, set the job price to None
+        if request.user.groups.filter(name='Project Managers').exists() \
+            and not request.user.groups.filter(name='Internal Coordinators').exists():
             show_job_price = False
 
         if show_job_price is False:
