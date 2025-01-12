@@ -45,3 +45,4 @@ from .job_master_pm import JobMasterPmSerializer
 from .vendor_detail import VendorDetailSerializer
 from .vendor_file import VendorFileSerializer
 from .customer_follower_email import CustomerFollowerEmailSerializer
+from .job_follower_email import JobFollowerEmailSerializer

@@ -20,7 +20,8 @@ from ..models import (
     PriceListEntries,
     InvoicedService,
     InvoicedDiscount,
-    InvoicedFee
+    InvoicedFee,
+    JobFollowerEmail
     )
 
 from api.email_notification_service import EmailNotificationService
@@ -142,6 +143,11 @@ class EditJobView(APIView):
 
                 for tag in tags:
                     JobTag.objects.create(job=job, tag=tag)
+
+                JobFollowerEmail.objects.filter(job=job).delete()
+                follower_emails = request.data.get('followerEmails', [])
+                for email in follower_emails:
+                    JobFollowerEmail.objects.create(job=job, email=email)
 
                 new_status = serializer.data['status']
 
