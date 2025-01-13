@@ -113,4 +113,5 @@ from .price_list_mappings import PriceListMappingsView
 from .price_list_available_vendors import PriceListAvailableVendorsView
 from .prices_listing import PricesListingView
 from .prices_listing_by_service import PricesListingByServiceView
-from .customer_follower_emails import CustomerFollowerEmailView
+from .customer_follower_emails import CustomerFollowerEmailsView
+from .customer_follower_email import CustomerFollowerEmailView

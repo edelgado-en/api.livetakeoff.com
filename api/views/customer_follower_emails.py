@@ -9,7 +9,7 @@ from api.serializers import (CustomerFollowerEmailSerializer)
 
 from ..pagination import CustomPageNumberPagination
 
-class CustomerFollowerEmailView(ListAPIView):
+class CustomerFollowerEmailsView(ListAPIView):
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = CustomerFollowerEmailSerializer
     pagination_class = CustomPageNumberPagination
