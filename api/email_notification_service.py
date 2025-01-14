@@ -76,7 +76,7 @@ class EmailNotificationService():
 
         email_util = EmailUtil()
 
-        subject = f'{job.tailNumber} - Job SUBMITTED by {job.customer.name}'
+        subject = f'{job.tailNumber} - Aircraft Detailing Request Created for {job.customer.name}'
         body = self.build_email_body_for_job_creation_for_followers(job, services, retainer_services, email_util)
 
         for email in unique_emails:
@@ -93,7 +93,7 @@ class EmailNotificationService():
 
         email_util = EmailUtil()
 
-        subject = f'{job.tailNumber} - Job COMPLETED'
+        subject = f'{job.tailNumber} - Aircraft Detailing Job Completed at  {job.airport.name}'
         body = self.build_email_body(job, 'Job Completed', '', email_util)
 
         for email in unique_emails:
@@ -128,8 +128,7 @@ class EmailNotificationService():
         email_util = EmailUtil()
 
         full_name = user.first_name + ' ' + user.last_name
-        
-        subject = f'{job.tailNumber} - Job COMPLETED'
+        subject = f'{job.tailNumber} - Aircraft Detailing Job Completed at  {job.airport.name}'
         body = self.build_email_body(job, 'Job Completed', '', email_util)
 
         for email in unique_emails:
@@ -344,7 +343,7 @@ class EmailNotificationService():
         email_util = EmailUtil()
 
         subject = f'{job.tailNumber} - Job ASSIGNED - Review and ACCEPT it or RETURN it as soon as possible.'
-        
+
         message = str(job.id) + '-' + job.tailNumber
         message_bytes = message.encode('ascii')
         base64_bytes = base64.b64encode(message_bytes)
@@ -575,9 +574,28 @@ class EmailNotificationService():
         if retainer_service_names:
             retainer_service_names = retainer_service_names[:-2]
 
+        message = str(job.id) + '-' + job.tailNumber
+        message_bytes = message.encode('ascii')
+        base64_bytes = base64.b64encode(message_bytes)
+        base64_message = base64_bytes.decode('ascii')
+
+        services_as_bullet_points_html = '<ul>'
+
+        for service in services:
+            services_as_bullet_points_html += f'<li>{service.name}</li>'
+
+        services_as_bullet_points_html += '</ul>'
+
+        retainer_services_as_bullet_points_html = '<ul>'
+        for retainer_service in retainer_services:
+            retainer_services_as_bullet_points_html += f'<li>{retainer_service.name}</li>'
+
+        retainer_services_as_bullet_points_html += '</ul>'
+
         body = f'''
                 <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">Job Created</div>
                 <div style="margin-bottom:20px"></div>
+                <a href="https://www.livetakeoff.com/shared/jobs/{base64_message}/" style="display: inline-block; padding: 0.5625rem 1.125rem; margin: 0 5px; font-size: 1.5rem; font-weight: 400; line-height: 1.5; text-align: center; vertical-align: middle; cursor: pointer; border: 1px solid transparent; border-radius: 0.375rem; transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; text-decoration: none; color: #212529; background-color: #f8f9fa; border-color: #f8f9fa;">Check it out</a>
                 <table style="border-collapse: collapse">
                     <tr>
                         <td style="padding:15px">Customer</td>
@@ -613,15 +631,18 @@ class EmailNotificationService():
                     </tr>
                     <tr>
                         <td style="padding:15px">Services</td>
-                        <td style="padding:15px">{service_names}</td>
+                        <td style="padding:15px">{services_as_bullet_points_html}</td>
                     </tr>
-                    <tr>
-                        <td style="padding:15px">Retainer Services</td>
-                        <td style="padding:15px">{retainer_service_names}</td>
-                    </tr>
-                </table>
-                <div style="margin-top:20px;padding:5px;font-weight: 700;"></div>
                 '''
+        
+        if retainer_service_names:
+            body += f""" <tr>
+                            <td style="padding:15px">Retainer Services</td>
+                            <td style="padding:15px">{retainer_services_as_bullet_points_html}</td>
+                        </tr> """
+            
+        body += """ </table>
+                    <div style="margin-top:20px;padding:5px;font-weight: 700;"></div> """
 
         body += email_util.getEmailSignature()
 
@@ -786,20 +807,47 @@ class EmailNotificationService():
         if retainer_service_names:
             retainer_service_names = retainer_service_names[:-2]
 
+        services_as_bullet_points_html = '<ul>'
+
+        for service in job.job_service_assignments.all():
+            services_as_bullet_points_html += f'<li>{service.service.name}</li>'
+
+        services_as_bullet_points_html += '</ul>'
+
+        retainer_services_as_bullet_points_html = '<ul>'
+        for retainer_service in job.job_retainer_service_assignments.all():
+            retainer_services_as_bullet_points_html += f'<li>{retainer_service.retainer_service.name}</li>'
+
+        retainer_services_as_bullet_points_html += '</ul>'
+        
+        message = str(job.id) + '-' + job.tailNumber
+        message_bytes = message.encode('ascii')
+        base64_bytes = base64.b64encode(message_bytes)
+        base64_message = base64_bytes.decode('ascii')
+
+        link = ''
+
+        if title == 'Job Completed':
+            link = f'<a href="https://www.livetakeoff.com/shared/jobs/{base64_message}/" style="display: inline-block; padding: 0.5625rem 1.125rem; margin: 0 5px; font-size: 1.5rem; font-weight: 400; line-height: 1.5; text-align: center; vertical-align: middle; cursor: pointer; border: 1px solid transparent; border-radius: 0.375rem; transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; text-decoration: none; color: #212529; background-color: #f8f9fa; border-color: #f8f9fa;">Click here to see a closeout with photos</a>'
+        else:    
+            link = f'<a href="http://livetakeoff.com/jobs/{job.id}/details" style="display: inline-block; padding: 0.5625rem 1.125rem; margin: 0 5px; font-size: 1.5rem; font-weight: 400; line-height: 1.5; text-align: center; vertical-align: middle; cursor: pointer; border: 1px solid transparent; border-radius: 0.375rem; transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; text-decoration: none; color: #212529; background-color: #f8f9fa; border-color: #f8f9fa;">REVIEW</a>'
+
+        comment_html_body =''
+
+        if comment:
+            comment_html_body = f""" <div style="font-size: 20px; font-weight: bold;">Important Note</div>
+                                    <div style="padding:15px">{comment}</div>
+                """
+
         body = f'''
                 <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">{title}</div>
-                <a href="http://livetakeoff.com/jobs/{job.id}/details" style="display: inline-block; padding: 0.5625rem 1.125rem; margin: 0 5px; font-size: 1.5rem; font-weight: 400; line-height: 1.5; text-align: center; vertical-align: middle; cursor: pointer; border: 1px solid transparent; border-radius: 0.375rem; transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; text-decoration: none; color: #212529; background-color: #f8f9fa; border-color: #f8f9fa;">REVIEW</a>
+                {link}
+
+                <div style="margin-bottom:10px"></div>
+                {comment_html_body}
 
                 <div style="margin-bottom:20px"></div>
-                <table style="border-collapse: collapse">
-                    <tr>
-                        <td style="padding:15px">Comment</td>
-                        <td style="padding:15px">{comment}</td>
-                    </tr>
-
-                </table>
-
-                <div style="margin-bottom:20px"></div>
+                <div style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">Job Information</div>
                 <table style="border-collapse: collapse">
                     <tr>
                         <td style="padding:15px">Customer</td>
@@ -835,15 +883,18 @@ class EmailNotificationService():
                     </tr>
                     <tr>
                         <td style="padding:15px">Services</td>
-                        <td style="padding:15px">{service_names}</td>
+                        <td style="padding:15px">{services_as_bullet_points_html}</td>
                     </tr>
-                    <tr>
-                        <td style="padding:15px">Retainer Services</td>
-                        <td style="padding:15px">{retainer_service_names}</td>
-                    </tr>
-                </table>
-                <div style="margin-top:20px;padding:5px;font-weight: 700;"></div>
                 '''
+
+        if retainer_service_names:
+            body += f""" <tr>
+                            <td style="padding:15px">Retainer Services</td>
+                            <td style="padding:15px">{retainer_services_as_bullet_points_html}</td>
+                        </tr> """
+            
+        body += """ </table>
+                    <div style="margin-top:20px;padding:5px;font-weight: 700;"></div> """
 
         body += email_util.getEmailSignature()
 
