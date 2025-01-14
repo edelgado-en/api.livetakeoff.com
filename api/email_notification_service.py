@@ -349,6 +349,27 @@ class EmailNotificationService():
         base64_bytes = base64.b64encode(message_bytes)
         base64_message = base64_bytes.decode('ascii')
 
+        services_as_bullet_points_html = '<ul>'
+        retainer_services_as_bullet_points_html = '<ul>'
+
+
+        if service_names:
+            # remove the last comma and trailing space from service_names
+            service_names = service_names[:-2]
+            for service in service_names.split(','):
+                services_as_bullet_points_html += f'<li>{service}</li>'
+
+        services_as_bullet_points_html += '</ul>'
+
+
+        if retainer_service_names:
+            # remove the last comma and trailing space from retainer_service_names
+            retainer_service_names = retainer_service_names[:-2]
+            for retainer_service in retainer_service_names.split(','):
+                retainer_services_as_bullet_points_html += f'<li>{retainer_service}</li>'
+
+        retainer_services_as_bullet_points_html += '</ul>'
+
         body = f'''
                 <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">Job Assignment</div>
                 <a href="http://livetakeoff.com/shared/jobs/{base64_message}/accept" style="display: inline-block; padding: 0.5625rem 1.125rem; margin: 0 5px; font-size: 1.5rem; font-weight: 400; line-height: 1.5; text-align: center; vertical-align: middle; cursor: pointer; border: 1px solid transparent; border-radius: 0.375rem; transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; text-decoration: none; color: #fff; background-color: #007bff; border-color: #007bff;">ACCEPT</a>
@@ -386,15 +407,22 @@ class EmailNotificationService():
                     </tr>
                     <tr>
                         <td style="padding:15px">Services</td>
-                        <td style="padding:15px">{service_names}</td>
+                        <td style="padding:15px">{services_as_bullet_points_html}</td>
                     </tr>
+                '''
+        
+        if retainer_service_names:
+            body += f'''
                     <tr>
                         <td style="padding:15px">Retainer Services</td>
-                        <td style="padding:15px">{retainer_service_names}</td>
+                        <td style="padding:15px">{retainer_services_as_bullet_points_html}</td>
                     </tr>
-                </table>
-                <div style="margin-top:20px;padding:5px;font-weight: 700;"></div>
                 '''
+        
+        body += f'''
+                </table>
+                <div style="margin-top:20px;padding:5px;font-weight: 700;"></div>'''
+        
 
         email_util = EmailUtil()
 
