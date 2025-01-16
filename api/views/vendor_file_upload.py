@@ -21,8 +21,12 @@ class VendorFileUploadView(APIView):
     lookup_url_kwarg = "vendorid"
 
     def post(self, request, *args, **kwargs):
-        vendorId = self.kwargs.get(self.lookup_url_kwarg)
-        vendor = get_object_or_404(Vendor, pk=vendorId)
+        if self.request.user.profile.vendor and self.request.user.profile.vendor.is_external:
+            vendor = self.request.user.profile.vendor
+        else:
+            vendorId = self.kwargs.get(self.lookup_url_kwarg)
+            vendor = get_object_or_404(Vendor, pk=vendorId)
+        
         file = request.data.get('file')
         file_type = request.data.get('file_type', 'O')
         expiration_date = request.data.get('expiration_date', 'null')
