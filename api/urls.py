@@ -115,6 +115,7 @@ from .views import (
         PricesListingByServiceView,
         CustomerFollowerEmailsView,
         CustomerFollowerEmailView,
+        VendorInsuranceCheckView
     )
 
 urlpatterns = [
@@ -167,6 +168,7 @@ urlpatterns = [
 
     path('vendors', VendorsView.as_view()),
     path('vendors/<int:id>/', VendorDetailView.as_view()),
+    path('vendors/insurance-check', VendorInsuranceCheckView.as_view()),
     path('vendors/create', CreateVendorView.as_view()),
     path('vendor-files/upload/<int:vendorid>/', VendorFileUploadView.as_view()),
     path('vendor-files/upload', VendorFileUploadView.as_view()),

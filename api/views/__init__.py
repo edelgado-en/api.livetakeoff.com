@@ -115,3 +115,4 @@ from .prices_listing import PricesListingView
 from .prices_listing_by_service import PricesListingByServiceView
 from .customer_follower_emails import CustomerFollowerEmailsView
 from .customer_follower_email import CustomerFollowerEmailView
+from .vendor_insurance_check import VendorInsuranceCheckView
