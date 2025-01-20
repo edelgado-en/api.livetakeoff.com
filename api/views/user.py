@@ -135,6 +135,7 @@ class UserView(APIView):
             isMasterPM = True
         
         content = {
+            "id": user.id,
             "initials": first_name[0] + last_name[0],
             "about": user_profile.about,
             "username": user.username,
