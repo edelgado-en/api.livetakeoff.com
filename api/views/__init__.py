@@ -116,3 +116,5 @@ from .prices_listing_by_service import PricesListingByServiceView
 from .customer_follower_emails import CustomerFollowerEmailsView
 from .customer_follower_email import CustomerFollowerEmailView
 from .vendor_insurance_check import VendorInsuranceCheckView
+from .ident_tail_lookup import IdentTailLookupView
+from .tail_flights import TailFlightsView

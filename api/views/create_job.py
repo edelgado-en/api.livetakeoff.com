@@ -38,7 +38,8 @@ from ..models import (
         LastProjectManagersNotified,
         JobAcceptanceNotification,
         CustomerFollowerEmail,
-        JobFollowerEmail
+        JobFollowerEmail,
+        TailIdent
     )
 
 class CreateJobView(APIView):
@@ -64,6 +65,8 @@ class CreateJobView(APIView):
         estimate_id = data.get('estimate_id')
         customer_purchase_order = data.get('customer_purchase_order')
         priority = data.get('priority', 'N')
+        ident = data.get('ident')
+        enable_flightaware_tracking = data.get('enable_flightaware_tracking', False)
 
         job_status = 'A'
 
@@ -87,12 +90,17 @@ class CreateJobView(APIView):
         if data['on_site'] == 'true':
             on_site = True
         
+        if enable_flightaware_tracking == 'true':
+            enable_flightaware_tracking = True
+        else:
+            enable_flightaware_tracking = False
 
         estimated_arrival_date = data['estimated_arrival_date']
         arrival_formatted_date = 'Not Specified'
 
         if estimated_arrival_date == 'null':
             estimated_arrival_date = None
+            enable_flightaware_tracking = False
         else :
             # Remove the timezone name
             date_str_cleaned = estimated_arrival_date.split(' (')[0]
@@ -224,9 +232,22 @@ class CreateJobView(APIView):
                   on_site=on_site,
                   arrival_formatted_date=arrival_formatted_date,
                   departure_formatted_date=departure_formatted_date,
-                  complete_before_formatted_date=complete_before_formatted_date)
+                  complete_before_formatted_date=complete_before_formatted_date,
+                  enable_flightaware_tracking=enable_flightaware_tracking)
 
         job.save()
+
+        # if ident is specified and it is not empty, then create a TailIdent entry or update the existing one by TailNumber
+        if ident:
+            ident = ident.strip()
+            if ident:
+                tail_ident = TailIdent.objects.filter(tail_number=tailNumber).first()
+                if tail_ident:
+                    tail_ident.ident = ident
+                    tail_ident.save()
+                else:
+                    tail_ident = TailIdent(tail_number=tailNumber, ident=ident)
+                    tail_ident.save()
 
         if follower_emails:
             job_follower_emails = follower_emails.split(',')

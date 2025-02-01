@@ -115,7 +115,9 @@ from .views import (
         PricesListingByServiceView,
         CustomerFollowerEmailsView,
         CustomerFollowerEmailView,
-        VendorInsuranceCheckView
+        VendorInsuranceCheckView,
+        IdentTailLookupView,
+        TailFlightsView
     )
 
 urlpatterns = [
@@ -130,6 +132,7 @@ urlpatterns = [
     path('jobs/return/<int:id>/', JobReturnView.as_view()),
     path('jobs/price-breakdown/<int:id>/', JobPriceBreakdownView.as_view()),
     path('jobs/<int:id>/', JobDetail.as_view()),
+    path('jobs/flights/<int:id>/', TailFlightsView.as_view()),
     path('jobs/accept/<int:id>/', JobAcceptView.as_view()),
     path('jobs/basic/<int:id>/', JobDetailBasicView.as_view()),
     path('jobs/edit/<int:id>/', EditJobView.as_view()),
@@ -184,6 +187,7 @@ urlpatterns = [
     path('tail-aircraft-lookup/<str:tailnumber>/', TailAircraftLookupView.as_view()),
     path('tail-alert-lookup/<str:tailnumber>/', TailAlertLookupView.as_view()),
     path('tail-open-job-lookup/<str:tailnumber>/', TailOpenJobLookupView.as_view()),
+    path('ident-tail-lookup/<str:tailnumber>/', IdentTailLookupView.as_view()),
 
     path('tail-note-lookup', TailNoteLookupView.as_view()),
 

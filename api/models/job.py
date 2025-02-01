@@ -117,5 +117,7 @@ class Job(models.Model):
 
     discounted_price = models.DecimalField(max_digits=9, decimal_places=2, blank=True, null=True)
 
+    enable_flightaware_tracking = models.BooleanField(default=False)
+
     def __str__(self) -> str:
         return str(self.id) + ' - ' + self.tailNumber + ' - ' + self.airport.initials + ' - ' + self.aircraftType.name
