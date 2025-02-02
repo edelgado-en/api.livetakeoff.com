@@ -21,7 +21,8 @@ from ..models import (
     InvoicedService,
     InvoicedDiscount,
     InvoicedFee,
-    JobFollowerEmail
+    JobFollowerEmail,
+    TailIdent
     )
 
 from api.email_notification_service import EmailNotificationService
@@ -75,6 +76,22 @@ class EditJobView(APIView):
                 saved_job.subcontractor_profit = saved_job.price - Decimal(str(vendor_charge + vendor_additional_cost))
 
                 saved_job.save(update_fields=['internal_additional_cost', 'vendor_charge', 'vendor_additional_cost', 'subcontractor_profit'])
+
+                ident = request.data.get('ident')
+
+                # if ident is not None, create or update the tail ident in TailIdent for this saved_job.tailNumber
+                if ident is not None:
+                    # if ident is empty, delete the tail ident
+                    if ident == '':
+                        TailIdent.objects.filter(tail_number=saved_job.tailNumber).delete()
+                    else:
+                        tail_ident = TailIdent.objects.filter(tail_number=saved_job.tailNumber).first()
+
+                        if tail_ident:
+                            tail_ident.ident = ident
+                            tail_ident.save(update_fields=['ident'])
+                        else:
+                            TailIdent.objects.create(tail_number=saved_job.tailNumber, ident=ident)
 
 
             if current_estimatedETD != saved_job.estimatedETD:
