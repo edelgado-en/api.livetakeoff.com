@@ -245,7 +245,7 @@ class FBOAdmin(admin.ModelAdmin):
 
 @admin.register(Job)
 class JobAdmin(admin.ModelAdmin):
-    list_display = ['id', 'created_at', 'purchase_order', 'customer', 'requestDate', 'tailNumber', 'aircraftType', 'airport', 'fbo', 'estimatedETA', 'estimatedETD', 'completeBy', 'status', 'estimated_completion_time', 'actual_completion_time', 'price', 'hours_worked', 'minutes_worked', 'number_of_workers', 'vendor', 'vendor_charge', 'vendor_additional_cost', 'internal_additional_cost', 'subcontractor_profit', 'travel_fees_amount_applied', 'fbo_fees_amount_applied', 'vendor_higher_price_amount_applied', 'management_fees_amount_applied']
+    list_display = ['id', 'created_at', 'purchase_order', 'customer', 'requestDate', 'tailNumber', 'aircraftType', 'airport', 'fbo', 'estimatedETA', 'estimatedETD', 'completeBy', 'status', 'estimated_completion_time', 'actual_completion_time', 'price', 'hours_worked', 'minutes_worked', 'number_of_workers', 'vendor', 'vendor_charge', 'vendor_additional_cost', 'internal_additional_cost', 'subcontractor_profit', 'travel_fees_amount_applied', 'fbo_fees_amount_applied', 'vendor_higher_price_amount_applied', 'management_fees_amount_applied', 'enable_flightaware_tracking']
     list_per_page = 100
     ordering = ['created_at', 'purchase_order', 'customer', 'aircraftType', 'tailNumber', 'airport', 'fbo', 'status', 'completeBy']
     search_fields = ['tailNumber']
