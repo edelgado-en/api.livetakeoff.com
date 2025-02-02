@@ -3,7 +3,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api.models import (
-    CustomerAdditionalFeeFBO
+    CustomerAdditionalFeeFBO,
+    FBO
 )
 
 class FBOCustomerFeesView(APIView):
@@ -17,13 +18,25 @@ class FBOCustomerFeesView(APIView):
                                                            fbo_id=fbo_id).all()
         fees_dtos = []
 
-        for fee in fees:
+        if not fees:
+            fbo = FBO.objects.get(pk=fbo_id)
+
             f = {
-                'fee': fee.customer_additional_fee.fee,
-                'is_percentage': fee.customer_additional_fee.percentage,
-                'amount': fee.customer_additional_fee.fee
+                'fee': fbo.fee,
+                'is_percentage': fbo.fee_percentage,
+                'amount': fbo.fee
             }
 
             fees_dtos.append(f)
+
+        else:
+            for fee in fees:
+                f = {
+                    'fee': fee.customer_additional_fee.fee,
+                    'is_percentage': fee.customer_additional_fee.percentage,
+                    'amount': fee.customer_additional_fee.fee
+                }
+
+                fees_dtos.append(f)
 
         return Response(fees_dtos, status=status.HTTP_200_OK)

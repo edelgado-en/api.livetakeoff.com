@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from api.models import (
     CustomerAdditionalFeeAirport,
     CustomerAdditionalFeeVendor,
+    Airport
 )
 
 class AirportCustomerFeesView(APIView):
@@ -18,14 +19,27 @@ class AirportCustomerFeesView(APIView):
                                                            airport_id=airport_id).all()
         fees_dtos = []
 
-        for fee in travel_fees:
+        # if travel_fees is empty, then use the travel fee from the airport itself
+        if not travel_fees:
+            airport = Airport.objects.get(pk=airport_id)
+
             f = {
                 'type': 'A',
-                'fee': fee.customer_additional_fee.fee,
-                'is_percentage': fee.customer_additional_fee.percentage,
+                'fee': airport.fee,
+                'is_percentage': airport.fee_percentage,
             }
 
             fees_dtos.append(f)
+        
+        else:
+            for fee in travel_fees:
+                f = {
+                    'type': 'A',
+                    'fee': fee.customer_additional_fee.fee,
+                    'is_percentage': fee.customer_additional_fee.percentage,
+                }
+
+                fees_dtos.append(f)
 
         vendor_higher_price_fees = CustomerAdditionalFeeVendor.objects.filter(customer_additional_fee__customer_setting__customer_id=customer_id,
                                                            customer_additional_fee__type='V',
