@@ -31,5 +31,6 @@ class JobEditSerializer(serializers.ModelSerializer):
             'hours_worked',
             'minutes_worked',
             'number_of_workers',
-            'labor_time'
+            'labor_time',
+            'enable_flightaware_tracking'
             )

@@ -89,7 +89,8 @@ class JobDetailSerializer(serializers.ModelSerializer):
             'departure_formatted_date',
             'complete_before_formatted_date',
             'discounted_price',
-            'follower_emails'
+            'follower_emails',
+            'enable_flightaware_tracking'
         )
 
 
