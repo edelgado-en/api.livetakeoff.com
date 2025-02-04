@@ -23,13 +23,14 @@ class AirportCustomerFeesView(APIView):
         if not travel_fees:
             airport = Airport.objects.get(pk=airport_id)
 
-            f = {
-                'type': 'A',
-                'fee': airport.fee,
-                'is_percentage': airport.fee_percentage,
-            }
+            if airport and airport.fee > 0:
+                f = {
+                    'type': 'A',
+                    'fee': airport.fee,
+                    'is_percentage': airport.fee_percentage,
+                }
 
-            fees_dtos.append(f)
+                fees_dtos.append(f)
         
         else:
             for fee in travel_fees:
