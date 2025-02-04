@@ -48,7 +48,8 @@ from api.models import (
     VendorCustomerPriceList,
     CustomerFollowerEmail,
     JobFollowerEmail,
-    TailIdent
+    TailIdent,
+    RetainerServiceActivity
 )
 
 class UserProfileInline(admin.StackedInline):
@@ -379,3 +380,10 @@ class JobFollowerEmailAdmin(admin.ModelAdmin):
 class TailIdentAdmin(admin.ModelAdmin):
     list_display = ['id', 'tail_number', 'ident']
     list_per_page = 100
+
+@admin.register(RetainerServiceActivity)
+class RetainerServiceActivityAdmin(admin.ModelAdmin):
+    list_display = ['id', 'status', 'timestamp', 'retainer_service', 'job', 'project_manager']
+    list_per_page = 100
+
+
