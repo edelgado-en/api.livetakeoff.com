@@ -23,7 +23,7 @@ class AirportCustomerFeesView(APIView):
         if not travel_fees:
             airport = Airport.objects.get(pk=airport_id)
 
-            if airport and airport.fee > 0:
+            if airport and airport.fee and airport.fee > 0:
                 f = {
                     'type': 'A',
                     'fee': airport.fee,

@@ -21,13 +21,14 @@ class FBOCustomerFeesView(APIView):
         if not fees:
             fbo = FBO.objects.get(pk=fbo_id)
 
-            f = {
-                'fee': fbo.fee,
-                'is_percentage': fbo.fee_percentage,
-                'amount': fbo.fee
-            }
+            if fbo and fbo.fee and fbo.fee > 0:
+                f = {
+                    'fee': fbo.fee,
+                    'is_percentage': fbo.fee_percentage,
+                    'amount': fbo.fee
+                }
 
-            fees_dtos.append(f)
+                fees_dtos.append(f)
 
         else:
             for fee in fees:
