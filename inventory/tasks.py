@@ -33,7 +33,9 @@ from api.models import (
     Tag,
     JobScheduleTag,
     JobStatusActivity,
-    JobPhotos
+    JobPhotos,
+    VendorFile,
+    Vendor
 )
 
 from api.pricebreakdown_service import PriceBreakdownService
@@ -494,6 +496,55 @@ def handleCreateJob(job_schedule, today):
 
 
 
+def check_vendor_insurance_expiration():
+    vendors = Vendor.objects.filter(is_external=True)
+
+    vendors_to_report = []
+
+    # Iterate through vendors and check if they have a VendorFile with file_type == 'I'
+    for vendor in vendors:
+        vendor_to_report = {
+            'name': vendor.name,
+            'has_no_insurance': False,
+            'insurance_about_to_expire': False,
+            'insurance_expired': False,
+            'ok': True
+        }
+
+        vendor_file = VendorFile.objects.filter(vendor=vendor, file_type='I').first()
+
+        if vendor_file is not None:
+            expiration_date = vendor_file.expiration_date
+
+            today = date.today()
+
+            # convert today to datetime
+            today = datetime(today.year, today.month, today.day)
+            
+            # make naive
+            today = today.replace(tzinfo=None)
+            expiration_date = expiration_date.replace(tzinfo=None)
+
+            # check if the insurance has expired
+            if expiration_date < today:
+                vendor_to_report['insurance_expired'] = True
+                vendor_to_report['ok'] = False
+
+            # check if the expiration date is within 30 days
+            elif (expiration_date - today).days <= 30:
+                vendor_to_report['insurance_about_to_expire'] = True
+                vendor_to_report['ok'] = False
+
+        else:
+            vendor_to_report['has_no_insurance'] = True
+            vendor_to_report['ok'] = False
+
+        # add vendor_to_report to vendors_to_report
+        vendors_to_report.append(vendor_to_report)
+
+    
+    EmailNotificationService().send_admin_vendor_insurance_notification(vendors_to_report)
+
 
 # run job every day at 8pm
 scheduler.add_job(collect_daily_inventory_stats, 'cron', hour=20, minute=0, second=0)
@@ -509,5 +560,8 @@ scheduler.add_job(deleteRepeatedScheduledJobs, 'cron', hour=4, minute=10, second
 
 #run job once a month on the first day of the month at 4:00 am
 scheduler.add_job(deletePhotosOlderThanOneYear, 'cron', day=1, hour=4, minute=0, second=0)
+
+# run check_vendor_insurance_expiration every 15 days at 11pm
+scheduler.add_job(check_vendor_insurance_expiration, 'cron', day='*/15', hour=23, minute=0, second=0)
 
 scheduler.start()

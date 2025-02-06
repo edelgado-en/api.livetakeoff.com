@@ -338,6 +338,61 @@ class EmailNotificationService():
             email_util.send_email(email, subject, body)
 
 
+    def send_admin_vendor_insurance_notification(self, vendors):
+        # vendors is an array of objects that look like this:
+        """ vendor_to_report = {
+            'name': vendor.name,
+            'has_no_insurance': False,
+            'insurance_about_to_expire': False,
+            'insurance_expired': False,
+            'ok': True
+        } """
+        internal_users = UserProfile.objects.filter(user__is_active=True,
+                                                    email_notifications=True,
+                                                    user__in=User.objects.filter(Q(is_superuser=True)
+                                                                         | Q(is_staff=True)
+                                                                         | Q(groups__name='Account Managers')
+                                                                         | Q(groups__name='Internal Coordinators')))
+        
+        unique_emails = self.get_unique_emails(internal_users)
+
+        subject = 'Vendor Insurance Status Summary Report'
+
+        body = f'''
+                <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">Vendor Insurance Status Summary Report</div>
+                <table style="border-collapse: collapse">
+                    <tr>
+                        <th style="padding:15px">Vendor</th>
+                        <th style="padding:15px">Insurance Status</th>
+                    </tr>
+                '''
+        
+        for vendor in vendors:
+            insurance_status = 'OK'
+            if vendor['has_no_insurance']:
+                insurance_status = 'No Insurance'
+            elif vendor['insurance_about_to_expire']:
+                insurance_status = 'Insurance About to Expire'
+            elif vendor['insurance_expired']:
+                insurance_status = 'Insurance Expired'
+
+            body += f'''
+                    <tr>
+                        <td style="padding:15px">{vendor['name']}</td>
+                        <td style="padding:15px">{insurance_status}</td>
+                    </tr>
+                    '''
+            
+        body += '</table>'
+
+        email_util = EmailUtil()
+
+        body += email_util.getEmailSignature()
+
+        for email in unique_emails:
+            email_util.send_email(email, subject, body)
+        
+
     def send_job_assigned_notification(self, job: Job, emails: [str],
                                     service_names: str, retainer_service_names: str):
         email_util = EmailUtil()
