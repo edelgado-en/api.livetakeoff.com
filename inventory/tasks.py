@@ -511,6 +511,14 @@ def check_vendor_insurance_expiration():
             'ok': True
         }
 
+        # vendor.emails can be a string of comma separated emails. It can be only one email or multiple emails or empty
+        emails = []
+
+        if vendor.emails is not None and vendor.emails != '':
+            emails = vendor.emails.split(',')
+        
+        vendor_to_report['emails'] = emails
+
         vendor_file = VendorFile.objects.filter(vendor=vendor, file_type='I').first()
 
         if vendor_file is not None:
@@ -542,6 +550,10 @@ def check_vendor_insurance_expiration():
         # add vendor_to_report to vendors_to_report
         vendors_to_report.append(vendor_to_report)
 
+        # if vendor_to_report['ok'] is False, and vendor_to_report['emails'] is not empty, send an email to the emails
+        if vendor_to_report['ok'] is False and len(vendor_to_report['emails']) > 0:
+            EmailNotificationService().send_vendor_insurance_notification(vendor_to_report)
+
     
     EmailNotificationService().send_admin_vendor_insurance_notification(vendors_to_report)
 
@@ -562,6 +574,9 @@ scheduler.add_job(deleteRepeatedScheduledJobs, 'cron', hour=4, minute=10, second
 scheduler.add_job(deletePhotosOlderThanOneYear, 'cron', day=1, hour=4, minute=0, second=0)
 
 # run check_vendor_insurance_expiration every 15 days at 11pm
-scheduler.add_job(check_vendor_insurance_expiration, 'cron', day='*/15', hour=23, minute=0, second=0)
+#scheduler.add_job(check_vendor_insurance_expiration, 'cron', day='*/15', hour=23, minute=0, second=0)
+
+# run check_vendor_insurance_expiration every 2 minutes
+scheduler.add_job(check_vendor_insurance_expiration, 'interval', minutes=2)
 
 scheduler.start()

@@ -338,6 +338,27 @@ class EmailNotificationService():
             email_util.send_email(email, subject, body)
 
 
+    def send_vendor_insurance_notification(self, vendor_to_report):
+        email_util = EmailUtil()
+
+        for email in vendor_to_report['emails']:
+            subject = 'Certificate of Insurance Renewal Required'
+            body = f'''
+                    <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">Certificate of Insurance Renewal Required</div>
+                    <div>
+                        <div style="padding:5px">Dear {vendor_to_report['name']},</div>
+                        <div style="padding:5px">We noticed that your Certificate of Insurance is either expired or about to expired. Please provide your renewed Certificate of Insurance.</div>
+                        <div style="padding:5px">You can provide it by:</div>
+                        <div style="padding:5px">* Uploading it directly on LiveTakeoff</div>
+                        <div style="padding:5px">* Sending it to us via email to ops@livetakeoff.com</div>
+                        <div style="padding:5px">Regards,</div>
+                        <div style="padding:5px">LiveTakeoff Ops Team</div>
+                        <div style="padding:5px">786-270-8120</div>
+                        <div style="padding:5px">www.livetakeoff.com</div>
+                    </div>
+                    '''
+            email_util.send_email(email, subject, body)
+
     def send_admin_vendor_insurance_notification(self, vendors):
         # vendors is an array of objects that look like this:
         """ vendor_to_report = {
