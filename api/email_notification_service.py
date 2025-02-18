@@ -347,7 +347,7 @@ class EmailNotificationService():
                     <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">Certificate of Insurance Renewal Required</div>
                     <div>
                         <div style="padding:5px">Dear {vendor_to_report['name']},</div>
-                        <div style="padding:5px">We noticed that your Certificate of Insurance is either expired or about to expired. Please provide your renewed Certificate of Insurance.</div>
+                        <div style="padding:5px">We noticed that your Certificate of Insurance is either expired or about to expire. Please provide your renewed Certificate of Insurance.</div>
                         <div style="padding:5px">You can provide it by:</div>
                         <div style="padding:5px">* Uploading it directly on LiveTakeoff</div>
                         <div style="padding:5px">* Sending it to us via email to ops@livetakeoff.com</div>
@@ -393,7 +393,7 @@ class EmailNotificationService():
             if vendor['has_no_insurance']:
                 insurance_status = 'No Insurance'
             elif vendor['insurance_about_to_expire']:
-                insurance_status = 'Insurance About to Expire'
+                insurance_status = 'Insurance About to Expired'
             elif vendor['insurance_expired']:
                 insurance_status = 'Insurance Expired'
 
