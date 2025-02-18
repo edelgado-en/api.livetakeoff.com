@@ -12,6 +12,7 @@ class RetainerService(models.Model):
     active = models.BooleanField(default=True)
     checklistActions = models.ManyToManyField('ChecklistAction', related_name='retainerchecklistActions')
     category = models.CharField(max_length=1, choices=CATEGORY_CHOICES, default='O')
+    is_special = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         return self.name

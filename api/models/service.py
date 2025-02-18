@@ -18,6 +18,7 @@ class Service(models.Model):
     checklistActions = models.ManyToManyField('ChecklistAction', related_name='checklist_actions', blank=True)
     type = models.ForeignKey(ServiceType, on_delete=models.CASCADE, related_name='type', blank=True, null=True)
     category = models.CharField(max_length=1, choices=CATEGORY_CHOICES, default='O')
+    is_special = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         return self.name

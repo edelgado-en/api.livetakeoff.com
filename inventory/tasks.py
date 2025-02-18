@@ -497,7 +497,7 @@ def handleCreateJob(job_schedule, today):
 
 
 def check_vendor_insurance_expiration():
-    vendors = Vendor.objects.filter(is_external=True)
+    vendors = Vendor.objects.filter(is_external=True, is_active=True)
 
     vendors_to_report = []
 

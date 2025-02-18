@@ -21,7 +21,7 @@ class CustomerRetainersServicesView(APIView):
         customer_retainer_services = CustomerRetainerService.objects.filter(customer=id).all()
 
         if not customer_retainer_services:
-            retainer_services = RetainerService.objects.all().order_by('name')
+            retainer_services = RetainerService.objects.filter(is_special=False).order_by('name')
         
         else:
             retainer_service_ids = []
@@ -33,7 +33,7 @@ class CustomerRetainersServicesView(APIView):
         customer_services = CustomerService.objects.filter(customer=id).all()
 
         if not customer_services:
-            services = Service.objects.all().order_by('name')
+            services = Service.objects.filter(is_special=False).order_by('name')
 
         else:
             service_ids = []
