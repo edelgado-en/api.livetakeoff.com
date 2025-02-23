@@ -103,6 +103,7 @@ class JobDetail(APIView):
                     r_assignment = {
                         'id': retainer_service_assignment.id,
                         'name': retainer_service_assignment.retainer_service.name,
+                        'description': retainer_service_assignment.retainer_service.description,
                         'project_manager': p_manager,
                         'status': retainer_service_assignment.status,
                         'checklist_actions': retainer_service_assignment.retainer_service.checklistActions.all(),
@@ -139,6 +140,7 @@ class JobDetail(APIView):
                 r_assignment = {
                     'id': retainer_service_assignment.id,
                     'name': retainer_service_assignment.retainer_service.name,
+                    'description': retainer_service_assignment.retainer_service.description,
                     'status': retainer_service_assignment.status,
                     'checklist_actions': retainer_service_assignment.retainer_service.checklistActions.all(),
                 }
