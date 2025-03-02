@@ -26,6 +26,7 @@ from ..models import (
         JobCommentCheck,
         ServiceActivity,
         RetainerServiceActivity,
+        UserCustomer
     )
 
 
@@ -347,9 +348,15 @@ class JobDetail(APIView):
           or user.groups.filter(name='Internal Coordinators').exists():
            return True
 
-        # check if the user is a customer by checking its profile and customer field. If the job's customer matches the user's customer, then the user can view the job
-        if user.profile.customer and user.profile.customer == job.customer:
-            return True
+        if user.profile.customer:
+            if user.profile.customer == job.customer:
+                return True
+
+            # Get extra customers from UserCustomer for this user
+            user_customers = UserCustomer.objects.filter(user=user).all()
+            for user_customer in user_customers:
+                if user_customer.customer == job.customer:
+                    return True
 
         # You are a Project Manager
         # Because the PM needs to be able to complete job after completing all the services

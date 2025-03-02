@@ -7,7 +7,7 @@ from datetime import datetime
 from ..serializers import (JobCommentSerializer)
 from rest_framework.generics import ListCreateAPIView
 from ..pagination import CustomPageNumberPagination
-from ..models import (JobComments, Job, JobCommentCheck, JobFollowerEmail)
+from ..models import (JobComments, Job, JobCommentCheck, UserCustomer)
 
 from api.sms_notification_service import SMSNotificationService
 from api.email_notification_service import EmailNotificationService
@@ -154,8 +154,15 @@ class JobCommentView(ListCreateAPIView):
           or user.groups.filter(name='Account Managers').exists():
            return True
 
-        if user.profile.customer and user.profile.customer == job.customer:
-            return True
+        if user.profile.customer:
+            if user.profile.customer == job.customer:
+                return True
+
+            # Get extra customers from UserCustomer for this user
+            user_customers = UserCustomer.objects.filter(user=user).all()
+            for user_customer in user_customers:
+                if user_customer.customer == job.customer:
+                    return True
 
         return False
 

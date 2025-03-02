@@ -21,10 +21,6 @@ class CustomersView(ListAPIView):
         user_profile = UserProfile.objects.get(user=self.request.user)
         is_customer = user_profile and user_profile.customer is not None
 
-        if is_customer:
-            # return empty queryset if user is customer
-            return Customer.objects.none()
-
         qs = Customer.objects \
                        .filter(name__icontains=name, active=True) \
                        .order_by('name')
@@ -47,7 +43,20 @@ class CustomersView(ListAPIView):
                         customer_ids.append(user_customer.customer.id)
 
                     qs = qs.filter(id__in=customer_ids)
+        
+        elif is_customer:
+            user_customers = UserCustomer.objects.filter(user=self.request.user).all()
+            if user_customers:
+                customer_ids = []
+                for user_customer in user_customers:
+                    customer_ids.append(user_customer.customer.id)
 
+                customer_ids.append(user_profile.customer.id)
+
+                qs = qs.filter(id__in=customer_ids)
+            else:
+                # if no user_customers, return empty queryset
+                qs = qs.none()
 
         return qs
 

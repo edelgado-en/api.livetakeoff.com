@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .aircraft_type import AircraftTypeSerializer
 from .airport import AirportSerializer
 from .fbo import FBOSerializer
+from .customer import CustomerSerializer
 from ..models import (Job, JobCommentCheck, JobComments)
 
 from .job_tag import JobTagSerializer
@@ -10,6 +11,7 @@ class JobSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
     aircraftType = AircraftTypeSerializer()
     airport = AirportSerializer()
+    customer = CustomerSerializer()
     fbo = FBOSerializer()
     completeBy = serializers.DateTimeField(format="%m/%d %H:%M")
     completeByFullDate = serializers.DateTimeField(source="completeBy", format="%m/%d/%Y %H:%M")
@@ -48,6 +50,7 @@ class JobSerializer(serializers.ModelSerializer):
             'purchase_order',
             'aircraftType',
             'airport',
+            'customer',
             'fbo',
             'completeBy',
             'completeByFullDate',

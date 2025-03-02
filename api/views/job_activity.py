@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from django.contrib.auth.models import User
 
-from api.models import (Job, JobStatusActivity)
+from api.models import (Job, JobStatusActivity, UserCustomer)
 
 from api.serializers import JobActivitySerializer
 
@@ -19,17 +19,13 @@ class JobActivityView(ListAPIView):
     def get_queryset(self):
         jobid = self.kwargs.get(self.lookup_url_kwarg)
         job = Job.objects.get(pk=jobid)
-        
 
-        if self.request.user.profile.customer and self.request.user.profile.customer == job.customer:
+        if self.request.user.profile.customer:
             return JobStatusActivity.objects.filter(job=job).exclude(Q(status='P') | Q(status='T') | Q(activity_type='P')).order_by('timestamp')
 
-
-        if  not self.request.user.profile.customer:
+        else: 
             return JobStatusActivity.objects.filter(job=jobid).order_by('timestamp')
 
-
-        return Response({'error': 'You do not have permission to view job activity for this job'}, status=status.HTTP_403_FORBIDDEN)
 
 
 

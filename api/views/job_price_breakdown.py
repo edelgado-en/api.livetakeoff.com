@@ -10,6 +10,7 @@ from api.models import (Job,
                         InvoicedService,
                         InvoicedDiscount,
                         VendorCustomerPriceList,
+                        UserCustomer,
                         InvoicedFee)
 
 class JobPriceBreakdownView(APIView):
@@ -75,13 +76,16 @@ class JobPriceBreakdownView(APIView):
         return Response(price_breakdown, status=status.HTTP_200_OK)
 
     def can_see_price_breakdown(self, user, job):
-        # if user is customer and it matches the job customer, user should have permission to see price breakdown
-        # and the customer setting Show Job Price is enabled
-        if user.profile.customer \
-                 and user.profile.customer == job.customer \
-                 and job.customer.customer_settings.show_job_price:
-            return True
 
+        if user.profile.customer and job.customer.customer_settings.show_job_price:
+            if user.profile.customer == job.customer:
+                return True
+
+            # Get extra customers from UserCustomer for this user
+            user_customers = UserCustomer.objects.filter(user=user).all()
+            for user_customer in user_customers:
+                if user_customer.customer == job.customer:
+                    return True
 
         if user.is_superuser \
             or user.is_staff \

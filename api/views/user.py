@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from ..models import (UserProfile, CustomerSettings)
+from ..models import (UserProfile, CustomerSettings, UserCustomer)
 
 from inventory.models import LocationUser
 
@@ -23,12 +23,10 @@ class UserView(APIView):
         customerId = None
 
         canSeePrice = False
-
         canConfirmJobs = False
-
         canAcceptJobs = False
-
         canSeeAirportAdditionalFees = False
+        hasExtraCustomers = False
 
         customerLogo = None
         if user_profile and user_profile.customer and user_profile.customer.logo:
@@ -133,6 +131,10 @@ class UserView(APIView):
         isMasterPM = False
         if user_profile and user_profile.master_vendor_pm:
             isMasterPM = True
+
+        # if user has at least one entry in UserCustomer, then the user has extra customers
+        if UserCustomer.objects.filter(user=user).exists():
+            hasExtraCustomers = True
         
         content = {
             "id": user.id,
@@ -170,6 +172,7 @@ class UserView(APIView):
             'showInventory': showInventory,
             'showAirportFees': canSeeAirportAdditionalFees,
             'isMasterPM': isMasterPM,
+            'hasExtraCustomers': hasExtraCustomers
         }
 
         return Response(content)

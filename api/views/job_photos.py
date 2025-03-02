@@ -7,7 +7,7 @@ from rest_framework .response import Response
 import cloudinary.uploader
 import cloudinary
 
-from api.models import (JobPhotos, Job)
+from api.models import (JobPhotos, Job, UserCustomer)
 
 from ..serializers import JobPhotoSerializer
 
@@ -64,8 +64,14 @@ class JobPhotosView(ListAPIView):
           or user.groups.filter(name='Account Managers').exists():
            return True
 
-        if user.profile.customer and user.profile.customer == job.customer:
-            return True
+        if user.profile.customer:
+            if user.profile.customer == job.customer:
+                return True
 
+            # Get extra customers from UserCustomer for this user
+            user_customers = UserCustomer.objects.filter(user=user).all()
+            for user_customer in user_customers:
+                if user_customer.customer == job.customer:
+                    return True
 
         return False

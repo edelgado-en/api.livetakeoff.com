@@ -248,8 +248,22 @@ class JobListView(ListAPIView):
             status = self.request.data.get('status')
             airport = self.request.data.get('airport')
             tags = self.request.data.get('tags')
+            customer = self.request.data.get('customer')
 
-            qs = Job.objects.prefetch_related('tags').filter(customer_id=user_profile.customer.id)
+            qs = Job.objects.prefetch_related('tags').all()
+
+            if customer != 'All':
+                qs = qs.filter(customer_id=customer)
+            else:
+                user_customers = UserCustomer.objects.filter(user=self.request.user).all()
+                customer_ids = []
+                if user_customers:
+                    for user_customer in user_customers:
+                        customer_ids.append(user_customer.customer.id)
+
+                customer_ids.append(user_profile.customer.id)
+
+                qs = qs.filter(customer_id__in=customer_ids)
 
             if searchText:
                 qs = qs.filter(Q(tailNumber__icontains=searchText)

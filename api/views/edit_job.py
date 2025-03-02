@@ -22,7 +22,8 @@ from ..models import (
     InvoicedDiscount,
     InvoicedFee,
     JobFollowerEmail,
-    TailIdent
+    TailIdent,
+    UserCustomer
     )
 
 from api.email_notification_service import EmailNotificationService
@@ -290,9 +291,16 @@ class EditJobView(APIView):
         """
         Check if the user has permission to edit a job.
         """
-        # if the user is a customer, he/she can edit the job is the job.customer matches its customer
-        if user.profile.customer and user.profile.customer == job.customer:
-            return True
+
+        if user.profile.customer:
+            if user.profile.customer == job.customer:
+                return True
+
+            # Get extra customers from UserCustomer for this user
+            user_customers = UserCustomer.objects.filter(user=user).all()
+            for user_customer in user_customers:
+                if user_customer.customer == job.customer:
+                    return True
 
         if user.is_superuser \
              or user.is_staff \
