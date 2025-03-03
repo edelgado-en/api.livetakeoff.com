@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from rest_framework.generics import ListAPIView
 from ..pagination import CustomPageNumberPagination
-from api.models import Job
+from api.models import (Job, UserCustomer)
 from ..serializers import (
         JobCompletedSerializer,
         JobAdminSerializer
@@ -72,7 +72,25 @@ class JobExportCSVView(APIView):
                 qs = qs.filter(vendor_higher_price_amount_applied__gt=0)
 
         if self.request.user.profile.customer:
-            qs = qs.filter(customer=self.request.user.profile.customer)
+            if customer and customer != 'All':
+                qs = qs.filter(customer_id=customer)
+            else:
+                user_customers = UserCustomer.objects.filter(user=self.request.user).all()
+
+                customer_ids = []
+                
+                # append self.request.user.profile.customer.id to customer_ids
+                customer_ids.append(self.request.user.profile.customer.id)
+
+                if user_customers:
+                    for user_customer in user_customers:
+                        customer_ids.append(user_customer.customer.id)
+
+                qs = qs.filter(customer_id__in=customer_ids)
+
+        else:
+            if customer and customer != 'All':
+                qs = qs.filter(customer_id=customer)
 
         if searchText:
                 qs = qs.filter(Q(tailNumber__icontains=searchText)
@@ -94,10 +112,6 @@ class JobExportCSVView(APIView):
 
         if fbo and fbo != 'All':
             qs = qs.filter(fbo_id=fbo)
-
-        if customer and customer != 'All':
-            qs = qs.filter(customer_id=customer)
-        
 
         # apply date range filters
         if arrivalDateFrom:

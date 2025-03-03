@@ -16,7 +16,8 @@ from api.models import (Job,
                         UserAvailableAirport,
                         InvoicedDiscount,
                         InvoicedFee,
-                        InvoicedService
+                        InvoicedService,
+                        UserCustomer
                         )
 
 from ..serializers import (
@@ -72,9 +73,27 @@ class CompletedJobsListView(ListAPIView):
             elif additionalFee == 'V':
                 qs = qs.filter(vendor_higher_price_amount_applied__gt=0)
 
-        # if customer use, then only show jobs for that customer
+        # if customer user, then only show jobs for that customer and extra customers
         if user_profile.customer:
-            qs = qs.filter(customer=self.request.user.profile.customer)
+            if customer and customer != 'All':
+                qs = qs.filter(customer_id=customer)
+            else:
+                user_customers = UserCustomer.objects.filter(user=self.request.user).all()
+
+                customer_ids = []
+                
+                # append self.request.user.profile.customer.id to customer_ids
+                customer_ids.append(self.request.user.profile.customer.id)
+
+                if user_customers:
+                    for user_customer in user_customers:
+                        customer_ids.append(user_customer.customer.id)
+
+                qs = qs.filter(customer_id__in=customer_ids)
+
+        else:
+            if customer and customer != 'All':
+                qs = qs.filter(customer_id=customer)
 
         if self.request.user.groups.filter(name='Internal Coordinators').exists():
             
@@ -122,8 +141,7 @@ class CompletedJobsListView(ListAPIView):
         if fbo and fbo != 'All':
             qs = qs.filter(fbo_id=fbo)
 
-        if customer and customer != 'All':
-            qs = qs.filter(customer_id=customer)
+        
 
 
         # apply date range filters
