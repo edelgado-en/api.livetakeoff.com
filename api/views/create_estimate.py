@@ -44,10 +44,12 @@ class CreateEstimateView(APIView):
 
         # if user is not a customer, get the provided customer
         if request.user.profile.customer:
-            customer = request.user.profile.customer
+            if customer_id:
+                customer = Customer.objects.get(id=customer_id)
+            else:
+                customer = request.user.profile.customer
         else:
             customer = Customer.objects.get(id=customer_id)
-        
 
         aircraft_type = AircraftType.objects.get(id=aircraft_type_id)
         airport = Airport.objects.get(id=airport_id)
