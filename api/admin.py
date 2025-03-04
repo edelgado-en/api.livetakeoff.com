@@ -283,7 +283,7 @@ class JobPhotosAdmin(admin.ModelAdmin):
 
 @admin.register(JobFiles)
 class JobFileAdmin(admin.ModelAdmin):
-    list_display = ['id', 'created_at', 'uploaded_by', 'job', 'name', 'file', 'size', 'customer_uploaded']
+    list_display = ['id', 'created_at', 'uploaded_by', 'job', 'name', 'file', 'size', 'customer_uploaded', 'is_public', 'is_customer_only']
     list_per_page = 100
 
 

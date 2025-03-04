@@ -23,6 +23,10 @@ class JobFileView(APIView):
 
         if is_public is not None:
             job_file.is_public = is_public
+
+            if job_file.is_public:
+                job_file.is_customer_only = False
+
             job_file.save()
 
         serializer = JobFileSerializer(job_file)

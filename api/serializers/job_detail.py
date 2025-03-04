@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.db.models import Q
 from .aircraft_type import AircraftTypeSerializer
 from .airport import AirportSerializer
 from .fbo import FBOSerializer
@@ -40,12 +41,12 @@ class JobDetailSerializer(serializers.ModelSerializer):
         
         if user.is_staff or user.is_superuser or user.groups.filter(name='Account Managers').exists():
             return JobFileSerializer(obj.files.all(), many=True, read_only=True).data
-        elif user.profile.customer and user.profile.customer == obj.customer:   
-            # if the current user is a customer user then only return the files that are public
-            return JobFileSerializer(obj.files.filter(is_public=True), many=True, read_only=True).data
+        elif user.profile.customer:   
+            # return all the obj.files where is_public is True OR is_customer_only is True. I need to include both flags in the resultset
+            return JobFileSerializer(obj.files.filter( Q(is_customer_only=True) | Q(is_public=True)), many=True, read_only=True).data
+
         else:
-            # return empty array
-            return []
+            return JobFileSerializer(obj.files.filter(is_public=True), many=True, read_only=True).data
 
     class Meta:
         model = Job

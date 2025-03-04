@@ -12,6 +12,7 @@ class JobFiles(models.Model):
     size = models.PositiveIntegerField(blank=True, null=True)
     customer_uploaded = models.BooleanField(default=False)
     is_public = models.BooleanField(default=False)
+    is_customer_only = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         return self.name

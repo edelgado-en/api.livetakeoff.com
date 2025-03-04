@@ -12,4 +12,4 @@ class JobFileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = JobFiles
-        fields = ['id', 'created_at', 'name', 'file', 'size', 'customer_uploaded', 'is_public']
+        fields = ['id', 'created_at', 'name', 'file', 'size', 'customer_uploaded', 'is_public', 'is_customer_only']
