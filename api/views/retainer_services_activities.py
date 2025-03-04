@@ -128,7 +128,22 @@ class RetainerServiceActivityListView(ListAPIView):
             qs = qs.filter(job__tailNumber__icontains=tail_number)
 
         if is_customer:
-            qs = qs.filter(job__customer=user_profile.customer)
+            if customer_id:
+                qs = qs.filter(job__customer_id=customer_id)
+            else:
+                user_customers = UserCustomer.objects.filter(user=self.request.user).all()
+                customer_ids = []
+                if user_customers:
+                    for user_customer in user_customers:
+                        customer_ids.append(user_customer.customer.id)
+
+                customer_ids.append(user_profile.customer.id)
+
+                qs = qs.filter(job__customer_id__in=customer_ids)
+
+        else:
+            if customer_id:
+                qs = qs.filter(job__customer_id=customer_id)
 
         if is_external_project_manager and user_profile.master_vendor_pm:
             qs = qs.filter(job__vendor_id=user_profile.vendor.id)
@@ -146,9 +161,6 @@ class RetainerServiceActivityListView(ListAPIView):
                         customer_ids.append(user_customer.customer.id)
 
                     qs = qs.filter(job__customer_id__in=customer_ids)
-
-        if customer_id:
-            qs = qs.filter(job__customer_id=customer_id)
 
         if sort_by_price_asc:
             qs = qs.order_by('price')

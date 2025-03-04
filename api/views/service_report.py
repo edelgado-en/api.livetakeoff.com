@@ -12,7 +12,8 @@ from api.models import (
     UserProfile,
     JobStatusActivity,
     UserCustomer,
-    UserAvailableAirport
+    UserAvailableAirport,
+    UserCustomer
 )
 
 class ServiceReportView(APIView):
@@ -120,7 +121,22 @@ class ServiceReportView(APIView):
             qs = qs.filter(job__tailNumber__icontains=tail_number)
 
         if is_customer:
-            qs = qs.filter(job__customer_id=user_profile.customer.id)
+            if customer_id:
+                qs = qs.filter(job__customer_id=customer_id)
+            else:
+                user_customers = UserCustomer.objects.filter(user=self.request.user).all()
+                customer_ids = []
+                if user_customers:
+                    for user_customer in user_customers:
+                        customer_ids.append(user_customer.customer.id)
+
+                customer_ids.append(user_profile.customer.id)
+
+                qs = qs.filter(job__customer_id__in=customer_ids)
+
+        else:
+            if customer_id:
+                qs = qs.filter(job__customer_id=customer_id)
 
         if is_external_project_manager and user_profile.master_vendor_pm:
             qs = qs.filter(job__vendor_id=user_profile.vendor.id)
@@ -156,8 +172,6 @@ class ServiceReportView(APIView):
 
                     qs = qs.filter(job__airport_id__in=airport_ids)
 
-        if customer_id:
-            qs = qs.filter(job__customer_id=customer_id)
 
         # number of services
         number_of_services_completed = qs.count()
@@ -204,10 +218,22 @@ class ServiceReportView(APIView):
                 qs = qs.filter(job__job_service_assignments__service_id=service_id)
 
             if is_customer:
-                qs = qs.filter(job__customer_id=user_profile.customer.id)
+                if customer_id:
+                    qs = qs.filter(job__customer_id=customer_id)
+                else:
+                    user_customers = UserCustomer.objects.filter(user=self.request.user).all()
+                    customer_ids = []
+                    if user_customers:
+                        for user_customer in user_customers:
+                            customer_ids.append(user_customer.customer.id)
 
-            if customer_id:
-                qs = qs.filter(job__customer_id=customer_id)
+                    customer_ids.append(user_profile.customer.id)
+
+                    qs = qs.filter(job__customer_id__in=customer_ids)
+
+            else:
+                if customer_id:
+                    qs = qs.filter(job__customer_id=customer_id)
 
             total_jobs_revenue = qs.aggregate(Sum('job__price'))['job__price__sum']
 
@@ -235,10 +261,22 @@ class ServiceReportView(APIView):
                 qs = qs.filter(job__job_service_assignments__service_id=service_id)
 
             if is_customer:
-                qs = qs.filter(job__customer_id=user_profile.customer.id)
+                if customer_id:
+                    qs = qs.filter(job__customer_id=customer_id)
+                else:
+                    user_customers = UserCustomer.objects.filter(user=self.request.user).all()
+                    customer_ids = []
+                    if user_customers:
+                        for user_customer in user_customers:
+                            customer_ids.append(user_customer.customer.id)
 
-            if customer_id:
-                qs = qs.filter(job__customer_id=customer_id)
+                    customer_ids.append(user_profile.customer.id)
+
+                    qs = qs.filter(job__customer_id__in=customer_ids)
+
+            else:
+                if customer_id:
+                    qs = qs.filter(job__customer_id=customer_id)
 
             total_jobs_revenue_not_invoiced = qs.aggregate(Sum('job__price'))['job__price__sum']
 
@@ -266,7 +304,22 @@ class ServiceReportView(APIView):
                 qs = qs.filter(job__fbo_id=fbo_id)
 
             if is_customer:
-                qs = qs.filter(job__customer_id=user_profile.customer.id)
+                if customer_id:
+                    qs = qs.filter(job__customer_id=customer_id)
+                else:
+                    user_customers = UserCustomer.objects.filter(user=self.request.user).all()
+                    customer_ids = []
+                    if user_customers:
+                        for user_customer in user_customers:
+                            customer_ids.append(user_customer.customer.id)
+
+                    customer_ids.append(user_profile.customer.id)
+
+                    qs = qs.filter(job__customer_id__in=customer_ids)
+
+            else:
+                if customer_id:
+                    qs = qs.filter(job__customer_id=customer_id)
             
             #Ensure that the JobStatusActivity included does not have jobs with retainer service assignments entries
             qs = qs.exclude(job__job_retainer_service_assignments__isnull=False)

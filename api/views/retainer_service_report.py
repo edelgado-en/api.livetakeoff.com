@@ -35,7 +35,6 @@ class RetainerServiceReportView(APIView):
 
         dateSelected = request.data.get('dateSelected')
 
-        
 
         # get start date and end date based on the dateSelected value provided
         if dateSelected == 'yesterday':
@@ -122,7 +121,22 @@ class RetainerServiceReportView(APIView):
             qs = qs.filter(job__tailNumber__icontains=tail_number)
 
         if is_customer:
-            qs = qs.filter(job__customer_id=user_profile.customer.id)
+            if customer_id:
+                qs = qs.filter(job__customer_id=customer_id)
+            else:
+                user_customers = UserCustomer.objects.filter(user=self.request.user).all()
+                customer_ids = []
+                if user_customers:
+                    for user_customer in user_customers:
+                        customer_ids.append(user_customer.customer.id)
+
+                customer_ids.append(user_profile.customer.id)
+
+                qs = qs.filter(job__customer_id__in=customer_ids)
+
+        else:
+            if customer_id:
+                qs = qs.filter(job__customer_id=customer_id)
 
         if is_external_project_manager and user_profile.master_vendor_pm:
             qs = qs.filter(job__vendor_id=user_profile.vendor.id)
@@ -152,8 +166,6 @@ class RetainerServiceReportView(APIView):
 
                     qs = qs.filter(job__airport_id__in=airport_ids)
 
-        if customer_id:
-            qs = qs.filter(job__customer_id=customer_id)
 
         # number of services
         number_of_services_completed = qs.count()
@@ -171,8 +183,23 @@ class RetainerServiceReportView(APIView):
             Q(timestamp__gte=start_date) & Q(timestamp__lte=end_date)
         )
 
-        if customer_id:
-            qs = qs.filter(job__customer_id=customer_id)
+        if is_customer:
+            if customer_id:
+                qs = qs.filter(job__customer_id=customer_id)
+            else:
+                user_customers = UserCustomer.objects.filter(user=self.request.user).all()
+                customer_ids = []
+                if user_customers:
+                    for user_customer in user_customers:
+                        customer_ids.append(user_customer.customer.id)
+
+                customer_ids.append(user_profile.customer.id)
+
+                qs = qs.filter(job__customer_id__in=customer_ids)
+
+        else:
+            if customer_id:
+                qs = qs.filter(job__customer_id=customer_id)
 
         if tail_number:
             qs = qs.filter(Q(job__tailNumber__icontains=tail_number))
@@ -182,9 +209,6 @@ class RetainerServiceReportView(APIView):
             
         if fbo_id:
             qs = qs.filter(job__fbo_id=fbo_id)
-
-        if is_customer:
-            qs = qs.filter(job__customer_id=user_profile.customer.id)
 
         #Ensure that the JobStatusActivity included does not have jobs with job_service_assignments entries
         qs = qs.exclude(job__job_service_assignments__isnull=False)
