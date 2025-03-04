@@ -13,7 +13,7 @@ class MyTokenObtainPairView(TokenObtainPairView):
         
         username = request.data.get('username')
 
-        user = User.objects.get(username=username)
+        user = User.objects.get(username__iexact=username)
 
         first_time_login = user.last_login is None
 

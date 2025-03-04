@@ -91,6 +91,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'livetakeoff.authentication_backends.CaseInsensitiveModelBackend', 
+    'django.contrib.auth.backends.ModelBackend',  
+]
+
 REST_FRAMEWORK = {
     'COERCE_DECIMAL_TO_STRING': False,
     'DEFAULT_PERMISSION_CLASSES': (
