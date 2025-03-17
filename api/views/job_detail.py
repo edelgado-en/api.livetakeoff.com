@@ -54,12 +54,23 @@ class JobDetail(APIView):
         job_service_assignments = []
         job_retainer_service_assignments = []
 
+        is_a_matching_customer = False
+        if request.user.profile.customer:
+            if request.user.profile.customer == job.customer:
+                is_a_matching_customer = True
+
+            # Get extra customers from UserCustomer for this user
+            user_customers = UserCustomer.objects.filter(user=request.user).all()
+            for user_customer in user_customers:
+                if user_customer.customer == job.customer:
+                    is_a_matching_customer = True
+
         # Services are shown depending on the user. If you are an account manager/admin OR a customer user,
         #  you can see all services
         # if you are a project manager, you can only see the services assigned to you
         if request.user.is_superuser \
             or request.user.is_staff \
-            or (request.user.profile.customer and request.user.profile.customer == job.customer) \
+            or (is_a_matching_customer) \
             or request.user.groups.filter(name='Account Managers').exists() \
             or request.user.groups.filter(name='Internal Coordinators').exists() \
             or request.user.profile.master_vendor_pm:
