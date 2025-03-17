@@ -573,7 +573,7 @@ scheduler.add_job(deleteRepeatedScheduledJobs, 'cron', hour=4, minute=10, second
 #run job once a month on the first day of the month at 4:00 am
 scheduler.add_job(deletePhotosOlderThanOneYear, 'cron', day=1, hour=4, minute=0, second=0)
 
-# run check_vendor_insurance_expiration every 15 days at 11pm
-scheduler.add_job(check_vendor_insurance_expiration, 'cron', day='*/15', hour=23, minute=0, second=0)
+# run check_vendor_insurance_expiration every 15 days at 5pm
+scheduler.add_job(check_vendor_insurance_expiration, 'cron', day='1,15', hour=17, minute=0, second=0)
 
 scheduler.start()
