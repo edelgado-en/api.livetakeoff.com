@@ -43,10 +43,15 @@ class JobCommentView(ListCreateAPIView):
             job_comment_check = JobCommentCheck(job=job, user=self.request.user, last_time_check=now)
             job_comment_check.save()
 
-        # if customer user and customer matches job customer then only return public comments
-        # request.user.profile.customer and request.user.profile.customer == job.customer
-        if self.request.user.profile.customer and self.request.user.profile.customer == job.customer:
-            return JobComments.objects.filter(job=job, is_public=True).order_by('created')
+        if self.request.user.profile.customer:
+            if self.request.user.profile.customer == job.customer:
+                return JobComments.objects.filter(job=job, is_public=True).order_by('created')
+
+            # Get extra customers from UserCustomer for this user
+            user_customers = UserCustomer.objects.filter(user=self.request.user).all()
+            for user_customer in user_customers:
+                if user_customer.customer == job.customer:
+                    return JobComments.objects.filter(job=job, is_public=True).order_by('created')
 
 
         return JobComments.objects.select_related('author').filter(job=job).order_by('created')
@@ -106,10 +111,17 @@ class JobCommentView(ListCreateAPIView):
         is_customer_user = False
         is_external_project_manager = False
 
-        # when the user is customer and the customer matches the job customer then is_public is always true
-        if user.profile.customer and user.profile.customer == job.customer:
-            is_public = True
-            is_customer_user = True
+        if user.profile.customer:
+            if user.profile.customer == job.customer:
+                is_customer_user = True
+                is_public = True
+
+            # Get extra customers from UserCustomer for this user
+            user_customers = UserCustomer.objects.filter(user=user).all()
+            for user_customer in user_customers:
+                if user_customer.customer == job.customer:
+                    is_customer_user = True
+                    is_public = True
 
         if user.profile.vendor and user.profile.vendor.is_external:
             is_external_project_manager = True
@@ -120,7 +132,6 @@ class JobCommentView(ListCreateAPIView):
                                   author=user)
 
         job_comment.save()
-
 
         if send_sms:
             SMSNotificationService().send_job_comment_added_notification(job)

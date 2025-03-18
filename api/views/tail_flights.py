@@ -22,6 +22,7 @@ class TailFlightsView(APIView):
 
         enable_flightaware_tracking = job.enable_flightaware_tracking
         arrival_date = job.estimatedETA
+        #use job.arrival_formatted_date
         tail_number = job.tailNumber
 
         if not enable_flightaware_tracking:
