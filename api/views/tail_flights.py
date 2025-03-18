@@ -21,14 +21,13 @@ class TailFlightsView(APIView):
         job = get_object_or_404(Job, pk=id)
 
         enable_flightaware_tracking = job.enable_flightaware_tracking
-        arrival_date = job.estimatedETA
-        #use job.arrival_formatted_date
+        arrival_formatted_date = job.arrival_formatted_date
         tail_number = job.tailNumber
 
         if not enable_flightaware_tracking:
             return Response({'error': 'FlightAware tracking is not enabled for this job'}, status=status.HTTP_400_BAD_REQUEST)
         
-        if arrival_date is None:
+        if arrival_formatted_date is None:
             return Response({'error': 'The estimated arrival date is not set for this job'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Only proceed if the job.status is either:  ('A', 'Accepted'), ('S', 'Assigned'), ('U', 'Submitted'), ('W', 'WIP'),
@@ -42,8 +41,10 @@ class TailFlightsView(APIView):
         
         ident = tail_ident.ident
 
+        parsed_date = datetime.strptime(arrival_formatted_date, "%m/%d/%y %H:%M LT")  # Parsing the string
+        
         # arrival_date must be in the following format as a string: 'YYYY-MM-DD'
-        arrival_date = arrival_date.strftime('%Y-%m-%d')
+        arrival_date = parsed_date.strftime("%Y-%m-%d")  # Formatting as YYYY-MM-DD
 
         response = FlightawareApiService().get_flight_info(ident, arrival_date)
 
