@@ -23,7 +23,7 @@ class JobEstimateDetailView(APIView):
         job_service_estimates = []
         for job_service_estimate in estimate.job_service_estimates.all():
             job_service_estimates.append({
-                'id': job_service_estimate.id,
+                'id': job_service_estimate.service.id,
                 'name': job_service_estimate.service.name,
                 'description': job_service_estimate.service.description,
                 'price': job_service_estimate.price,
