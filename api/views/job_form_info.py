@@ -53,7 +53,7 @@ class JobFormInfoView(APIView):
 
         vendors = Vendor.objects.all().order_by('name')
         
-        airports = Airport.objects.all().order_by('name')[:500]
+        airports = Airport.objects.all().order_by('name')
 
         if self.request.user.groups.filter(name='Internal Coordinators').exists():
 
