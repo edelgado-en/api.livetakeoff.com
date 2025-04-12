@@ -98,41 +98,17 @@ class EditJobView(APIView):
             if current_estimatedETD != saved_job.estimatedETD:
                 JobStatusActivity.objects.create(job=job, user=request.user,
                                                  status=serializer.data['status'], activity_type='E')
-                
-                departure_formatted_date = 'Not Specified'
-                if saved_job.estimatedETD:
-                    departure_formatted_date = serializer.data['estimatedETD']
-                    departure_formatted_date += ' LT'
-
-                saved_job.departure_formatted_date = departure_formatted_date
-
 
             if current_estimatedETA != saved_job.estimatedETA:
                 JobStatusActivity.objects.create(job=job, user=request.user,
                                     status=serializer.data['status'], activity_type='A')
-                
-                arrival_formatted_date = 'Not Specified'
-                if saved_job.estimatedETA:
-                    arrival_formatted_date = serializer.data['estimatedETA']
-                    arrival_formatted_date += ' LT'
-
                 if saved_job.on_site:
-                    arrival_formatted_date = 'On Site'
-                
-                saved_job.arrival_formatted_date = arrival_formatted_date
+                    saved_job.arrival_formatted_date = 'On Site'
 
 
             if current_completeBy != saved_job.completeBy:
                 JobStatusActivity.objects.create(job=job, user=request.user,
                                     status=serializer.data['status'], activity_type='B')
-                
-                complete_by_formatted_date = 'Not Specified'
-                if saved_job.completeBy:
-                    complete_by_formatted_date = serializer.data['completeBy']
-                    complete_by_formatted_date += ' LT'
-                
-                saved_job.complete_before_formatted_date = complete_by_formatted_date
-
 
             if current_airport != serializer.data['airport']:
                 JobStatusActivity.objects.create(job=job, user=request.user,
