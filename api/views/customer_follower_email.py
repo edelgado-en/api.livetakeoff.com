@@ -35,5 +35,21 @@ class CustomerFollowerEmailView(APIView):
             p.delete()
 
             return Response(status=status.HTTP_204_NO_CONTENT)
+        
+        if action == 'make_persistent':
+            p = CustomerFollowerEmail.objects.get(email=email, customer=customer)
+
+            p.is_persistent = True
+            p.save()
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        
+        if action == 'remove_persistent':
+            p = CustomerFollowerEmail.objects.get(email=email, customer=customer)
+
+            p.is_persistent = False
+            p.save()
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
         return Response(status=status.HTTP_400_BAD_REQUEST)

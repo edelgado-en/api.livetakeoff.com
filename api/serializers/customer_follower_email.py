@@ -6,4 +6,4 @@ class CustomerFollowerEmailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomerFollowerEmail
-        fields = ('id', 'email', 'customer')
+        fields = ('id', 'email', 'customer', 'is_persistent')
