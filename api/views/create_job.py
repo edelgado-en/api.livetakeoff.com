@@ -258,6 +258,13 @@ class CreateJobView(APIView):
 
                 job_follower_email = JobFollowerEmail(job=job, email=email)
                 job_follower_email.save()
+        else:
+            if is_customer:
+                # get all the customer persistent follower emails for this customer
+                customer_follower_emails = CustomerFollowerEmail.objects.filter(customer=customer, is_persistent=True)
+                for customer_follower_email in customer_follower_emails:
+                    job_follower_email = JobFollowerEmail(job=job, email=customer_follower_email.email)
+                    job_follower_email.save()
 
 
         for service in services:
