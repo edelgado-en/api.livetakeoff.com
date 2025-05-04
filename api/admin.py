@@ -262,7 +262,7 @@ class JobScheduleAdmin(admin.ModelAdmin):
 
 @admin.register(JobStatusActivity)
 class JobStatusActivityAdmin(admin.ModelAdmin):
-    list_display = ['id', 'timestamp', 'status', 'job', 'user']
+    list_display = ['id', 'timestamp', 'activity_type', 'status', 'job', 'user']
     list_per_page = 100
     ordering = ['timestamp']
     search_fields = ['status']

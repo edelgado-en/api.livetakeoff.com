@@ -37,5 +37,6 @@ class JobActivitySerializer(serializers.ModelSerializer):
             'user',
             'timestamp',
             'activity_type',
-            'user_full_name'
+            'user_full_name',
+            'service_name'
             )

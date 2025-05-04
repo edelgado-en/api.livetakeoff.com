@@ -9,7 +9,8 @@ from api.models import (
         JobServiceAssignment,
         Job,
         RetainerService,
-        RetainerServiceActivity
+        RetainerServiceActivity,
+        JobStatusActivity
     )
 
 from api.serializers import JobRetainerServiceAssignmentSerializer
@@ -97,6 +98,13 @@ class JobRetainerServiceAssignmentView(APIView):
                                                            status=status)
         retainer_assignment.save()
 
+        #Create JobStatusActivity for the retainer service assignment
+        JobStatusActivity.objects.create(job=job,
+                                        status=status,
+                                        user=request.user,
+                                        activity_type='X',
+                                        service_name=retainer_service.name)
+
         updated_job = Job.objects.get(pk=job.id)
 
         if job.status != 'I':
@@ -125,6 +133,13 @@ class JobRetainerServiceAssignmentView(APIView):
 
         # get job before deleting service
         job_id = job_retainer_service_assignment.job.id
+
+        # Create JobStatusActivity for the retainer service removed
+        JobStatusActivity.objects.create(job=job_retainer_service_assignment.job,
+                                        status=job_retainer_service_assignment.status,
+                                        user=request.user,
+                                        activity_type='Y',
+                                        service_name=job_retainer_service_assignment.retainer_service.name)
 
         # delete the service activities associated with this service
         RetainerServiceActivity.objects.filter(job=job_id, retainer_service=job_retainer_service_assignment.retainer_service).delete()

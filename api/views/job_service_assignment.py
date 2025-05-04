@@ -22,7 +22,8 @@ from ..models import (
     JobTag,
     UserEmail,
     LastProjectManagersNotified,
-    JobAcceptanceNotification
+    JobAcceptanceNotification,
+    JobStatusActivity
     )
 
 from ..pricebreakdown_service import PriceBreakdownService
@@ -195,6 +196,9 @@ class JobServiceAssignmentView(APIView):
 
         assignment = JobServiceAssignment(job=job, project_manager=project_manager, service=service, status=status)
         assignment.save()
+
+        JobStatusActivity.objects.create(job=job, status=status, activity_type='C',
+                                         user=request.user, service_name=service.name)
 
         # re-fetch job and update price after deleting service only if the job is auto_priced  and not invoiced
         
@@ -439,6 +443,10 @@ class JobServiceAssignmentView(APIView):
 
         # get job before deleting service
         job_id = job_service_assignment.job.id
+        
+        #create JobStatusActivity for the service removed
+        JobStatusActivity.objects.create(job=job_service_assignment.job, status=job_service_assignment.job.status, activity_type='D',
+                                         user=request.user, service_name=job_service_assignment.service.name)
 
         # delete the service activities associated with this service
         ServiceActivity.objects.filter(job=job_id, service=job_service_assignment.service).delete()

@@ -271,9 +271,17 @@ class CreateJobView(APIView):
             assignment = JobServiceAssignment(job=job,service=service)
             assignment.save()
 
+            JobStatusActivity.objects.create(job=job, user=request.user,
+                                             status=job_status, service_name=service.name,
+                                             activity_type='C')
+
         for retainer_service in retainer_services:
             assignment = JobRetainerServiceAssignment(job=job, retainer_service=retainer_service)
             assignment.save()
+
+            JobStatusActivity.objects.create(job=job, user=request.user,
+                                                status=job_status, service_name=retainer_service.name,
+                                                activity_type='X')
 
         for tag in tags:
             job_tag = JobTag(job=job, tag=tag)

@@ -27,6 +27,10 @@ class JobStatusActivity(models.Model):
         ('U', 'Photos Uploaded'),
         ('R', 'Job Returned'),
         ('V', 'Vendor Accepted'),
+        ('C', 'Service Added'),
+        ('D', 'Service Removed'),
+        ('X', 'Retainer Added'),
+        ('Y', 'Retainer Removed'),
     ]
 
     activity_type = models.CharField(max_length=1, choices=ACTIVITY_TYPE_CHOICES, default='S')
@@ -36,6 +40,7 @@ class JobStatusActivity(models.Model):
     price = models.DecimalField(max_digits=9, decimal_places=2, null=True)
     user = models.ForeignKey('auth.User', on_delete=models.PROTECT, null=True, blank=True, related_name='status_activities')
     timestamp = models.DateTimeField(auto_now_add=True)
+    service_name = models.CharField(max_length=255, null=True, blank=True, help_text='Name of the service that was added or removed. This includes retainers.')
 
     class Meta:
         verbose_name_plural = 'Job Status Activities'
