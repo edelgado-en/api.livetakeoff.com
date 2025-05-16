@@ -393,7 +393,7 @@ class EmailNotificationService():
             if vendor['has_no_insurance']:
                 insurance_status = 'No Insurance'
             elif vendor['insurance_about_to_expire']:
-                insurance_status = 'Insurance About to Expired'
+                insurance_status = 'Insurance About to Expire'
             elif vendor['insurance_expired']:
                 insurance_status = 'Insurance Expired'
 
