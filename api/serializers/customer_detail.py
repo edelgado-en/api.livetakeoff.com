@@ -21,5 +21,6 @@ class CustomerDetailSerializer(serializers.ModelSerializer):
             'billingInfo',
             'phone_number',
             'settings',
-            'active'
+            'active',
+            'exterior_service_checker'
         )

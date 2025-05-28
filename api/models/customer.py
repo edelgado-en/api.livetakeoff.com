@@ -17,5 +17,11 @@ class Customer(models.Model):
 
     active = models.BooleanField(default=True)
 
+    exterior_service_checker = models.PositiveIntegerField(
+        default=0,
+        verbose_name='Exterior Service Checker',
+        help_text='Refers to the number of arrived flights to be checked before suggesting an exterior service level 2'
+    )
+
     def __str__(self) -> str:
         return self.name

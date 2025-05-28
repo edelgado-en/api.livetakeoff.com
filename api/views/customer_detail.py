@@ -54,6 +54,10 @@ class CustomerDetail(APIView):
         specialInstructions = request.data.get('specialInstructions')
         priceListId = request.data.get('priceListId')
         retainerAmount = request.data.get('retainerAmount')
+        exterior_service_checker = request.data.get('exterior_service_checker', 0)
+
+        if exterior_service_checker == '':
+            exterior_service_checker = 0
 
         # update customer
         customer.name = name
@@ -62,6 +66,7 @@ class CustomerDetail(APIView):
         customer.about = about
         customer.billingInfo = billingInfo
         customer.phone_number = phoneNumber
+        customer.exterior_service_checker = exterior_service_checker
 
         customer.save()
 
