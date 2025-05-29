@@ -65,7 +65,7 @@ admin.site.register(User, UserAdmin)
 
 @admin.register(Service)
 class ServiceAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'description', 'active', 'public', 'type', 'category', 'is_special']
+    list_display = ['id', 'name', 'description', 'active', 'public', 'type', 'category', 'is_special', 'is_exterior_detail_level_2']
     list_per_page = 100
     ordering = ['name', 'active']
     search_fields = ['name', 'active']

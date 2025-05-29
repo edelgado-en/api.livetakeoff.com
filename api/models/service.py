@@ -20,6 +20,12 @@ class Service(models.Model):
     category = models.CharField(max_length=1, choices=CATEGORY_CHOICES, default='O')
     is_special = models.BooleanField(default=False)
 
+    is_exterior_detail_level_2 = models.BooleanField(
+        default=False,
+        verbose_name='Exterior Detail Level 2',
+        help_text='This service is used to suggest an exterior service level 2 when the number of arrived flights exceeds the exterior service checker value in the customer settings.'
+    )
+
     def __str__(self) -> str:
         return self.name
 
