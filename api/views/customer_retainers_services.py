@@ -49,7 +49,8 @@ class CustomerRetainersServicesView(APIView):
                 'id': service.id,
                 'name': service.name,
                 'description': service.description,
-                'category': service.category
+                'category': service.category,
+                'is_exterior_detail_level_2': service.is_exterior_detail_level_2,
             }
 
             checklist_actions = service.checklistActions.all()

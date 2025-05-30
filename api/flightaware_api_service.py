@@ -6,7 +6,12 @@ class FlightawareApiService():
     def get_flight_info(self, ident, start_date):
         # start_date must be in the format of 'YYYY-MM-DD'
         # Base URL for the FlightAware API
-        base_url = f'https://aeroapi.flightaware.com/aeroapi/flights/{ident}?start={start_date}'
+        base_url = ''
+
+        if start_date:
+            base_url = f'https://aeroapi.flightaware.com/aeroapi/flights/{ident}?start={start_date}'
+        else:
+            base_url = f'https://aeroapi.flightaware.com/aeroapi/flights/{ident}'
 
         api_key = os.environ.get('FLIGHTAWARE_API_KEY')
 

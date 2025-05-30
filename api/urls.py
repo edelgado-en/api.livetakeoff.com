@@ -117,7 +117,8 @@ from .views import (
         CustomerFollowerEmailView,
         VendorInsuranceCheckView,
         IdentTailLookupView,
-        TailFlightsView
+        TailFlightsView,
+        TailExteriorLevel2CheckerView
     )
 
 urlpatterns = [
@@ -190,6 +191,7 @@ urlpatterns = [
     path('ident-tail-lookup/<str:tailnumber>/', IdentTailLookupView.as_view()),
 
     path('tail-note-lookup', TailNoteLookupView.as_view()),
+    path('tail-exterior-level-2-checker', TailExteriorLevel2CheckerView.as_view()),
 
     path('fbos', FBOsView.as_view()),
     path('fbo-search', FboSearchView.as_view()),
@@ -283,5 +285,6 @@ urlpatterns = [
 
     path('help-file/<int:id>/', CreateHelpFileView.as_view()),
 
-    path('help-files', HelpFileListView.as_view())
+    path('help-files', HelpFileListView.as_view()),
+    
 ]
