@@ -12,6 +12,8 @@ from email.utils import parsedate_tz, mktime_tz
 
 from api.models import (VendorFile, Vendor)
 
+from api.email_notification_service import EmailNotificationService
+
 from api.serializers import (VendorFileSerializer)
 
 class VendorFileUploadView(APIView):
@@ -21,8 +23,10 @@ class VendorFileUploadView(APIView):
     lookup_url_kwarg = "vendorid"
 
     def post(self, request, *args, **kwargs):
+        shoul_notify_admins = False
         if self.request.user.profile.vendor and self.request.user.profile.vendor.is_external:
             vendor = self.request.user.profile.vendor
+            should_notify_admins = True
         else:
             vendorId = self.kwargs.get(self.lookup_url_kwarg)
             vendor = get_object_or_404(Vendor, pk=vendorId)
@@ -59,6 +63,9 @@ class VendorFileUploadView(APIView):
                     )
         
         p.save()
+
+        if should_notify_admins:
+            EmailNotificationService().notify_admins_vendor_file_upload(vendor, p)
 
         serializer = VendorFileSerializer(p)
 

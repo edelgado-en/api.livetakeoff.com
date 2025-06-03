@@ -154,6 +154,51 @@ class EmailNotificationService():
         for email in unique_emails:
             email_util.send_email(email, subject, body)
 
+    
+    def notify_admins_vendor_file_upload(self, vendor, vendor_file):
+        internal_users = UserProfile.objects.filter(user__is_active=True,
+                                                    email_notifications=True,
+                                                    user__in=User.objects.filter(Q(is_superuser=True)
+                                                                         | Q(is_staff=True)
+                                                                         | Q(groups__name='Account Managers')
+                                                                         | Q(groups__name='Internal Coordinators')))
+        
+        unique_emails = self.get_unique_emails(internal_users)
+
+        email_util = EmailUtil()
+
+        file_type_display = ''
+        if vendor_file.file_type == 'I':
+            file_type_display = 'Insurance'
+        elif vendor_file.file_type == 'W':
+            file_type_display = 'W-9'
+        elif vendor_file.file_type == 'O':
+            file_type_display = 'Other'
+
+        subject = f'New Vendor File Uploaded - {vendor.name} - {file_type_display}'
+        body = f'''
+                <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">New Vendor File Uploaded</div>
+                <table style="border-collapse: collapse">
+                    <tr>
+                        <td style="padding:15px">Vendor</td>
+                        <td style="padding:15px">{vendor.name}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:15px">File Name</td>
+                        <td style="padding:15px">{vendor_file.name}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:15px">File Type</td>
+                        <td style="padding:15px">{file_type_display}</td>
+                    </tr>
+                </table>
+                '''
+
+        body += email_util.getEmailSignature()
+
+        for email in unique_emails:
+            email_util.send_email(email, subject, body)
+
 
     def send_job_comment_added_notification(self, job: Job, comment: str, emails: [str]):
         email_util = EmailUtil()
