@@ -138,6 +138,28 @@ class CreateEstimateView(APIView):
                                             'fee': customer_additional_fee.fee, 'isPercentage': customer_additional_fee.percentage})
                         break
 
+        # check if additional_fees contains at least one additional_fee with name 'A'
+        at_least_one_travel_fee = False
+        for additional_fee in additional_fees:
+            if additional_fee['name'] == 'A':
+                at_least_one_travel_fee = True
+                break
+        
+        # if at_least_one_travel_fee is False, then add a travel fee to the additional_fees list using the job.airport.fee
+        if not at_least_one_travel_fee and airport.fee:
+            if airport.fee > 0:
+                additional_fees.append({'id': -1, 'name': 'A', 'fee': airport.fee, 'isPercentage': airport.fee_percentage})
+
+        at_least_one_fbo_fee = False
+        for additional_fee in additional_fees:
+            if additional_fee['name'] == 'F':
+                at_least_one_fbo_fee = True
+                break
+
+        if not at_least_one_fbo_fee and selected_fbo.fee:
+            if selected_fbo.fee > 0:
+                additional_fees.append({'id': -2, 'name': 'F', 'fee': selected_fbo.fee, 'isPercentage': selected_fbo.fee_percentage})
+
         # calculate total price discounts first, then additional fees
         total_price = services_price
         
