@@ -35,6 +35,8 @@ class JobDetailSerializer(serializers.ModelSerializer):
 
     files = serializers.SerializerMethodField()
 
+    show_billing_info = serializers.SerializerMethodField()
+
     def get_files(self, obj):
         # if the current user is_admin or is_staff, or belong to the group Account Managers then return all the files for this job
         user = self.context['request'].user
@@ -47,6 +49,22 @@ class JobDetailSerializer(serializers.ModelSerializer):
 
         else:
             return JobFileSerializer(obj.files.filter(is_public=True), many=True, read_only=True).data
+
+    def get_show_billing_info(self, obj):
+        user = self.context['request'].user
+
+        # we only show billing info if the job is complete
+        if obj.status != 'C':
+            return False
+        
+        # obj.customer.billingInfo cannot be empty
+        if not obj.customer.billingInfo:
+            return False
+        
+        if user.is_staff or user.is_superuser or user.groups.filter(name='Account Managers').exists():
+            return True
+        
+        return False
 
     class Meta:
         model = Job
@@ -91,7 +109,8 @@ class JobDetailSerializer(serializers.ModelSerializer):
             'complete_before_formatted_date',
             'discounted_price',
             'follower_emails',
-            'enable_flightaware_tracking'
+            'enable_flightaware_tracking',
+            'show_billing_info'
         )
 
 
