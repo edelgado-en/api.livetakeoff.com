@@ -149,7 +149,7 @@ class CustomerPMAdmin(admin.ModelAdmin):
 
 @admin.register(CustomerSettings)
 class CustomerSettingsAdmin(admin.ModelAdmin):
-    list_display = ['id', 'customer', 'show_spending_info', 'allow_cancel_job', 'retainer_amount', 'special_instructions', 'price_list']
+    list_display = ['id', 'customer', 'show_spending_info', 'allow_cancel_job', 'retainer_amount', 'special_instructions', 'price_list', 'enable_flight_based_scheduled_cleaning']
     list_per_page = 100
 
     def has_delete_permission(self, request, obj=None):

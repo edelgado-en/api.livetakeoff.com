@@ -18,6 +18,11 @@ class CustomerSettings(models.Model):
 
     enable_request_priority = models.BooleanField(default=False, help_text='If enabled, the customer will be able to request priority service when creating a job')
 
+    enable_flight_based_scheduled_cleaning = models.BooleanField(
+        default=False,
+        help_text='If enabled, a daily job will be run to check which tail numbers require cleaning based on the number of flights completed since last service. Admins will receive an email notification with the list of tails that require cleaning.'
+    )
+
     def __str__(self) -> str:
         return self.customer.name
 
