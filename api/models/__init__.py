@@ -63,3 +63,4 @@ from .vendor_customer_price_list import VendorCustomerPriceList
 from .customer_follower_email import CustomerFollowerEmail
 from .job_follower_email import JobFollowerEmail
 from .tail_ident import TailIdent
+from .customer_tail import CustomerTail
