@@ -862,8 +862,53 @@ class EmailNotificationService():
                         email_util.send_email(email, subject, body)
 
                     JobAcceptanceNotification.objects.create(job=job, project_manager=project_manager, attempt=attempt)
-    
 
+
+    def send_flight_based_scheduled_cleaning_notification(self, customer_name, tails_to_report):
+        internal_users = UserProfile.objects.filter(user__is_active=True,
+                                                    email_notifications=True,
+                                                    user__in=User.objects.filter(Q(is_superuser=True)
+                                                                         | Q(is_staff=True)
+                                                                         | Q(groups__name='Account Managers')
+                                                                         | Q(groups__name='Internal Coordinators')))
+        
+        unique_emails = self.get_unique_emails(internal_users)
+
+        subject = f'Flight Based Scheduled Cleaning Notification - {customer_name}'
+        
+        body = f'''
+                <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">Flight Based Scheduled Cleaning Notification</div>
+                <div style="text-align: center; font-size: 16px; font-weight: bold; margin-bottom: 20px;">Customer: {customer_name}</div>
+                <table style="border-collapse: collapse; width: 100%;">
+                <tr>
+                    <th style="padding:15px; border: 1px solid #ddd;">Tail</th>
+                    <th style="padding:15px; border: 1px solid #ddd;">Aircraft Type</th> 
+                    <th style="padding:15px; border: 1px solid #ddd;">Since Last Exterior Level 1</th>
+                    <th style="padding:15px; border: 1px solid #ddd;">Since Last Exterior Level 2</th>
+                    <th style="padding:15px; border: 1px solid #ddd;">Since Last Interior Level 1</th>
+                    <th style="padding:15px; border: 1px solid #ddd;">Since Last Interior Level 2</th>
+                </tr>
+                '''
+        for tail in tails_to_report:
+            body += f'''
+                    <tr>
+                        <td style="padding:15px; border: 1px solid #ddd;">{tail['tail_number']}</td>
+                        <td style="padding:15px; border: 1px solid #ddd;">{tail['aircraft_type']}</td>
+                        <td style="padding:15px; border: 1px solid #ddd;">{tail['since_last_exterior_level_1']}</td>
+                        <td style="padding:15px; border: 1px solid #ddd;">{tail['since_last_exterior_level_2']}</td>
+                        <td style="padding:15px; border: 1px solid #ddd;">{tail['since_last_interior_level_1']}</td>
+                        <td style="padding:15px; border: 1px solid #ddd;">{tail['since_last_interior_level_2']}</td>
+                    </tr>
+                    '''
+        body += '</table>'
+        
+        email_util = EmailUtil()
+        body += email_util.getEmailSignature()
+        
+        for email in unique_emails:
+            email_util.send_email(email, subject, body)
+
+    
     def build_email_body_for_recurrent_acceptance(self, job):
         message = str(job.id) + '-' + job.tailNumber
         message_bytes = message.encode('ascii')

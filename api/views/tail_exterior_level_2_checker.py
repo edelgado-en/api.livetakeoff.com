@@ -41,6 +41,7 @@ class TailExteriorLevel2CheckerView(APIView):
             last_service_date = last_exterior_service_activity.timestamp
 
             # if last_service_date was completed less than 10 days ago, then use the last_service_date to get the flight info 
+            # We use the number 10 because Flightaware API only allows us to get flights from the last 10 days
             if (datetime.now(ZoneInfo("UTC")) - last_service_date).days < 10:
                 # last_service_date needs to be in the following format as a string: 'MM/DD/YY HH:MM LT'
                 last_service_date = last_service_date.strftime("%m/%d/%y %H:%M LT")  # Formatting as MM/DD/YY HH:MM LT

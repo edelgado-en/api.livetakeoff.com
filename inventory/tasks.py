@@ -9,7 +9,11 @@ import json
 from datetime import date
 import pytz
 
+from zoneinfo import ZoneInfo
+
 from django.contrib.auth.models import User
+
+from api.flightaware_api_service import FlightawareApiService
 
 from inventory.models import (
     DailyGeneralStats,
@@ -18,7 +22,7 @@ from inventory.models import (
     LocationItem,
     LocationItemActivity,
     Location,
-    DailyStatsAudit
+    DailyStatsAudit,
 )
 
 from api.models import (
@@ -35,7 +39,12 @@ from api.models import (
     JobStatusActivity,
     JobPhotos,
     VendorFile,
-    Vendor
+    Vendor,
+    CustomerTail,
+    TailAircraftLookup,
+    TailIdent,
+    Customer,
+    ServiceActivity
 )
 
 from api.pricebreakdown_service import PriceBreakdownService
@@ -558,6 +567,227 @@ def check_vendor_insurance_expiration():
     EmailNotificationService().send_admin_vendor_insurance_notification(vendors_to_report)
 
 
+def notify_admins_flight_based_scheduled_cleaning():
+    # This is the number of flights that must be arrived for level 1 cleaning to be recommended
+    SERVICE_LEVEL_1_THRESHOLD = 10  
+    
+    # This is the number of flights that must be arrived for level 2 cleaning to be recommended
+    SERVICE_LEVEL_2_THRESHOLD = 20  
+
+    # Fetch all customers with enable_flight_based_scheduled_cleaning set to True
+    customers = Customer.objects.filter(customer_settings__enable_flight_based_scheduled_cleaning=True)
+
+    for customer in customers:
+        active_tails = CustomerTail.objects.filter(customer=customer, is_active=True)
+
+        tails_to_report = []
+
+        for tail in active_tails:
+            tail_ident = TailIdent.objects.filter(tail_number=tail.tail_number).first()
+            ident_to_use = tail_ident.ident if tail_ident else tail.tail_number
+
+            is_exterior_level_1_due_for_cleaning = False
+            is_exterior_level_2_due_for_cleaning = False
+            is_interior_level_1_due_for_cleaning = False
+            is_interior_level_2_due_for_cleaning = False
+
+            # EXTERIOR LEVEL 2 CHECKER
+            #########################################################################
+
+            last_exterior_level_2_service_activity = ServiceActivity.objects.filter(
+                Q(service__is_exterior_detail_level_2=True) & 
+                Q(job__tailNumber=tail.tail_number) & 
+                Q(job__customer=customer) &
+                Q(status='C') 
+            ).order_by('-timestamp').first()
+
+            last_exterior_level_2_service_activity_date = None
+            flights_count_since_last_exterior_level_2 = 0
+
+            if last_exterior_level_2_service_activity:
+                last_service_date = last_exterior_level_2_service_activity.timestamp
+
+                # if last_service_date was completed less than 10 days ago, then use the last_service_date to get the flight info 
+                # We use the number 10 because Flightaware API only allows us to get flights from the last 10 days
+                if (datetime.now(ZoneInfo("UTC")) - last_service_date).days < 10:
+                    # last_service_date needs to be in the following format as a string: 'MM/DD/YY HH:MM LT'
+                    last_service_date = last_service_date.strftime("%m/%d/%y %H:%M LT")  # Formatting as MM/DD/YY HH:MM LT
+                    parsed_date = datetime.strptime(last_service_date, "%m/%d/%y %H:%M LT")  # Parsing the string
+                
+                    # arrival_date must be in the following format as a string: 'YYYY-MM-DD'
+                    last_exterior_level_2_service_activity_date = parsed_date.strftime("%Y-%m-%d")  # Formatting as YYYY-MM-DD
+
+            exterior_level_2_response = FlightawareApiService().get_flight_info(ident_to_use,
+                                                                                last_exterior_level_2_service_activity_date)
+
+            if exterior_level_2_response:
+                flights = exterior_level_2_response.get('flights', [])
+
+                # iterate throught flights array and count how many entries have status 'Arrived'. If that number is equal or bigger than the exterior_service_checker, then set show_recommendation to true, and also return the number of arrived flights
+                flights_count_since_last_exterior_level_2 = sum(1 for flight in flights if flight.get('status') == 'Arrived')
+                if flights_count_since_last_exterior_level_2 >= SERVICE_LEVEL_2_THRESHOLD:
+                    is_exterior_level_2_due_for_cleaning = True
+
+            # END EXTERIOR LEVEL 2 CHECKER
+            #########################################################################
+
+            # EXTERIOR LEVEL 1 CHECKER
+            #########################################################################
+
+            last_exterior_level_1_service_activity = ServiceActivity.objects.filter(
+                Q(service__is_exterior_detail_level_1=True) & 
+                Q(job__tailNumber=tail.tail_number) & 
+                Q(job__customer=customer) &
+                Q(status='C') 
+            ).order_by('-timestamp').first()
+
+            last_exterior_level_1_service_activity_date = None
+            flights_count_since_last_exterior_level_1 = 0
+
+            if last_exterior_level_1_service_activity:
+                last_service_date = last_exterior_level_1_service_activity.timestamp
+
+                # if last_service_date was completed less than 10 days ago, then use the last_service_date to get the flight info 
+                # We use the number 10 because Flightaware API only allows us to get flights from the last 10 days
+                if (datetime.now(ZoneInfo("UTC")) - last_service_date).days < 10:
+                    # last_service_date needs to be in the following format as a string: 'MM/DD/YY HH:MM LT'
+                    last_service_date = last_service_date.strftime("%m/%d/%y %H:%M LT")  # Formatting as MM/DD/YY HH:MM LT
+                    parsed_date = datetime.strptime(last_service_date, "%m/%d/%y %H:%M LT")  # Parsing the string
+                
+                    # arrival_date must be in the following format as a string: 'YYYY-MM-DD'
+                    last_exterior_level_1_service_activity_date = parsed_date.strftime("%Y-%m-%d")  # Formatting as YYYY-MM-DD
+
+            exterior_level_1_response = FlightawareApiService().get_flight_info(ident_to_use,
+                                                                                last_exterior_level_1_service_activity_date)
+
+            if exterior_level_1_response:
+                flights = exterior_level_1_response.get('flights', [])
+
+                # iterate throught flights array and count how many entries have status 'Arrived'. If that number is equal or bigger than the exterior_service_checker, then set show_recommendation to true, and also return the number of arrived flights
+                flights_count_since_last_exterior_level_1 = sum(1 for flight in flights if flight.get('status') == 'Arrived')
+                if flights_count_since_last_exterior_level_1 >= SERVICE_LEVEL_1_THRESHOLD \
+                    and flights_count_since_last_exterior_level_2 >= SERVICE_LEVEL_1_THRESHOLD:
+                    is_exterior_level_1_due_for_cleaning = True
+
+            # END EXTERIOR LEVEL 1 CHECKER
+            #########################################################################
+
+            # INTERIOR LEVEL 2 CHECKER
+            #########################################################################
+            last_interior_level_2_service_activity = ServiceActivity.objects.filter(
+                Q(service__is_interior_detail_level_2=True) & 
+                Q(job__tailNumber=tail.tail_number) & 
+                Q(job__customer=customer) &
+                Q(status='C') 
+            ).order_by('-timestamp').first()
+
+            last_interior_level_2_service_activity_date = None
+            flights_count_since_last_interior_level_2 = 0
+
+            if last_interior_level_2_service_activity:
+                last_service_date = last_interior_level_2_service_activity.timestamp
+
+                # if last_service_date was completed less than 10 days ago, then use the last_service_date to get the flight info 
+                # We use the number 10 because Flightaware API only allows us to get flights from the last 10 days
+                if (datetime.now(ZoneInfo("UTC")) - last_service_date).days < 10:
+                    # last_service_date needs to be in the following format as a string: 'MM/DD/YY HH:MM LT'
+                    last_service_date = last_service_date.strftime("%m/%d/%y %H:%M LT")  # Formatting as MM/DD/YY HH:MM LT
+                    parsed_date = datetime.strptime(last_service_date, "%m/%d/%y %H:%M LT")  # Parsing the string
+                
+                    # arrival_date must be in the following format as a string: 'YYYY-MM-DD'
+                    last_interior_level_2_service_activity_date = parsed_date.strftime("%Y-%m-%d")  # Formatting as YYYY-MM-DD
+
+            interior_level_2_response = FlightawareApiService().get_flight_info(ident_to_use,
+                                                                                last_interior_level_2_service_activity_date)
+
+            if interior_level_2_response:
+                flights = interior_level_2_response.get('flights', [])
+
+                # iterate throught flights array and count how many entries have status 'Arrived'. If that number is equal or bigger than the exterior_service_checker, then set show_recommendation to true, and also return the number of arrived flights
+                flights_count_since_last_interior_level_2 = sum(1 for flight in flights if flight.get('status') == 'Arrived')
+                if flights_count_since_last_interior_level_2 >= SERVICE_LEVEL_2_THRESHOLD:
+                    is_interior_level_2_due_for_cleaning = True
+
+
+            # END INTERIOR LEVEL 2 CHECKER
+            #########################################################################
+
+            # INTERIOR LEVEL 1 CHECKER
+            #########################################################################
+            last_interior_level_1_service_activity = ServiceActivity.objects.filter(
+                Q(service__is_interior_detail_level_1=True) & 
+                Q(job__tailNumber=tail.tail_number) & 
+                Q(job__customer=customer) &
+                Q(status='C') 
+            ).order_by('-timestamp').first()
+
+            last_interior_level_1_service_activity_date = None
+            flights_count_since_last_interior_level_1 = 0
+
+            if last_interior_level_1_service_activity:
+                last_service_date = last_interior_level_1_service_activity.timestamp
+
+                # if last_service_date was completed less than 10 days ago, then use the last_service_date to get the flight info 
+                # We use the number 10 because Flightaware API only allows us to get flights from the last 10 days
+                if (datetime.now(ZoneInfo("UTC")) - last_service_date).days < 10:
+                    # last_service_date needs to be in the following format as a string: 'MM/DD/YY HH:MM LT'
+                    last_service_date = last_service_date.strftime("%m/%d/%y %H:%M LT")  # Formatting as MM/DD/YY HH:MM LT
+                    parsed_date = datetime.strptime(last_service_date, "%m/%d/%y %H:%M LT")  # Parsing the string
+                
+                    # arrival_date must be in the following format as a string: 'YYYY-MM-DD'
+                    last_interior_level_1_service_activity_date = parsed_date.strftime("%Y-%m-%d")  # Formatting as YYYY-MM-DD
+
+            interior_level_1_response = FlightawareApiService().get_flight_info(ident_to_use,
+                                                                                last_interior_level_1_service_activity_date)
+
+            if interior_level_1_response:
+                flights = interior_level_1_response.get('flights', [])
+
+                # iterate throught flights array and count how many entries have status 'Arrived'. If that number is equal or bigger than the exterior_service_checker, then set show_recommendation to true, and also return the number of arrived flights
+                flights_count_since_last_interior_level_1 = sum(1 for flight in flights if flight.get('status') == 'Arrived')
+                if flights_count_since_last_interior_level_1 >= SERVICE_LEVEL_1_THRESHOLD \
+                    and flights_count_since_last_interior_level_2 >= SERVICE_LEVEL_1_THRESHOLD:
+                    is_interior_level_1_due_for_cleaning = True
+
+            # END INTERIOR LEVEL 1 CHECKER
+            #########################################################################
+
+            # an entry is only added if at least one of the is_*_due_for_cleaning is True
+            if (is_exterior_level_1_due_for_cleaning or is_exterior_level_2_due_for_cleaning or 
+                is_interior_level_1_due_for_cleaning or is_interior_level_2_due_for_cleaning):
+                # get aircraft type name from TailAircraftLookup
+                aircraft_lookup = TailAircraftLookup.objects.filter(tail_number=tail.tail_number).first()
+                aircraft_type_name = aircraft_lookup.aircraft_type.name if aircraft_lookup else "Unknown"
+                
+                tail_report = {
+                    "tail_number": tail.tail_number,
+                    "aircraft_type": aircraft_type_name,
+                    "since_last_exterior_level_1": f"{flights_count_since_last_exterior_level_1} flights",
+                    "since_last_exterior_level_2": f"{flights_count_since_last_exterior_level_2} flights",
+                    "since_last_interior_level_1": f"{flights_count_since_last_interior_level_1} flights",
+                    "since_last_interior_level_2": f"{flights_count_since_last_interior_level_2} flights"
+                }
+
+                if is_exterior_level_1_due_for_cleaning:
+                    tail_report["since_last_exterior_level_1"] += ". DUE"
+                
+                if is_exterior_level_2_due_for_cleaning:
+                    tail_report["since_last_exterior_level_2"] += ". DUE"
+
+                if is_interior_level_1_due_for_cleaning:
+                    tail_report["since_last_interior_level_1"] += ". DUE"
+
+                if is_interior_level_2_due_for_cleaning:
+                    tail_report["since_last_interior_level_2"] += ". DUE"
+
+                tails_to_report.append(tail_report)
+        
+        # If tails_to_report is not empty, then send an email to the customer with the report
+        if len(tails_to_report) > 0:
+            EmailNotificationService().send_flight_based_scheduled_cleaning_notification(customer.name, tails_to_report)
+                
+
+
 # run job every day at 8pm
 scheduler.add_job(collect_daily_inventory_stats, 'cron', hour=20, minute=0, second=0)
 
@@ -575,5 +805,8 @@ scheduler.add_job(deletePhotosOlderThanOneYear, 'cron', day=1, hour=4, minute=0,
 
 # run check_vendor_insurance_expiration every 15 days at 5pm
 scheduler.add_job(check_vendor_insurance_expiration, 'cron', day='1,15', hour=17, minute=0, second=0)
+
+# run notify_admins_flight_based_scheduled_cleaning everyday at 8:30am
+scheduler.add_job(notify_admins_flight_based_scheduled_cleaning, 'cron', hour=8, minute=30, second=0)
 
 scheduler.start()
