@@ -26,6 +26,21 @@ class Service(models.Model):
         help_text='This service is used to suggest an exterior service level 2 when the number of arrived flights exceeds the exterior service checker value in the customer settings.'
     )
 
+    is_exterior_detail_level_1 = models.BooleanField(
+        default=False,
+        verbose_name='Exterior Detail Level 1'
+    )
+
+    is_interior_detail_level_2 = models.BooleanField(
+        default=False,
+        verbose_name='Interior Detail Level 2'
+    )
+
+    is_interior_detail_level_1 = models.BooleanField(
+        default=False,
+        verbose_name='Interior Detail Level 1'
+    )
+
     def __str__(self) -> str:
         return self.name
 
