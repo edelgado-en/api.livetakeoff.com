@@ -10,8 +10,15 @@ class FlightawareApiService():
 
         if start_date:
             base_url = f'https://aeroapi.flightaware.com/aeroapi/flights/{ident}?start={start_date}'
+
+            # This will ensure we get more than 20 flights for comparison purposes
+            base_url += '&max_pages=2'
+
         else:
             base_url = f'https://aeroapi.flightaware.com/aeroapi/flights/{ident}'
+            # This will ensure we get more than 20 flights for comparison purposes
+            base_url += '?max_pages=2'
+        
 
         api_key = os.environ.get('FLIGHTAWARE_API_KEY')
 
