@@ -607,6 +607,10 @@ def notify_admins_flight_based_scheduled_cleaning():
             if last_exterior_level_2_service_activity:
                 last_service_date = last_exterior_level_2_service_activity.timestamp
 
+                #update customer tail model
+                tail.last_exterior_level_2_service_date = last_service_date
+                tail.last_exterior_level_2_location = last_exterior_level_2_service_activity.job.airport.initials
+
                 # if last_service_date was completed less than 10 days ago, then use the last_service_date to get the flight info 
                 # We use the number 10 because Flightaware API only allows us to get flights from the last 10 days
                 if (datetime.now(ZoneInfo("UTC")) - last_service_date).days < 10:
@@ -647,6 +651,10 @@ def notify_admins_flight_based_scheduled_cleaning():
             if last_exterior_level_1_service_activity:
                 last_service_date = last_exterior_level_1_service_activity.timestamp
 
+                # update customer tail model
+                tail.last_exterior_level_1_service_date = last_service_date
+                tail.last_exterior_level_1_location = last_exterior_level_1_service_activity.job.airport.initials
+
                 # if last_service_date was completed less than 10 days ago, then use the last_service_date to get the flight info 
                 # We use the number 10 because Flightaware API only allows us to get flights from the last 10 days
                 if (datetime.now(ZoneInfo("UTC")) - last_service_date).days < 10:
@@ -666,8 +674,10 @@ def notify_admins_flight_based_scheduled_cleaning():
                 # iterate throught flights array and count how many entries have status 'Arrived'. If that number is equal or bigger than the exterior_service_checker, then set show_recommendation to true, and also return the number of arrived flights
                 flights_count_since_last_exterior_level_1 = sum(1 for flight in flights if flight.get('status') == 'Arrived')
                 if flights_count_since_last_exterior_level_1 >= SERVICE_LEVEL_1_THRESHOLD \
-                    and flights_count_since_last_exterior_level_2 >= SERVICE_LEVEL_1_THRESHOLD:
+                    and is_exterior_level_2_due_for_cleaning is False:
                     is_exterior_level_1_due_for_cleaning = True
+
+
 
             # END EXTERIOR LEVEL 1 CHECKER
             #########################################################################
@@ -686,6 +696,10 @@ def notify_admins_flight_based_scheduled_cleaning():
 
             if last_interior_level_2_service_activity:
                 last_service_date = last_interior_level_2_service_activity.timestamp
+
+                # update customer tail model
+                tail.last_interior_level_2_service_date = last_service_date
+                tail.last_interior_level_2_location = last_interior_level_2_service_activity.job.airport.initials
 
                 # if last_service_date was completed less than 10 days ago, then use the last_service_date to get the flight info 
                 # We use the number 10 because Flightaware API only allows us to get flights from the last 10 days
@@ -727,6 +741,10 @@ def notify_admins_flight_based_scheduled_cleaning():
             if last_interior_level_1_service_activity:
                 last_service_date = last_interior_level_1_service_activity.timestamp
 
+                # update customer tail model
+                tail.last_interior_level_1_service_date = last_service_date
+                tail.last_interior_level_1_location = last_interior_level_1_service_activity.job.airport.initials
+
                 # if last_service_date was completed less than 10 days ago, then use the last_service_date to get the flight info 
                 # We use the number 10 because Flightaware API only allows us to get flights from the last 10 days
                 if (datetime.now(ZoneInfo("UTC")) - last_service_date).days < 10:
@@ -746,15 +764,32 @@ def notify_admins_flight_based_scheduled_cleaning():
                 # iterate throught flights array and count how many entries have status 'Arrived'. If that number is equal or bigger than the exterior_service_checker, then set show_recommendation to true, and also return the number of arrived flights
                 flights_count_since_last_interior_level_1 = sum(1 for flight in flights if flight.get('status') == 'Arrived')
                 if flights_count_since_last_interior_level_1 >= SERVICE_LEVEL_1_THRESHOLD \
-                    and flights_count_since_last_interior_level_2 >= SERVICE_LEVEL_1_THRESHOLD:
+                    and is_interior_level_2_due_for_cleaning is False:
                     is_interior_level_1_due_for_cleaning = True
 
             # END INTERIOR LEVEL 1 CHECKER
             #########################################################################
 
+            # update customer tail model with due cleanings
+            tail.is_exterior_level_1_due_for_cleaning = is_exterior_level_1_due_for_cleaning
+            tail.is_exterior_level_2_due_for_cleaning = is_exterior_level_2_due_for_cleaning
+            tail.is_interior_level_1_due_for_cleaning = is_interior_level_1_due_for_cleaning
+            tail.is_interior_level_2_due_for_cleaning = is_interior_level_2_due_for_cleaning
+
+            #update customer tail model with flights count since last service
+            tail.flights_since_last_exterior_level_1_service = flights_count_since_last_exterior_level_1
+            tail.flights_since_last_exterior_level_2_service = flights_count_since_last_exterior_level_2
+            tail.flights_since_last_interior_level_1_service = flights_count_since_last_interior_level_1
+            tail.flights_since_last_interior_level_2_service = flights_count_since_last_interior_level_2
+
+
             # an entry is only added if at least one of the is_*_due_for_cleaning is True
-            if (is_exterior_level_1_due_for_cleaning or is_exterior_level_2_due_for_cleaning or 
+            if (is_exterior_level_1_due_for_cleaning or is_exterior_level_2_due_for_cleaning or
                 is_interior_level_1_due_for_cleaning or is_interior_level_2_due_for_cleaning):
+                
+                # services due status
+                tail.status = 'S'
+
                 # get aircraft type name from TailAircraftLookup
                 aircraft_lookup = TailAircraftLookup.objects.filter(tail_number=tail.tail_number).first()
                 aircraft_type_name = aircraft_lookup.aircraft_type.name if aircraft_lookup else "Unknown"
@@ -781,6 +816,9 @@ def notify_admins_flight_based_scheduled_cleaning():
                     tail_report["since_last_interior_level_2"] += ". DUE"
 
                 tails_to_report.append(tail_report)
+
+            # save the tail with the updated information
+            tail.save()
         
         # If tails_to_report is not empty, then send an email to the customer with the report
         if len(tails_to_report) > 0:
