@@ -390,7 +390,7 @@ class RetainerServiceActivityAdmin(admin.ModelAdmin):
 
 @admin.register(CustomerTail)
 class CustomerTailAdmin(admin.ModelAdmin):
-    list_display = ['id', 'tail_number', 'aircraft_type_name', 'status', 'customer', 'is_active']
+    list_display = ['id', 'tail_number', 'aircraft_type_name', 'status', 'is_interior_level_1_service_due', 'is_interior_level_2_service_due', 'is_exterior_level_1_service_due', 'is_exterior_level_2_service_due', 'customer', 'is_active']
     list_per_page = 100
     search_fields = ['tail_number']
 

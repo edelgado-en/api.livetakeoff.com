@@ -771,10 +771,10 @@ def notify_admins_flight_based_scheduled_cleaning():
             #########################################################################
 
             # update customer tail model with due cleanings
-            tail.is_exterior_level_1_due_for_cleaning = is_exterior_level_1_due_for_cleaning
-            tail.is_exterior_level_2_due_for_cleaning = is_exterior_level_2_due_for_cleaning
-            tail.is_interior_level_1_due_for_cleaning = is_interior_level_1_due_for_cleaning
-            tail.is_interior_level_2_due_for_cleaning = is_interior_level_2_due_for_cleaning
+            tail.is_exterior_level_1_service_due = is_exterior_level_1_due_for_cleaning
+            tail.is_exterior_level_2_service_due = is_exterior_level_2_due_for_cleaning
+            tail.is_interior_level_1_service_due = is_interior_level_1_due_for_cleaning
+            tail.is_interior_level_2_service_due = is_interior_level_2_due_for_cleaning
 
             #update customer tail model with flights count since last service
             tail.flights_since_last_exterior_level_1_service = flights_count_since_last_exterior_level_1
@@ -782,6 +782,11 @@ def notify_admins_flight_based_scheduled_cleaning():
             tail.flights_since_last_interior_level_1_service = flights_count_since_last_interior_level_1
             tail.flights_since_last_interior_level_2_service = flights_count_since_last_interior_level_2
 
+            # get aircraft type name from TailAircraftLookup
+            aircraft_lookup = TailAircraftLookup.objects.filter(tail_number=tail.tail_number).first()
+            aircraft_type_name = aircraft_lookup.aircraft_type.name if aircraft_lookup else "Unknown"
+
+            tail.aircraft_type_name = aircraft_type_name
 
             # an entry is only added if at least one of the is_*_due_for_cleaning is True
             if (is_exterior_level_1_due_for_cleaning or is_exterior_level_2_due_for_cleaning or
@@ -789,10 +794,6 @@ def notify_admins_flight_based_scheduled_cleaning():
                 
                 # services due status
                 tail.status = 'S'
-
-                # get aircraft type name from TailAircraftLookup
-                aircraft_lookup = TailAircraftLookup.objects.filter(tail_number=tail.tail_number).first()
-                aircraft_type_name = aircraft_lookup.aircraft_type.name if aircraft_lookup else "Unknown"
                 
                 tail_report = {
                     "tail_number": tail.tail_number,
