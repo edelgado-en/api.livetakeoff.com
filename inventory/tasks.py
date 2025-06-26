@@ -788,12 +788,15 @@ def notify_admins_flight_based_scheduled_cleaning():
 
             tail.aircraft_type_name = aircraft_type_name
 
+            are_services_due = False
+
             # an entry is only added if at least one of the is_*_due_for_cleaning is True
             if (is_exterior_level_1_due_for_cleaning or is_exterior_level_2_due_for_cleaning or
                 is_interior_level_1_due_for_cleaning or is_interior_level_2_due_for_cleaning):
                 
                 # services due status
-                tail.status = 'S'
+                #tail.status = 'S'
+                are_services_due = True
                 
                 tail_report = {
                     "tail_number": tail.tail_number,
@@ -817,6 +820,37 @@ def notify_admins_flight_based_scheduled_cleaning():
                     tail_report["since_last_interior_level_2"] += ". DUE"
 
                 tails_to_report.append(tail_report)
+
+            
+            # Get the date for 2 days ago
+            two_days_ago = datetime.now(ZoneInfo("UTC")) - timedelta(days=2)
+            two_days_ago_date = two_days_ago.strftime("%m/%d/%y %H:%M LT")  
+            parsed_date = datetime.strptime(two_days_ago_date, "%m/%d/%y %H:%M LT")  
+            two_days_ago = parsed_date.strftime("%Y-%m-%d")  # Formatting as YYYY-MM-DD
+
+            # Determine if there is no flight history by calling FlightawareApiService
+            flight_history_response = FlightawareApiService().get_flight_info(ident_to_use, two_days_ago)
+
+            no_flight_history_found = False
+
+            if flight_history_response:
+                flights = flight_history_response.get('flights', [])
+
+                arrived_flights_count = sum(1 for flight in flights if flight.get('status') == 'Arrived')
+
+                if arrived_flights_count == 0:
+                    no_flight_history_found = True
+                
+            else:
+                no_flight_history_found = True
+
+            # Determine tail status
+            if no_flight_history_found:
+                tail.status = 'N'
+            elif are_services_due:
+                tail.status = 'S'
+            else:
+                tail.status = 'O'
 
             # save the tail with the updated information
             tail.save()
