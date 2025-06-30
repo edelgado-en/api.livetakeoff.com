@@ -15,7 +15,7 @@ class CustomerTail(models.Model):
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='O', help_text='Current status of the tail')
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='tails')
     is_active = models.BooleanField(default=True)
-    
+
     flights_since_last_interior_level_1_service = models.IntegerField(default=0, help_text='Number of flights since the last interior level 1 service')
     flights_since_last_interior_level_2_service = models.IntegerField(default=0, help_text='Number of flights since the last interior level 2 service')
     flights_since_last_exterior_level_1_service = models.IntegerField(default=0, help_text='Number of flights since the last exterior level 1 service')
