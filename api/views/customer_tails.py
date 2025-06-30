@@ -16,9 +16,21 @@ class CustomerTailListView(ListAPIView):
 
     def get_queryset(self):
         searchText = self.request.data.get('searchText')
-        status = self.request.data.get('status')
+        status = self.request.data.get('status', 'All')
+        customerId = self.request.data.get('customerId', 'All')
 
         qs = CustomerTail.objects.all()
+
+        if searchText:
+            qs = qs.filter(
+                Q(tail_number__icontains=searchText)
+            )
+
+        if customerId != "All":
+            qs = qs.filter(customer__id=customerId)
+
+        if status != "All":
+            qs = qs.filter(status=status)
 
         return qs
 
