@@ -119,7 +119,8 @@ from .views import (
         IdentTailLookupView,
         TailFlightsView,
         TailExteriorLevel2CheckerView,
-        CustomerTailListView
+        CustomerTailListView,
+        CustomerTailStatsView
     )
 
 urlpatterns = [
@@ -223,6 +224,7 @@ urlpatterns = [
     path('customers/follower-emails/<int:id>/', CustomerFollowerEmailView.as_view()),
 
     path('customers/tails', CustomerTailListView.as_view()),
+    path('customers/tails/stats', CustomerTailStatsView.as_view()),
 
     path('users', UsersView.as_view()),
     path('users/<int:id>/', UserDetailView.as_view()),

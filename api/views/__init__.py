@@ -120,3 +120,4 @@ from .ident_tail_lookup import IdentTailLookupView
 from .tail_flights import TailFlightsView
 from .tail_exterior_level_2_checker import TailExteriorLevel2CheckerView
 from .customer_tails import CustomerTailListView
+from .customer_tails_stats import CustomerTailStatsView
