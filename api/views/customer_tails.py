@@ -18,6 +18,7 @@ class CustomerTailListView(ListAPIView):
         searchText = self.request.data.get('searchText')
         status = self.request.data.get('status', 'All')
         customerId = self.request.data.get('customerId', 'All')
+        service_due = self.request.data.get('service_due', 'All')
 
         qs = CustomerTail.objects.all()
 
@@ -31,6 +32,16 @@ class CustomerTailListView(ListAPIView):
 
         if status != "All":
             qs = qs.filter(status=status)
+
+        if service_due != "All":
+            if service_due == "intLvl1Due":
+                qs = qs.filter(is_interior_level_1_service_due=True)
+            elif service_due == "intLvl2Due":
+                qs = qs.filter(is_interior_level_2_service_due=True)
+            elif service_due == "extLvl1Due":
+                qs = qs.filter(is_exterior_level_1_service_due=True)
+            elif service_due == "extLvl2Due":
+                qs = qs.filter(is_exterior_level_2_service_due=True)
 
         return qs
 
