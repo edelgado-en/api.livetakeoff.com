@@ -19,6 +19,7 @@ class CustomerTailStatsView(APIView):
         if searchText:
             qs = qs.filter(
                 Q(tail_number__icontains=searchText)
+                | Q(aircraft_type_name__icontains=searchText)
             )
         if customerId != "All":
             qs = qs.filter(customer__id=customerId)
