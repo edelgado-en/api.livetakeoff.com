@@ -28,8 +28,13 @@ class CustomerTailListView(ListAPIView):
                 | Q(aircraft_type_name__icontains=searchText)
             )
 
-        if customerId != "All":
-            qs = qs.filter(customer__id=customerId)
+        user_profile = self.request.user.profile
+
+        if user_profile.customer:
+            qs = qs.filter(customer=user_profile.customer)
+        else:
+            if customerId != "All":
+                qs = qs.filter(customer__id=customerId)
 
         if status != "All":
             qs = qs.filter(status=status)
