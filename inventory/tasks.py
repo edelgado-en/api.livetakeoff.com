@@ -588,6 +588,9 @@ def notify_admins_flight_based_scheduled_cleaning():
 
             flights_response = FlightawareApiService().get_flight_info(ident_to_use, None)
 
+            # Add a 5 seconds delay to avoid hitting the API rate limit
+            time.sleep(5)
+
             if flights_response is None:
                 continue
 
@@ -828,10 +831,7 @@ scheduler.add_job(deletePhotosOlderThanOneYear, 'cron', day=1, hour=4, minute=0,
 # run check_vendor_insurance_expiration every 15 days at 5pm
 scheduler.add_job(check_vendor_insurance_expiration, 'cron', day='1,15', hour=17, minute=0, second=0)
 
-# run notify_admins_flight_based_scheduled_cleaning everyday at 8:30am
-#scheduler.add_job(notify_admins_flight_based_scheduled_cleaning, 'cron', hour=8, minute=30, second=0)
-
-# run notify_admins_flight_based_scheduled_cleaning everyday at 9:30am
-scheduler.add_job(notify_admins_flight_based_scheduled_cleaning, 'cron', hour=9, minute=30, second=0)
+# run notify_admins_flight_based_scheduled_cleaning everyday at 8:00am
+scheduler.add_job(notify_admins_flight_based_scheduled_cleaning, 'cron', hour=8, minute=0, second=0)
 
 scheduler.start()
