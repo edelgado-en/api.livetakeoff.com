@@ -832,6 +832,6 @@ def start_scheduler():
     scheduler.add_job(check_vendor_insurance_expiration, 'cron', day='1,15', hour=17, minute=0, second=0)
 
     # run notify_admins_flight_based_scheduled_cleaning everyday at 8:00am
-    scheduler.add_job(notify_admins_flight_based_scheduled_cleaning, 'cron', hour=9, minute=20, second=0)
+    scheduler.add_job(notify_admins_flight_based_scheduled_cleaning, 'cron', hour=8, minute=00, second=0)
 
     scheduler.start()
