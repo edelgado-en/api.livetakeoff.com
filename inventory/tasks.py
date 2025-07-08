@@ -812,26 +812,26 @@ def notify_admins_flight_based_scheduled_cleaning():
             EmailNotificationService().send_flight_based_scheduled_cleaning_notification(customer.name, tails_to_report)
                 
 
+def start_scheduler():
+    # run job every day at 8pm
+    scheduler.add_job(collect_daily_inventory_stats, 'cron', hour=20, minute=0, second=0)
 
-# run job every day at 8pm
-scheduler.add_job(collect_daily_inventory_stats, 'cron', hour=20, minute=0, second=0)
+    # run job every 6 hours
+    scheduler.add_job(deleteRepeatedDailyGeneralStats, 'interval', hours=6)
 
-# run job every 6 hours
-scheduler.add_job(deleteRepeatedDailyGeneralStats, 'interval', hours=6)
+    # run job every day at 4am
+    scheduler.add_job(createJobSchedules, 'cron', hour=4, minute=0, second=0)
 
-# run job every day at 4am
-scheduler.add_job(createJobSchedules, 'cron', hour=4, minute=0, second=0)
+    #run job every day at 4:10 am
+    scheduler.add_job(deleteRepeatedScheduledJobs, 'cron', hour=4, minute=10, second=0)
 
-#run job every day at 4:10 am
-scheduler.add_job(deleteRepeatedScheduledJobs, 'cron', hour=4, minute=10, second=0)
+    #run job once a month on the first day of the month at 4:00 am
+    scheduler.add_job(deletePhotosOlderThanOneYear, 'cron', day=1, hour=4, minute=0, second=0)
 
-#run job once a month on the first day of the month at 4:00 am
-scheduler.add_job(deletePhotosOlderThanOneYear, 'cron', day=1, hour=4, minute=0, second=0)
+    # run check_vendor_insurance_expiration every 15 days at 5pm
+    scheduler.add_job(check_vendor_insurance_expiration, 'cron', day='1,15', hour=17, minute=0, second=0)
 
-# run check_vendor_insurance_expiration every 15 days at 5pm
-scheduler.add_job(check_vendor_insurance_expiration, 'cron', day='1,15', hour=17, minute=0, second=0)
+    # run notify_admins_flight_based_scheduled_cleaning everyday at 8:00am
+    scheduler.add_job(notify_admins_flight_based_scheduled_cleaning, 'cron', hour=9, minute=20, second=0)
 
-# run notify_admins_flight_based_scheduled_cleaning everyday at 8:00am
-scheduler.add_job(notify_admins_flight_based_scheduled_cleaning, 'cron', hour=8, minute=40, second=0)
-
-scheduler.start()
+    scheduler.start()
