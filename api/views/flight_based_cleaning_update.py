@@ -47,8 +47,8 @@ class FlightBasedCleaningUpdateView(APIView):
 
                 flights_response = FlightawareApiService().get_flight_info(ident_to_use, None)
 
-                # Add a 10 seconds delay to avoid hitting the API rate limit
-                time.sleep(10)
+                # Add a 2 seconds delay to avoid hitting the API rate limit
+                time.sleep(2)
 
                 if flights_response is None:
                     continue
