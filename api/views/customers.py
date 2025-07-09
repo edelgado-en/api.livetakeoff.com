@@ -17,6 +17,7 @@ class CustomersView(ListAPIView):
         name = self.request.data.get('name', '')
         open_jobs = self.request.data.get('open_jobs', False)
         closed_jobs = self.request.data.get('closed_jobs', False)
+        has_flight_based_scheduled_cleaning = self.request.data.get('has_flight_based_scheduled_cleaning', False)
 
         user_profile = UserProfile.objects.get(user=self.request.user)
         is_customer = user_profile and user_profile.customer is not None
@@ -31,6 +32,9 @@ class CustomersView(ListAPIView):
     
         if closed_jobs:
             qs = qs.filter(jobs__status__in=['C', 'I', 'T']).distinct()
+        
+        if has_flight_based_scheduled_cleaning:
+            qs = qs.filter(customer_settings__enable_flight_based_scheduled_cleaning=True)
 
         if self.request.user.groups.filter(name='Internal Coordinators').exists():
 
