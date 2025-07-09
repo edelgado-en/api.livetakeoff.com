@@ -120,7 +120,8 @@ from .views import (
         TailFlightsView,
         TailExteriorLevel2CheckerView,
         CustomerTailListView,
-        CustomerTailStatsView
+        CustomerTailStatsView,
+        FlightBasedCleaningUpdateView
     )
 
 urlpatterns = [
@@ -292,5 +293,7 @@ urlpatterns = [
     path('help-file/<int:id>/', CreateHelpFileView.as_view()),
 
     path('help-files', HelpFileListView.as_view()),
+
+    path('flight-based-cleaning/update', FlightBasedCleaningUpdateView.as_view()),
     
 ]
