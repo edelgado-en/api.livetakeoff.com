@@ -261,6 +261,7 @@ class FlightBasedCleaningUpdateView(APIView):
                     tail.status = 'O'
 
                 # save the tail with the updated information
+                tail.is_viewed = False
                 tail.save()
             
             # If tails_to_report is not empty, then send an email to the customer with the report

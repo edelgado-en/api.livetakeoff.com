@@ -122,3 +122,4 @@ from .tail_exterior_level_2_checker import TailExteriorLevel2CheckerView
 from .customer_tails import CustomerTailListView
 from .customer_tails_stats import CustomerTailStatsView
 from .flight_based_cleaning_update import FlightBasedCleaningUpdateView
+from .customer_tail import CustomerTailView
