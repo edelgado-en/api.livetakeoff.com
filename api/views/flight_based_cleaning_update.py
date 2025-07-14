@@ -105,6 +105,10 @@ class FlightBasedCleaningUpdateView(APIView):
                 if last_exterior_level_1_service_activity:
                     last_service_date = last_exterior_level_1_service_activity.timestamp
 
+                    # update customer tail model
+                    tail.last_exterior_level_1_service_date = last_service_date
+                    tail.last_exterior_level_1_location = last_exterior_level_1_service_activity.job.airport.initials
+
                     for flight in flights:
                         if flight.get("status") == "Arrived":
                             scheduled_on_str = flight.get("scheduled_on")
@@ -113,14 +117,25 @@ class FlightBasedCleaningUpdateView(APIView):
                                 if scheduled_on > last_service_date:
                                     flights_count_since_last_exterior_level_1 += 1
 
-                    if flights_count_since_last_exterior_level_1 >= SERVICE_LEVEL_1_THRESHOLD \
-                        and is_exterior_level_2_due_for_cleaning is False:
+                    # Determine if exterior level 1 service is due
+                    if last_exterior_level_2_service_activity:
+                        if last_exterior_level_2_service_activity.timestamp > last_service_date:
+                            last_service_date = last_exterior_level_2_service_activity.timestamp
+                        
+                    flights_count_since_last_exterior_cleaning = 0
+                    for flight in flights:
+                        if flight.get("status") == "Arrived":
+                            scheduled_on_str = flight.get("scheduled_on")
+                            if scheduled_on_str:
+                                scheduled_on = datetime.fromisoformat(scheduled_on_str.replace("Z", "+00:00"))
+                                if scheduled_on > last_service_date:
+                                    flights_count_since_last_exterior_cleaning += 1
+
+                    if is_exterior_level_2_due_for_cleaning is False \
+                        and flights_count_since_last_exterior_cleaning >= SERVICE_LEVEL_1_THRESHOLD:
                         is_exterior_level_1_due_for_cleaning = True
 
-                    # update customer tail model
-                    tail.last_exterior_level_1_service_date = last_service_date
-                    tail.last_exterior_level_1_location = last_exterior_level_1_service_activity.job.airport.initials
-
+                
                 # END EXTERIOR LEVEL 1 CHECKER
                 #########################################################################
 
@@ -169,6 +184,10 @@ class FlightBasedCleaningUpdateView(APIView):
 
                 if last_interior_level_1_service_activity:
                     last_service_date = last_interior_level_1_service_activity.timestamp
+                    
+                    # update customer tail model
+                    tail.last_interior_level_1_service_date = last_service_date
+                    tail.last_interior_level_1_location = last_interior_level_1_service_activity.job.airport.initials
 
                     for flight in flights:
                         if flight.get("status") == "Arrived":
@@ -177,15 +196,25 @@ class FlightBasedCleaningUpdateView(APIView):
                                 scheduled_on = datetime.fromisoformat(scheduled_on_str.replace("Z", "+00:00"))
                                 if scheduled_on > last_service_date:
                                     flights_count_since_last_interior_level_1 += 1
+                    
+                    # Determine if interior level 1 service is due
+                    if last_interior_level_2_service_activity:
+                        if last_interior_level_2_service_activity.timestamp > last_service_date:
+                            last_service_date = last_interior_level_2_service_activity.timestamp
+                    
+                    flights_count_since_last_interior_cleaning = 0
+                    for flight in flights:
+                        if flight.get("status") == "Arrived":
+                            scheduled_on_str = flight.get("scheduled_on")
+                            if scheduled_on_str:
+                                scheduled_on = datetime.fromisoformat(scheduled_on_str.replace("Z", "+00:00"))
+                                if scheduled_on > last_service_date:
+                                    flights_count_since_last_interior_cleaning += 1
 
-                    if flights_count_since_last_interior_level_1 >= SERVICE_LEVEL_1_THRESHOLD \
-                        and is_interior_level_2_due_for_cleaning is False:
+                    if is_interior_level_2_due_for_cleaning is False \
+                        and flights_count_since_last_interior_cleaning >= SERVICE_LEVEL_1_THRESHOLD:
                         is_interior_level_1_due_for_cleaning = True
 
-
-                    # update customer tail model
-                    tail.last_interior_level_1_service_date = last_service_date
-                    tail.last_interior_level_1_location = last_interior_level_1_service_activity.job.airport.initials
 
                 # END INTERIOR LEVEL 1 CHECKER
                 #########################################################################
