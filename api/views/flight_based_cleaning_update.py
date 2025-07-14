@@ -289,7 +289,7 @@ class FlightBasedCleaningUpdateView(APIView):
                 else:
                     tail.status = 'O'
 
-                # save the tail with the updated information
+                
                 tail.is_viewed = False
                 tail.save()
             
