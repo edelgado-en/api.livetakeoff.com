@@ -44,5 +44,6 @@ class CustomerTailSerializer(serializers.ModelSerializer):
                     'last_exterior_level_2_location',
                     'ident',
                     'is_viewed',
-                    'last_updated'
+                    'last_updated',
+                    'notes'
                   )

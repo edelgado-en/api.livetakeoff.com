@@ -36,5 +36,7 @@ class CustomerTail(models.Model):
     last_exterior_level_1_location = models.CharField(max_length=4, null=True, blank=True, help_text='Airport initials for last known location for exterior level 1 service')
     last_exterior_level_2_location = models.CharField(max_length=4, null=True, blank=True, help_text='Airport initials for last known location for exterior level 2 service')
 
+    notes = models.TextField(blank=True, null=True)
+
     is_viewed = models.BooleanField(default=False, help_text='Indicates if the tail has been viewed by the a user. Set manually by the user.')
     last_updated = models.DateTimeField(auto_now=True, help_text='Timestamp of the last update to this tail')
