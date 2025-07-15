@@ -65,6 +65,7 @@ class UserProfile(models.Model):
 
     enable_sms_notification_job_cancelled = models.BooleanField(default=False, help_text='If enabled, the user will receive an sms notification when a job is cancelled.')
 
+    is_job_submitter_only = models.BooleanField(default=False, help_text='If enabled, the user will only be able to submit jobs. This is meant for users that only submnit jobs. We only show functionality related to job submission, and hide all other functionality.')
 
 
 

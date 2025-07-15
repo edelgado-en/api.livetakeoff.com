@@ -172,7 +172,8 @@ class UserView(APIView):
             'showInventory': showInventory,
             'showAirportFees': canSeeAirportAdditionalFees,
             'isMasterPM': isMasterPM,
-            'hasExtraCustomers': hasExtraCustomers
+            'hasExtraCustomers': hasExtraCustomers,
+            'is_job_submitter_only': user_profile.is_job_submitter_only,
         }
 
         return Response(content)
