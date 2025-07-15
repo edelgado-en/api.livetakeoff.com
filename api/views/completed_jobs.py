@@ -75,6 +75,9 @@ class CompletedJobsListView(ListAPIView):
 
         # if customer user, then only show jobs for that customer and extra customers
         if user_profile.customer:
+            if user_profile.is_job_submitter_only:
+                qs = qs.filter(created_by=self.request.user)
+            
             if customer and customer != 'All':
                 qs = qs.filter(customer_id=customer)
             else:

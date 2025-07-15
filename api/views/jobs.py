@@ -252,6 +252,9 @@ class JobListView(ListAPIView):
 
             qs = Job.objects.prefetch_related('tags').all()
 
+            if user_profile.is_job_submitter_only:
+                qs = qs.filter(created_by=self.request.user)
+            
             if customer != 'All':
                 qs = qs.filter(customer_id=customer)
             else:
