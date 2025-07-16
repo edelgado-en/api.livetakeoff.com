@@ -61,6 +61,9 @@ class SMSNotificationService():
         if job.estimatedETA:
             eta = job.estimatedETA.strftime('%m/%d/%y %H:%M')
 
+        if job.on_site:
+            eta = 'On Site'
+
         notification_util = NotificationUtil()
         message = f'JOB SUBMITTED\n•⁠  ⁠{job.customer.name}\n•⁠  ⁠{job.airport.initials}\n•⁠  ⁠{job.tailNumber}\nETA: {eta}\nETD: {etd}'
 
