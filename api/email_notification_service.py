@@ -627,6 +627,19 @@ class EmailNotificationService():
         if retainer_service_names:
             retainer_service_names = retainer_service_names[:-2]
 
+        services_as_bullet_points_html = '<ul>'
+
+        for service in job.job_service_assignments.all():
+            services_as_bullet_points_html += f'<li>{service.service.name}</li>'
+
+        services_as_bullet_points_html += '</ul>'
+
+        retainer_services_as_bullet_points_html = '<ul>'
+        for retainer_service in job.job_retainer_service_assignments.all():
+            retainer_services_as_bullet_points_html += f'<li>{retainer_service.retainer_service.name}</li>'
+
+        retainer_services_as_bullet_points_html += '</ul>'
+
         message = str(job.id) + '-' + job.tailNumber
         message_bytes = message.encode('ascii')
         base64_bytes = base64.b64encode(message_bytes)
@@ -673,15 +686,31 @@ class EmailNotificationService():
                     </tr>
                     <tr>
                         <td style="padding:15px">Services</td>
-                        <td style="padding:15px">{service_names}</td>
+                        <td style="padding:15px">{services_as_bullet_points_html}</td>
                     </tr>
-                    <tr>
-                        <td style="padding:15px">Retainer Services</td>
-                        <td style="padding:15px">{retainer_service_names}</td>
-                    </tr>
-                </table>
-                <div style="margin-top:20px;padding:5px;font-weight: 700;"></div>
                 '''
+        if retainer_service_names:
+            body += f""" <tr>
+                            <td style="padding:15px">Retainer Services</td>
+                            <td style="padding:15px">{retainer_services_as_bullet_points_html}</td>
+                        </tr> """
+            
+        if job.requested_by:
+            body += f""" <tr>
+                            <td style="padding:15px">Requested By</td>
+                            <td style="padding:15px">{job.requested_by}</td>
+                        </tr> """
+
+        if job.comments:
+            latest_comment = job.comments.order_by('-created').first()
+            if latest_comment:
+                body += f""" <tr>
+                            <td style="padding:15px">Important Note</td>
+                            <td style="padding:15px">{latest_comment.comment}</td>
+                        </tr> """
+            
+        body += """ </table>
+                    <div style="margin-top:20px;padding:5px;font-weight: 700;"></div> """
 
         body += email_util.getEmailSignature()
 
@@ -722,6 +751,7 @@ class EmailNotificationService():
         # remove the last comma from retainer_service_names if not empty
         if retainer_service_names:
             retainer_service_names = retainer_service_names[:-2]
+        
 
         message = str(job.id) + '-' + job.tailNumber
         message_bytes = message.encode('ascii')
