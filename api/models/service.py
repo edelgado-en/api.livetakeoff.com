@@ -10,6 +10,8 @@ class Service(models.Model):
     ]
 
     name = models.CharField(max_length=255, unique=True)
+    short_name = models.CharField(max_length=100, blank=True, null=True)
+    short_description = models.TextField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     active = models.BooleanField(default=True)
     # when a service is public it will be shown to customers and it will included in the create estimate view
