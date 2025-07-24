@@ -137,6 +137,8 @@ class JobDetail(APIView):
                 s_assignment = {
                     'id': service_assignment.id,
                     'name': service_assignment.service.name,
+                    'short_name': service_assignment.service.short_name,
+                    'short_description': service_assignment.service.short_description,
                     'description': service_assignment.service.description,
                     'status': service_assignment.status,
                     'checklist_actions': service_assignment.service.checklistActions.all(),

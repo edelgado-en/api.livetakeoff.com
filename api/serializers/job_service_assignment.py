@@ -14,6 +14,8 @@ class ChecklistActionSerializer(serializers.Serializer):
 class GenericServiceAssignmentSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
+    short_name = serializers.CharField(allow_null=True, required=False)
+    short_description = serializers.CharField(allow_null=True, required=False)
     description = serializers.CharField(allow_null=True, required=False)
     status = serializers.CharField()
     project_manager = serializers.CharField(allow_null=True, required=False)
