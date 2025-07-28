@@ -67,7 +67,7 @@ class UserProfile(models.Model):
 
     is_job_submitter_only = models.BooleanField(default=False, help_text='If enabled, the user will only be able to submit jobs. This is meant for users that only submnit jobs. We only show functionality related to job submission, and hide all other functionality.')
 
-
+    expo_push_token = models.CharField(max_length=256, blank=True, null=True)
 
 
 
