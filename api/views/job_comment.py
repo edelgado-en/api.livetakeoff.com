@@ -160,6 +160,8 @@ class JobCommentView(ListCreateAPIView):
             if len(message) > 100:
                 message = message[:97] + '...'
 
+            print(f'Sending push notification to {job.created_by.username} with message: {message}')
+
             self.send_push_notification(user.profile.expo_push_token, message, job.tailNumber)
 
         serializer = JobCommentSerializer(job_comment)
