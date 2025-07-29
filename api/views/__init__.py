@@ -123,3 +123,4 @@ from .customer_tails import CustomerTailListView
 from .customer_tails_stats import CustomerTailStatsView
 from .flight_based_cleaning_update import FlightBasedCleaningUpdateView
 from .customer_tail import CustomerTailView
+from .user_push_token import UserPushTokenView

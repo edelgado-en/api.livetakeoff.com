@@ -3,11 +3,12 @@ from django.shortcuts import get_object_or_404
 from rest_framework import (permissions, status)
 from rest_framework .response import Response
 from datetime import datetime
+import requests
 
 from ..serializers import (JobCommentSerializer)
 from rest_framework.generics import ListCreateAPIView
 from ..pagination import CustomPageNumberPagination
-from ..models import (JobComments, Job, JobCommentCheck, UserCustomer)
+from ..models import (JobComments, Job, JobCommentCheck, UserCustomer, UserProfile)
 
 from api.sms_notification_service import SMSNotificationService
 from api.email_notification_service import EmailNotificationService
@@ -133,9 +134,16 @@ class JobCommentView(ListCreateAPIView):
 
         job_comment.save()
 
+        if user.profile.expo_push_token:
+            # create a new variable to crop the message. It cannot be longer than 100 characters
+            message = f'New comment on job {job.tailNumber}: {comment[:100]}'
+            if len(message) > 100:
+                message = message[:97] + '...'
+
+            self.send_push_notification(user.profile.expo_push_token, message)
+
         if send_sms:
             SMSNotificationService().send_job_comment_added_notification(job)
-
 
         if send_email:
             EmailNotificationService().send_job_comment_added_notification(job, comment, emails)
@@ -176,4 +184,15 @@ class JobCommentView(ListCreateAPIView):
                     return True
 
         return False
+    
+
+    def send_push_notification(expo_token, message):
+        payload = {
+            "to": expo_token,
+            "sound": "default",
+            "title": "New Comment",
+            "body": message,
+        }
+        
+        requests.post("https://exp.host/--/api/v2/push/send", json=payload)
 

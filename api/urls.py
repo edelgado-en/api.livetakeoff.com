@@ -122,7 +122,8 @@ from .views import (
         CustomerTailListView,
         CustomerTailStatsView,
         FlightBasedCleaningUpdateView,
-        CustomerTailView
+        CustomerTailView,
+        UserPushTokenView
     )
 
 urlpatterns = [
@@ -235,6 +236,7 @@ urlpatterns = [
     path('users/me/avatar', UserAvatarView.as_view()),
     path('users/me/reset-password', UserResetPasswordView.as_view()),
     path('users/signup', UserSignupView.as_view()),
+    path('users/push-token', UserPushTokenView.as_view()),
     path('users/available-airports', UserAvailableAirportsView.as_view()),
     path('users/available-airports/<int:id>/', UserAvailableAirportsView.as_view()),
     path('users/customers', UserCustomersView.as_view()),
