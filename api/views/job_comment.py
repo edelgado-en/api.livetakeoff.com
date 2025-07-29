@@ -134,14 +134,6 @@ class JobCommentView(ListCreateAPIView):
 
         job_comment.save()
 
-        if user.profile.expo_push_token:
-            # create a new variable to crop the message. It cannot be longer than 100 characters
-            message = f'New comment on job {job.tailNumber}: {comment[:100]}'
-            if len(message) > 100:
-                message = message[:97] + '...'
-
-            self.send_push_notification(user.profile.expo_push_token, message)
-
         if send_sms:
             SMSNotificationService().send_job_comment_added_notification(job)
 
@@ -159,6 +151,16 @@ class JobCommentView(ListCreateAPIView):
             EmailNotificationService().send_job_comment_added_notification_to_admins(job, comment,
                                                                                      is_customer_user,
                                                                                      is_external_project_manager)
+
+        # We are only sending push notifications to the job creator if they have a token for now
+        # TODO: This is temporary, just for testing purposes.
+        if job.created_by.profile.expo_push_token:
+            # create a new variable to crop the message. It cannot be longer than 100 characters
+            message = f'New comment on job {job.tailNumber}: {comment[:100]}'
+            if len(message) > 100:
+                message = message[:97] + '...'
+
+            self.send_push_notification(user.profile.expo_push_token, message)
 
         serializer = JobCommentSerializer(job_comment)
 
