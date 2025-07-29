@@ -186,7 +186,7 @@ class JobCommentView(ListCreateAPIView):
         return False
     
 
-    def send_push_notification(expo_token, message):
+    def send_push_notification(self, expo_token, message):
         payload = {
             "to": expo_token,
             "sound": "default",
