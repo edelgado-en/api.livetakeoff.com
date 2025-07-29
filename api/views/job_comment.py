@@ -152,15 +152,11 @@ class JobCommentView(ListCreateAPIView):
                                                                                      is_customer_user,
                                                                                      is_external_project_manager)
 
-        # We are only sending push notifications to the job creator if they have a token for now
-        # TODO: This is temporary, just for testing purposes.
-        if job.created_by.profile.expo_push_token:
-            # create a new variable to crop the message. It cannot be longer than 100 characters
+    
+        if job.created_by.profile.expo_push_token and send_email:
             message = f'New comment on job {job.tailNumber}: {comment[:100]}'
             if len(message) > 100:
                 message = message[:97] + '...'
-
-            print(f'Sending push notification to {job.created_by.username} with message: {message}')
 
             self.send_push_notification(user.profile.expo_push_token, message, job.tailNumber)
 
