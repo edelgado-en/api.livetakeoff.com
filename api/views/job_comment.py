@@ -160,7 +160,7 @@ class JobCommentView(ListCreateAPIView):
             if len(message) > 100:
                 message = message[:97] + '...'
 
-            self.send_push_notification(user.profile.expo_push_token, message)
+            self.send_push_notification(user.profile.expo_push_token, message, job.tailNumber)
 
         serializer = JobCommentSerializer(job_comment)
 
@@ -188,12 +188,13 @@ class JobCommentView(ListCreateAPIView):
         return False
     
 
-    def send_push_notification(self, expo_token, message):
+    def send_push_notification(self, expo_token, message, tailNumber):
         payload = {
             "to": expo_token,
             "sound": "default",
-            "title": "New Comment", # TODO :A message was added to (TAIL)’s cleaning request.
+            "title": f"A message was added to ({tailNumber})’s cleaning request",
             "body": message,
+            "sound": "default"
         }
         
         requests.post("https://exp.host/--/api/v2/push/send", json=payload)
