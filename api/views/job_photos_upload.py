@@ -48,8 +48,8 @@ class JobPhotosUploadView(APIView):
         total_photos = JobPhotos.objects.filter(job=jobid, interior=interior, customer_uploaded=customer).count()
 
         # check if the total photos plus the new ones is greater than the max
-        if total_photos + len(request.data.getlist('photo')) > TOTAL_PHOTOS_MAX_COUNT:
-            return Response({'error': 'There is aleady 10 photos associated with this job'}, status=status.HTTP_406_NOT_ACCEPTABLE)
+        """ if total_photos + len(request.data.getlist('photo')) > TOTAL_PHOTOS_MAX_COUNT:
+            return Response({'error': 'There is aleady 10 photos associated with this job'}, status=status.HTTP_406_NOT_ACCEPTABLE) """
 
         counter = 0
 
