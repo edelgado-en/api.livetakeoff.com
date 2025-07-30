@@ -28,9 +28,6 @@ class JobPhotosUploadView(APIView):
         jobid = self.kwargs.get(self.lookup_url_kwarg)
         job = get_object_or_404(Job, pk=jobid)
 
-        if not self.can_view_job(request.user, job):
-            return Response({'error': 'You do not have permission to view this job'}, status=status.HTTP_403_FORBIDDEN)
-        
         is_interior = request.data.get('is_interior')
         is_exterior = request.data.get('is_exterior')
         is_customer = request.data.get('is_customer')
@@ -80,26 +77,5 @@ class JobPhotosUploadView(APIView):
         JobStatusActivity.objects.create(job=job, user=request.user,
                                     status=job.status, activity_type='U')
 
-
         return Response({'uploaded_photos': counter}, status=status.HTTP_201_CREATED)
 
-
-    def can_view_job(self, user, job):
-        if user.is_superuser \
-          or user.is_staff \
-          or user.groups.filter(name='Account Managers').exists() \
-          or user.groups.filter(name='Internal Coordinators').exists():
-           return True
-
-        # You are a Project Manager
-        # Because the PM needs to be able to complete job after completing all the services
-        # we allow them if they have at least one service associated with the job
-
-        if job.status == 'I':
-            return False
-        
-        if JobServiceAssignment.objects.filter(project_manager=user.id, job=job).exists() \
-            or JobRetainerServiceAssignment.objects.filter(project_manager=user.id, job=job).exists():
-            return True
-
-        return False
