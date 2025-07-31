@@ -56,13 +56,11 @@ class JobServiceAssignmentView(APIView):
                                     .filter(job=job) \
                                     .order_by('created_at')
 
-        # Use a different serializer because you don't need the profile part
         service_assignments = JobServiceAssignmentSerializer(assignments, many=True)
         retainer_service_assignments = JobRetainerServiceAssignmentSerializer(retainer_assignments, many=True)
 
         airport = job.airport
 
-        # get project managers and their availability
         is_master_vendor_pm = self.request.user.profile.master_vendor_pm
 
         if is_master_vendor_pm:
@@ -84,72 +82,6 @@ class JobServiceAssignmentView(APIView):
 
                 if airport.id not in airport_ids:
                     project_managers = project_managers.exclude(id=project_manager.id)
-
-
-            # Get the in-process assignments for this user for other jobs
-            assignments_in_process = project_manager \
-                                       .job_service_assignments \
-                                       .select_related('job') \
-                                       .select_related('service') \
-                                       .filter(Q(status='W') | Q(status='A')) \
-                                       .filter(~Q(job=job))
-
-            if assignments_in_process.count() == 0:
-                project_manager.availability = 'available'
-                continue
-
-            # if you are here, that means you are either busy or available soon
-
-            # the available soon is calculated after iterating through the assignments in process
-            # all you have to do in the loop is add up the hours of the service in process
-            # so that then you can compare
-
-            # you get all the wip services for a user with their corresponding aircraft types. You are just collecting
-            # so that you can add up the hours in total
-            # then outside the this loop, you can say this a project manager has x hours to be available 
-
-            total_estimated_work_hours = 0
-
-            for assignment_in_process in assignments_in_process:
-                job_in_process = assignment_in_process.job
-
-
-                # Get the latest assignment
-                latest_assignment_activity =  JobStatusActivity.objects \
-                                                                .filter(job=job_in_process, status='A') \
-                                                                .order_by('-timestamp') \
-                                                                .first()
-                
-                # account for no activity. Maybe someone is adding from admin view
-                if latest_assignment_activity is None:
-                    continue
-
-
-                # get estimated hours for this service/aircraftType
-                try:
-                    estimated_time = EstimatedServiceTime.objects.get(service=assignment_in_process.service,
-                                                                  aircraft_type=job_in_process.aircraftType)        
-
-                    if estimated_time is None:
-                        continue
-
-                    # keep going
-
-                except EstimatedServiceTime.DoesNotExist:
-                    # do something here
-                    pass
-
-
-
-            # Because you don't have estimated times, you are unavailable to calculate available soon
-            # just say it is busy
-            if total_estimated_work_hours == 0:
-                project_manager.availability = 'busy'
-
-
-            # TODO: YOU HAVE TO ALSO CHECK IN RETAINER SERVICES
-            # you the aircraft type of the job and the service to check the estimated time
-
 
         users = BasicUserSerializer(project_managers, many=True)
 
