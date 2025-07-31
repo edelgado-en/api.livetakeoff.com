@@ -16,9 +16,10 @@ class JobCompletedSerializer(serializers.ModelSerializer):
     estimatedETD = serializers.DateTimeField(format="%m/%d/%y %H:%M")
     requestDate = serializers.DateTimeField(format="%m/%d/%y %H:%M", read_only=True)
     completion_date = serializers.DateTimeField(format="%m/%d/%y %H:%M", read_only=True)
-    comments_count = serializers.SerializerMethodField()
+    comments_count = serializers.IntegerField(read_only=True, default=0)
 
-    def get_comments_count(self, obj):
+    """ THIS IS CAUSING MASSIVE PERFORMANCE ISSUES """
+    """ def get_comments_count(self, obj):
         comments_count = 0
 
         request = self.context.get('request')
@@ -41,7 +42,7 @@ class JobCompletedSerializer(serializers.ModelSerializer):
                 
                 comments_count = qs.count()
         
-        return comments_count
+        return comments_count """
 
     class Meta:
         model = Job
