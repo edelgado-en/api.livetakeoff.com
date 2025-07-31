@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from django.db.models import Q
+from django.db.models import Q, OuterRef, Exists
 from rest_framework import (permissions, status)
 from rest_framework .response import Response
 from rest_framework.views import APIView
@@ -46,59 +46,44 @@ class JobServiceAssignmentView(APIView):
     def get(self, request, id):
         job = get_object_or_404(Job, pk=id)
 
-        assignments = JobServiceAssignment \
-                                .objects.select_related('service') \
-                                .filter(job=job) \
-                                .order_by('created_at')
-
-        retainer_assignments = JobRetainerServiceAssignment \
-                                    .objects.select_related('retainer_service') \
-                                    .filter(job=job) \
-                                    .order_by('created_at')
+        assignments = JobServiceAssignment.objects.select_related('service').filter(job=job).order_by('created_at')
+        retainer_assignments = JobRetainerServiceAssignment.objects.select_related('retainer_service').filter(job=job).order_by('created_at')
 
         service_assignments = JobServiceAssignmentSerializer(assignments, many=True)
         retainer_service_assignments = JobRetainerServiceAssignmentSerializer(retainer_assignments, many=True)
 
         airport = job.airport
-
         is_master_vendor_pm = self.request.user.profile.master_vendor_pm
 
+        # Base query: all active Project Managers (filtered by vendor if needed)
+        base_pm_query = User.objects.filter(groups__name='Project Managers', is_active=True)
         if is_master_vendor_pm:
-            # only get the project managers that are part of the same vendor id as the self.request.user.profile.vendor
-            project_managers = User.objects.filter(groups__name='Project Managers', is_active=True, profile__vendor=self.request.user.profile.vendor)
-        else:
-            project_managers = User.objects.filter(groups__name='Project Managers', is_active=True)
+            base_pm_query = base_pm_query.filter(profile__vendor=self.request.user.profile.vendor)
 
-        for project_manager in project_managers:
-            # Check if this project_manager has any entries in UserAvailableAirport table. If there are entries, then check if the airport for this job is in the list of available airports for this project manager
-            # if not, then remove the project manager from the list of project managers
-            # if there are no entries at all, then the project manager is available for all airports
-            user_available_airports = UserAvailableAirport.objects.filter(user=project_manager).all()
+        # Subquery: check if a user has a specific airport in their availability
+        airport_match = UserAvailableAirport.objects.filter(user=OuterRef('pk'), airport=airport)
+        has_any_airports = UserAvailableAirport.objects.filter(user=OuterRef('pk'))
 
-            if user_available_airports:
-                airport_ids = []
-                for user_available_airport in user_available_airports:
-                    airport_ids.append(user_available_airport.airport.id)
+        # Final queryset: either the user has no airports mapped, or has the current airport mapped
+        eligible_pms = base_pm_query.annotate(
+            has_airport=Exists(airport_match),
+            has_any_airports=Exists(has_any_airports),
+        ).filter(
+            Q(has_airport=True) | Q(has_any_airports=False)
+        )
 
-                if airport.id not in airport_ids:
-                    project_managers = project_managers.exclude(id=project_manager.id)
-
-        users = BasicUserSerializer(project_managers, many=True)
+        users = BasicUserSerializer(eligible_pms, many=True)
 
         preferred_project_manager_id = None
-        for project_manager in project_managers:
-            if job.airport.preferred_project_manager == project_manager:
-                preferred_project_manager_id = project_manager.id
-                break
+        if job.airport.preferred_project_manager and eligible_pms.filter(id=job.airport.preferred_project_manager.id).exists():
+            preferred_project_manager_id = job.airport.preferred_project_manager.id
 
-        response = {
+        return Response({
             'services': service_assignments.data,
             'preferred_project_manager_id': preferred_project_manager_id,
             'retainer_services': retainer_service_assignments.data,
             'project_managers': users.data
-        }
-
-        return Response(response, status.HTTP_200_OK)
+        }, status=status.HTTP_200_OK)
 
 
     def post(self, request, id):
