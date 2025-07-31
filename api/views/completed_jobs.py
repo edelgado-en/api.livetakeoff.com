@@ -54,12 +54,7 @@ class CompletedJobsListView(ListAPIView):
         completionDateFrom = self.request.data.get('completionDateFrom')
         completionDateTo = self.request.data.get('completionDateTo')
 
-        qs = Job.objects.select_related('airport') \
-                        .select_related('customer') \
-                        .select_related('fbo') \
-                        .select_related('aircraftType') \
-                        .order_by('-completion_date') \
-                        .all()
+        qs = Job.objects.all()
         
         user_profile = self.request.user.profile
         
@@ -144,9 +139,6 @@ class CompletedJobsListView(ListAPIView):
         if fbo and fbo != 'All':
             qs = qs.filter(fbo_id=fbo)
 
-        
-
-
         # apply date range filters
         if arrivalDateFrom:
             qs = qs.filter(estimatedETA__gte=arrivalDateFrom)
@@ -177,6 +169,9 @@ class CompletedJobsListView(ListAPIView):
         
         if completionDateTo:
             qs = qs.filter(completion_date__lte=completionDateTo)
+
+        # after applying all the filters, now prefetch to increase performance
+        qs = qs.select_related('airport', 'customer', 'fbo', 'aircraftType')
 
         # the sorting needs to be by status in the following order:
         #('A', 'Accepted'),
