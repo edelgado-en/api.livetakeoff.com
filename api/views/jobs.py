@@ -43,7 +43,7 @@ class JobListView(ListAPIView):
           or self.request.user.groups.filter(name='Account Managers').exists():
 
             searchText = self.request.data['searchText']
-            status = self.request.data['status']
+            status = self.request.data.get('status', 'All')
             customer = self.request.data.get('customer')
             airport = self.request.data.get('airport')
             project_manager = self.request.data.get('project_manager')

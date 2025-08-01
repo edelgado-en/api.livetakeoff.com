@@ -32,12 +32,13 @@ class CompletedJobsListView(ListAPIView):
     pagination_class = CustomPageNumberPagination
 
     def get_queryset(self):
+        isMobileRequest = self.request.data.get('isMobileRequest', False)
         searchText = self.request.data['searchText']
-        status = self.request.data['status']
+        status = self.request.data.get('status', 'All')
         airport = self.request.data.get('airport')
         fbo = self.request.data.get('fbo')
         customer = self.request.data.get('customer')
-        additionalFees = self.request.data.get('additionalFees')
+        additionalFees = self.request.data.get('additionalFees', [])
 
         requestedDateFrom = self.request.data.get('requestedDateFrom')
         requestedDateTo = self.request.data.get('requestedDateTo')
@@ -125,7 +126,10 @@ class CompletedJobsListView(ListAPIView):
         if status == 'All':
             # if customer user, do not include T status
             if self.request.user.profile.customer:
-                qs = qs.filter(Q(status='C') | Q(status='I') | Q(status='A') | Q(status='S') | Q(status='U') | Q(status='W') | Q(status='N'))
+                if isMobileRequest:
+                    qs = qs.filter(Q(status='C') | Q(status='I') | Q(status='T'))
+                else:
+                    qs = qs.filter(Q(status='C') | Q(status='I') | Q(status='A') | Q(status='S') | Q(status='U') | Q(status='W') | Q(status='N'))
             else:
                 qs = qs.filter(Q(status='C') | Q(status='I') | Q(status='T') | Q(status='N'))
 
