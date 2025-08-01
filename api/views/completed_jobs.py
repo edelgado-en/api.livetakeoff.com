@@ -127,7 +127,7 @@ class CompletedJobsListView(ListAPIView):
             # if customer user, do not include T status
             if self.request.user.profile.customer:
                 if isMobileRequest:
-                    qs = qs.filter(Q(status='C') | Q(status='I') | Q(status='T'))
+                    qs = qs.filter(Q(status='C') | Q(status='I') | Q(status='N'))
                 else:
                     qs = qs.filter(Q(status='C') | Q(status='I') | Q(status='A') | Q(status='S') | Q(status='U') | Q(status='W') | Q(status='N'))
             else:
