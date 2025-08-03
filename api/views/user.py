@@ -182,14 +182,14 @@ class UserView(APIView):
         user = User.objects.get(id=request.user.id)
         user_profile = UserProfile.objects.get(user=user)
 
-        user_profile.about = request.data['about']
-        user_profile.email_notifications = request.data['email_notifications']
-        user_profile.sms_notifications = request.data['sms_notifications']
+        user_profile.about = request.data.get('about', user_profile.about)
+        user_profile.email_notifications = request.data.get('email_notifications', user_profile.email_notifications)
+        user_profile.sms_notifications = request.data.get('sms_notifications', user_profile.sms_notifications)
         user_profile.phone_number = request.data.get('phone_number', None)
 
         user_profile.save()
 
-        user.username = request.data['username']
+        user.username = request.data.get('username', user.username)
         user.first_name = request.data['first_name']
         user.last_name = request.data['last_name']
         user.email = request.data['email']
