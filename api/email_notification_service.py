@@ -491,6 +491,10 @@ class EmailNotificationService():
 
         retainer_services_as_bullet_points_html += '</ul>'
 
+        arrival_date = job.arrival_formatted_date
+        if job.on_site:
+            arrival_date = 'On Site'
+
         body = f'''
                 <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">Job Assignment</div>
                 <a href="http://livetakeoff.com/shared/jobs/{base64_message}/accept" style="display: inline-block; padding: 0.5625rem 1.125rem; margin: 0 5px; font-size: 1.5rem; font-weight: 400; line-height: 1.5; text-align: center; vertical-align: middle; cursor: pointer; border: 1px solid transparent; border-radius: 0.375rem; transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; text-decoration: none; color: #fff; background-color: #007bff; border-color: #007bff;">ACCEPT</a>
@@ -516,7 +520,7 @@ class EmailNotificationService():
                     </tr>
                     <tr>
                         <td style="padding:15px">Arrival</td>
-                        <td style="padding:15px">{job.arrival_formatted_date}</td>
+                        <td style="padding:15px">{arrival_date}</td>
                     </tr>
                     <tr>
                         <td style="padding:15px">Departure</td>
@@ -963,6 +967,10 @@ class EmailNotificationService():
         if retainer_service_names:
             retainer_service_names = retainer_service_names[:-2]
 
+        arrival_date = job.arrival_formatted_date
+        if job.on_site:
+            arrival_date = 'On Site'
+
         body = f'''
                 <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">Job Assignment</div>
                 <a href="http://livetakeoff.com/shared/jobs/{base64_message}/accept" style="display: inline-block; padding: 0.5625rem 1.125rem; margin: 0 5px; font-size: 1.5rem; font-weight: 400; line-height: 1.5; text-align: center; vertical-align: middle; cursor: pointer; border: 1px solid transparent; border-radius: 0.375rem; transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; text-decoration: none; color: #fff; background-color: #007bff; border-color: #007bff;">ACCEPT</a>
@@ -988,7 +996,7 @@ class EmailNotificationService():
                     </tr>
                     <tr>
                         <td style="padding:15px">Arrival</td>
-                        <td style="padding:15px">{job.arrival_formatted_date}</td>
+                        <td style="padding:15px">{arrival_date}</td>
                     </tr>
                     <tr>
                         <td style="padding:15px">Departure</td>
@@ -1062,6 +1070,10 @@ class EmailNotificationService():
             comment_html_body = f""" <div style="font-size: 20px; font-weight: bold;">Important Note</div>
                                     <div style="padding:15px">{comment}</div>
                 """
+            
+        arrival_date = job.arrival_formatted_date
+        if job.on_site:
+            arrival_date = 'On Site'
 
         body = f'''
                 <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">{title}</div>
@@ -1095,7 +1107,7 @@ class EmailNotificationService():
                     </tr>
                     <tr>
                         <td style="padding:15px">Arrival</td>
-                        <td style="padding:15px">{job.arrival_formatted_date}</td>
+                        <td style="padding:15px">{arrival_date}</td>
                     </tr>
                     <tr>
                         <td style="padding:15px">Departure</td>
