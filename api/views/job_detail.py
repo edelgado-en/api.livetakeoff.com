@@ -350,6 +350,11 @@ class JobDetail(APIView):
             if 'status' in request.data:
                 JobStatusActivity.objects.create(job=job, user=user_selected, status=request.data['status'])
 
+            #TODO: when the job is confirmed by the customer, send an email to all admins and coordinators
+            # and the person that submitted the job should also receive an email saying that the job was confirmed
+            # and only if approval process is enabled for this customer
+            # review this part: EmailNotificationService().send_job_confirmed_notification(job, full_name)
+
             return Response(serializer.data)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

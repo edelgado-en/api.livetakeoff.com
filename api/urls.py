@@ -123,7 +123,8 @@ from .views import (
         CustomerTailStatsView,
         FlightBasedCleaningUpdateView,
         CustomerTailView,
-        UserPushTokenView
+        UserPushTokenView,
+        ResetPasswordView
     )
 
 urlpatterns = [
@@ -283,6 +284,7 @@ urlpatterns = [
     path('premium/contact', PremiumContactView.as_view()),
 
     path('forgot-password', ForgotPasswordView.as_view()),
+    path('reset-password', ResetPasswordView.as_view()),
 
     path('tail-alerts', TailAlertsView.as_view()),
     path('tail-alerts/<int:id>/', TailAlertsView.as_view()),
