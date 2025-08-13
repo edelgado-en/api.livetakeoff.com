@@ -246,6 +246,11 @@ class EmailNotificationService():
                                                                          | Q(is_staff=True)
                                                                          | Q(groups__name='Account Managers')
                                                                          | Q(groups__name='Internal Coordinators')))
+        # Notify the user that created the job
+        if job.created_by.profile.email_notifications \
+                and job.created_by.profile.enable_email_notification_job_confirmed:
+            internal_users = internal_users | UserProfile.objects.filter(user=job.created_by)
+
 
         unique_emails = self.get_unique_emails(internal_users, job.customer.id)
 

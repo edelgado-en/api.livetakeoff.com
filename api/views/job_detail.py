@@ -231,6 +231,8 @@ class JobDetail(APIView):
         serializer = JobDetailSerializer(job, data=request.data, partial=True, context={'request': request})
 
         if serializer.is_valid():
+            job_status_before_saving = job.status
+
             serializer.save()
 
             user_selected_id = request.data.get('user_selected_id')
@@ -350,10 +352,23 @@ class JobDetail(APIView):
             if 'status' in request.data:
                 JobStatusActivity.objects.create(job=job, user=user_selected, status=request.data['status'])
 
-            #TODO: when the job is confirmed by the customer, send an email to all admins and coordinators
-            # and the person that submitted the job should also receive an email saying that the job was confirmed
-            # and only if approval process is enabled for this customer
-            # review this part: EmailNotificationService().send_job_confirmed_notification(job, full_name)
+            is_customer_user = False
+            if request.user.profile.customer:
+                is_customer_user = True
+
+            # if the jobs status is going from 'U' to 'A', that means it was confirmed by the customer
+            if 'status' in request.data \
+                and request.data['status'] == 'A' and job_status_before_saving == 'U' and is_customer_user:
+                full_name = ''
+                # Get the full name from request.user
+                if request.user.first_name and request.user.last_name:
+                    full_name = f"{request.user.first_name} {request.user.last_name}"
+                elif request.user.first_name:
+                    full_name = request.user.first_name
+                elif request.user.last_name:
+                    full_name = request.user.last_name
+
+                EmailNotificationService().send_job_confirmed_notification(job, full_name)
 
             return Response(serializer.data)
 
