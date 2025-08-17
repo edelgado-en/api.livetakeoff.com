@@ -38,6 +38,7 @@ whitenoise = "==6.2.0"
 apscheduler = "==3.10.1"
 django-apscheduler = "==0.6.2"
 python-quickbooks = "*"
+django-q = "*"
 
 [dev-packages]
 

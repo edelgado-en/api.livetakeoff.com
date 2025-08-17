@@ -47,3 +47,7 @@ Create a .env file and add the following entries
     TWILIO_NUMBER='enter_your_value'
 
     SENDGRID_API_KEY='enter_your_value'
+
+To start the Django-q cluster to execute async jobs
+
+    $ python manage.py qcluster

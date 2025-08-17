@@ -34,7 +34,8 @@ INSTALLED_APPS = [
     'inventory',
     'phonenumber_field',
     'debug_toolbar',
-    'django_apscheduler'
+    'django_apscheduler',
+    'django_q',
 ]
 
 SCHEDULER_AUTOSTART = True
@@ -150,3 +151,14 @@ EMAIL_HOST_USER = os.environ.get('MAILGUN_SMTP_LOGIN')
 EMAIL_HOST_PASSWORD = os.environ.get('MAILGUN_SMTP_PASSWORD')
 EMAIL_PORT = os.environ.get('MAILGUN_SMTP_PORT')
 DEFAULT_FROM_EMAIL = 'mailgun@sandboxbce98d27da5647048777272edbfc6ef2.mailgun.org'
+
+#qcluster will work locally without adding another dyno or Redis on Heroku with the following settings
+Q_CLUSTER = {
+    "name": "livetakeoff",
+    "workers": 1,
+    "recycle": 500,
+    "timeout": 60,
+    "queue_limit": 50,
+    "bulk": 10,
+    "orm": "default",  # use the ORM broker
+}
