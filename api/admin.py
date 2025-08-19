@@ -51,7 +51,8 @@ from api.models import (
     TailIdent,
     RetainerServiceActivity,
     CustomerTail,
-    TailAircraftLookup
+    TailAircraftLookup,
+    ExportJob
 )
 
 class UserProfileInline(admin.StackedInline):
@@ -402,5 +403,10 @@ class TailAircraftLookupAdmin(admin.ModelAdmin):
     list_per_page = 100
     search_fields = ['tail_number']
 
+@admin.register(ExportJob)
+class ExportJobAdmin(admin.ModelAdmin):
+    list_display = ['id', 'user', 'status', 'progress', 'file_bytes', 'filename', 'error_message', 'created_at', 'started_at', 'finished_at']
+    list_per_page = 100
+    search_fields = ['user__username', 'status']
 
 

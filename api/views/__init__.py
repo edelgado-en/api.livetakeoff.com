@@ -125,3 +125,5 @@ from .flight_based_cleaning_update import FlightBasedCleaningUpdateView
 from .customer_tail import CustomerTailView
 from .user_push_token import UserPushTokenView
 from .reset_password import ResetPasswordView
+from .export_job import ExportJobDetailView
+from .export_jobs import ExportJobsView

@@ -162,3 +162,15 @@ Q_CLUSTER = {
     "bulk": 10,
     "orm": "default",  # use the ORM broker
 }
+
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOWED_ORIGINS = [
+    "https://www.livetakeoff.com",
+    "http://localhost:3000",  # dev only
+]
+
+# Let the frontend read the filename
+CORS_EXPOSE_HEADERS = ["Content-Disposition"]
+
+# If you are NOT using cookie-based auth, keep this False:
+CORS_ALLOW_CREDENTIALS = False

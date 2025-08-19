@@ -47,3 +47,4 @@ from .vendor_file import VendorFileSerializer
 from .customer_follower_email import CustomerFollowerEmailSerializer
 from .job_follower_email import JobFollowerEmailSerializer
 from .customer_tail import CustomerTailSerializer
+from .export_job import ExportJobSerializer

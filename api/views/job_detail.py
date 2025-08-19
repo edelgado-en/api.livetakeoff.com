@@ -32,7 +32,7 @@ from ..models import (
 
 class JobDetail(APIView):
     permission_classes = (permissions.IsAuthenticated,)
-
+    
 
     def get(self, request, id):
         job = get_object_or_404(Job, pk=id)

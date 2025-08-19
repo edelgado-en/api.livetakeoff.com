@@ -9,6 +9,7 @@ from api.models import (
     UserProfile,
     UserEmail,
     Job,
+    ExportJob,
     Service,
     RetainerService,
     JobSchedule,
@@ -901,6 +902,26 @@ class EmailNotificationService():
                         email_util.send_email(email, subject, body)
 
                     JobAcceptanceNotification.objects.create(job=job, project_manager=project_manager, attempt=attempt)
+
+
+    def send_export_job_completed_notification(self, exportJob: ExportJob):
+        email_util = EmailUtil()
+        subject = f'Export Job Completed'
+
+        body = f'''
+                <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">Export Job Completed</div>
+                <div style="padding:5px">Dear {exportJob.user.first_name},</div>
+                <div style="padding:5px">Your export job has been completed successfully.</div>
+                <div style="padding:5px">You can download the exported file from the Exports page</div>
+                <div style="padding:5px"><a href="https://www.livetakeoff.com/export-jobs" style="color: #007bff; text-decoration: none;">Click here to go to the Exports page</a></div>
+                <div style="padding:5px">Thank you for using LiveTakeoff!</div>
+                <div style="padding:5px">Regards,</div>
+                <div style="padding:5px">LiveTakeoff Team</div>
+                <div style="padding:5px">www.livetakeoff.com</div>
+                '''
+        body += email_util.getEmailSignature()
+        
+        email_util.send_email(exportJob.user.email, subject, body)
 
 
     def send_flight_based_scheduled_cleaning_notification(self, customer_name, tails_to_report):

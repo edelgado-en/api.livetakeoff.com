@@ -124,7 +124,9 @@ from .views import (
         FlightBasedCleaningUpdateView,
         CustomerTailView,
         UserPushTokenView,
-        ResetPasswordView
+        ResetPasswordView,
+        ExportJobDetailView,
+        ExportJobsView
     )
 
 urlpatterns = [
@@ -132,6 +134,12 @@ urlpatterns = [
     path('jobs/form-info', JobFormInfoView.as_view()),
     path('jobs/create', CreateJobView.as_view()),
     path('jobs/export', JobExportCSVView.as_view()),
+    
+    path('jobs/export/async', ExportJobDetailView.as_view()),
+    path('jobs/export/async/<int:id>/', ExportJobDetailView.as_view()),
+    path('jobs/exports', ExportJobsView.as_view()),
+    path('jobs/exports/<int:id>/', ExportJobsView.as_view()),
+    
     path('jobs/can-complete/<int:id>/', JobCompleteCheck.as_view()),
     path('jobs/completed', CompletedJobsListView.as_view()),
     path('jobs/completed/<int:id>/', CompletedJobsListView.as_view()),
@@ -158,6 +166,8 @@ urlpatterns = [
     path('jobs/schedules/<int:id>/', JobScheduleDetailView.as_view()),
 
     path('jobs/invoice-details/<int:id>/', JobInvoiceDetailsView.as_view()),
+
+    
 
     path('job-comments/<int:jobid>/', JobCommentView.as_view()),
     path('services', ServicesView.as_view()),
