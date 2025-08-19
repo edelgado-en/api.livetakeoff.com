@@ -24,9 +24,15 @@ class ExportJobDetailView(APIView):
         if request.user.profile.customer: 
             customer = request.user.profile.customer
 
-        ej = ExportJob.objects.create(user=request.user, params=request.data or {}, customer=customer)
+        with transaction.atomic():
+            ej = ExportJob.objects.create(
+                user=request.user,
+                params=request.data or {},
+                customer=customer
+            )
 
-        transaction.on_commit(lambda: async_task("api.tasks.run_export", ej.id))
+            # Enqueue ONLY AFTER the row is committed
+            transaction.on_commit(lambda: async_task("api.tasks.run_export", ej.id))
 
         return Response(ExportJobSerializer(ej).data, status=status.HTTP_201_CREATED)
 

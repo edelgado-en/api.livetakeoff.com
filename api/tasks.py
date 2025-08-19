@@ -174,13 +174,31 @@ def _apply_filters(base_qs, params: dict, user):
     return qs
 
 def run_export(export_id: int):
-    # Wrap minimal state updates in transactions to keep rows consistent
+    # --- 0) Fetch the job row safely (no lock). Bail out if missing. ---
+    ej = (
+        ExportJob.objects
+        .filter(pk=export_id)
+        .select_related(
+            "user",
+            "user__profile",
+            "user__profile__customer",
+            "user__profile__customer__customer_settings",
+        )
+        .first()
+    )
+    if not ej:
+        # Guard: if the task ever runs before the row is committed
+        # (should not happen once you use transaction.on_commit to enqueue),
+        # just exit gracefully.
+        return
+
+    # --- 1) Flip to RUNNING inside a short transaction/lock ---
     with transaction.atomic():
-        ej = ExportJob.objects.select_for_update().get(pk=export_id)
-        ej.status = ExportJob.Status.RUNNING
-        ej.started_at = timezone.now()
-        ej.progress = 0
-        ej.save(update_fields=["status", "started_at", "progress"])
+        ej_running = ExportJob.objects.select_for_update().get(pk=export_id)
+        ej_running.status = ExportJob.Status.RUNNING
+        ej_running.started_at = timezone.now()
+        ej_running.progress = 0
+        ej_running.save(update_fields=["status", "started_at", "progress"])
 
     try:
         user = ej.user
@@ -190,166 +208,130 @@ def run_export(export_id: int):
 
         total = qs.count()
 
+        # Determine price visibility
         show_job_price = True
-
-        # check the customer settings if the user is a customer user to check if show_job_price is True
-        if user.profile.customer:
-            show_job_price_at_customer_level = user.profile.customer.customer_settings.show_job_price
-
+        if getattr(user, "profile", None) and getattr(user.profile, "customer", None):
+            show_job_price_at_customer_level = (
+                user.profile.customer.customer_settings.show_job_price
+            )
             if show_job_price_at_customer_level:
-                show_job_price_at_customer_user_level = user.profile.show_job_price
-
-                if show_job_price_at_customer_user_level:
-                    show_job_price = True
-                
-                else:
-                    show_job_price = False
-
+                show_job_price = bool(user.profile.show_job_price)
             else:
                 show_job_price = False
 
-        if total == 0:
-            # Create a CSV with just headers to keep behavior consistent
-            csv_buffer = io.StringIO()
-            writer = csv.DictWriter(csv_buffer, fieldnames=[
-                "P.O","Customer","Request Date","Tail Number","Aircraft","Airport","FBO",
-                "Arrival Date","Departure Date","Complete By Date","Completion Date",
-                "Travel Fees","FBO Fees","Vendor Price Diff","Management Fees","Price",
-                "Services","Retainers"
-            ])
-            writer.writeheader()
-        else:
-            csv_buffer = io.StringIO()
-            writer = csv.DictWriter(csv_buffer, fieldnames=[
-                "P.O","Customer","Request Date","Tail Number","Aircraft","Airport","FBO",
-                "Arrival Date","Departure Date","Complete By Date","Completion Date",
-                "Travel Fees","FBO Fees","Vendor Price Diff","Management Fees","Price",
-                "Services","Retainers"
-            ])
-            writer.writeheader()
+        # Prepare CSV
+        headers = [
+            "P.O","Customer","Request Date","Tail Number","Aircraft","Airport","FBO",
+            "Arrival Date","Departure Date","Complete By Date","Completion Date",
+            "Travel Fees","FBO Fees","Vendor Price Diff","Management Fees","Price",
+            "Services","Retainers"
+        ]
+        csv_buffer = io.StringIO()
+        writer = csv.DictWriter(csv_buffer, fieldnames=headers)
+        writer.writeheader()
 
-            processed = 0
-            
-            # Use iterator() to keep memory low
-            for job in qs.iterator(chunk_size=2000):
-                # If user requested cancel, stop cooperatively
-                ej_ref = ExportJob.objects.only("cancel_requested","id").get(pk=ej.pk)
-                if ej_ref.cancel_requested:
-                    with transaction.atomic():
-                        ej = ExportJob.objects.select_for_update().get(pk=export_id)
-                        ej.status = ExportJob.Status.CANCELED
-                        ej.finished_at = timezone.now()
-                        ej.save(update_fields=["status","finished_at"])
-                    return
+        processed = 0
 
-                if job.estimatedETA:
-                    arrivalDate = job.estimatedETA.strftime('%m/%d/%Y %H:%M')
-                else:
-                    arrivalDate = ''
-                
-                if job.estimatedETD:
-                    departureDate = job.estimatedETD.strftime('%m/%d/%Y %H:%M')
-                else:
-                    departureDate = ''
-                
-                if job.completeBy:
-                    completeByDate = job.completeBy.strftime('%m/%d/%Y %H:%M')
-                else:
-                    completeByDate = ''
-                
-                if job.completion_date:
-                    completionDate = job.completion_date.strftime('%m/%d/%Y %H:%M')
-                else:
-                    completionDate = ''
+        # Use iterator() to keep memory low
+        for job in qs.iterator(chunk_size=2000):
+            # Cooperative cancel check
+            ej_ref = ExportJob.objects.only("cancel_requested", "id").filter(pk=ej.pk).first()
+            if ej_ref and ej_ref.cancel_requested:
+                with transaction.atomic():
+                    ej_cancel = ExportJob.objects.select_for_update().get(pk=export_id)
+                    ej_cancel.status = ExportJob.Status.CANCELED
+                    ej_cancel.finished_at = timezone.now()
+                    ej_cancel.save(update_fields=["status", "finished_at"])
+                return
 
-                # add list of services to csv
-                services = ''
-                for service in job.job_service_assignments.all():
-                    services += service.service.name + ' | '
+            arrivalDate = job.estimatedETA.strftime("%m/%d/%Y %H:%M") if job.estimatedETA else ""
+            departureDate = job.estimatedETD.strftime("%m/%d/%Y %H:%M") if job.estimatedETD else ""
+            completeByDate = job.completeBy.strftime("%m/%d/%Y %H:%M") if job.completeBy else ""
+            completionDate = job.completion_date.strftime("%m/%d/%Y %H:%M") if job.completion_date else ""
 
-                # add list of retainers to csv
-                retainers = ''
-                for retainer in job.job_retainer_service_assignments.all():
-                    retainers += retainer.retainer_service.name + ' | '
+            services = ""
+            for s in job.job_service_assignments.all():
+                services += f"{s.service.name} | "
 
-                if show_job_price:
-                    writer.writerow({
-                        'P.O': job.purchase_order,
-                        'Customer': job.customer.name,
-                        'Request Date': job.requestDate.strftime('%m/%d/%Y %H:%M'),
-                        'Tail Number': job.tailNumber,
-                        'Aircraft': job.aircraftType.name,
-                        'Airport': job.airport.initials,
-                        'FBO': job.fbo.name,
-                        'Arrival Date': arrivalDate,
-                        'Departure Date': departureDate,
-                        'Complete By Date': completeByDate,
-                        'Completion Date': completionDate,
-                        'Travel Fees': job.travel_fees_amount_applied,
-                        'FBO Fees': job.fbo_fees_amount_applied,
-                        'Vendor Price Diff': job.vendor_higher_price_amount_applied,
-                        'Management Fees': job.management_fees_amount_applied,
-                        'Price': job.price,
-                        'Services': services,
-                        'Retainers': retainers
-                    })
-                else:
-                    writer.writerow({
-                        'P.O': job.purchase_order,
-                        'Customer': job.customer.name,
-                        'Request Date': job.requestDate.strftime('%m/%d/%Y %H:%M'),
-                        'Tail Number': job.tailNumber,
-                        'Aircraft': job.aircraftType.name,
-                        'Airport': job.airport.initials,
-                        'FBO': job.fbo.name,
-                        'Arrival Date': arrivalDate,
-                        'Departure Date': departureDate,
-                        'Complete By Date': completeByDate,
-                        'Completion Date': completionDate,
-                        'Services': services,
-                        'Retainers': retainers
-                    })
+            retainers = ""
+            for r in job.job_retainer_service_assignments.all():
+                retainers += f"{r.retainer_service.name} | "
 
-                processed += 1
-                
-                # update progress occasionally
-                if processed % 2000 == 0 or processed == total:
-                    pct = int(processed * 100 / max(total, 1))
-                    ExportJob.objects.filter(pk=ej.pk).update(progress=pct)
+            row_common = {
+                "P.O": job.purchase_order,
+                "Customer": job.customer.name,
+                "Request Date": job.requestDate.strftime("%m/%d/%Y %H:%M"),
+                "Tail Number": job.tailNumber,
+                "Aircraft": job.aircraftType.name,
+                "Airport": job.airport.initials,
+                "FBO": job.fbo.name,
+                "Arrival Date": arrivalDate,
+                "Departure Date": departureDate,
+                "Complete By Date": completeByDate,
+                "Completion Date": completionDate,
+                "Services": services,
+                "Retainers": retainers,
+            }
 
-        # Build outer zip filename
+            if show_job_price:
+                row_common.update({
+                    "Travel Fees": job.travel_fees_amount_applied,
+                    "FBO Fees": job.fbo_fees_amount_applied,
+                    "Vendor Price Diff": job.vendor_higher_price_amount_applied,
+                    "Management Fees": job.management_fees_amount_applied,
+                    "Price": job.price,
+                })
+            else:
+                # Ensure columns still exist even if not shown
+                row_common.update({
+                    "Travel Fees": "",
+                    "FBO Fees": "",
+                    "Vendor Price Diff": "",
+                    "Management Fees": "",
+                    "Price": "",
+                })
+
+            writer.writerow(row_common)
+
+            processed += 1
+            if total and (processed % 2000 == 0 or processed == total):
+                pct = int(processed * 100 / max(total, 1))
+                ExportJob.objects.filter(pk=ej.pk).update(progress=pct)
+
+        # If there were no rows, csv_buffer already only has headers (that’s fine)
+
+        # --- 2) Build filenames (outer zip + inner csv) ---
         filename = f"jobs_{datetime.datetime.utcnow().strftime('%Y-%m-%d_%H-%M-%S')}.zip"
+        base_name = filename.rsplit(".", 1)[0]
+        inner_filename = f"{base_name}.csv"
 
-        # Derive inner filename (strip .zip, add .csv)
-        base_name = filename.rsplit(".", 1)[0]   # "jobs_2025-08-18_12-34-56"
-        inner_filename = f"{base_name}.csv"      # "jobs_2025-08-18_12-34-56.csv"
-
-        # ZIP it in-memory
+        # --- 3) Create ZIP in-memory ---
         zip_bytes = io.BytesIO()
         with zipfile.ZipFile(zip_bytes, mode="w", compression=zipfile.ZIP_DEFLATED) as z:
             z.writestr(inner_filename, csv_buffer.getvalue())
         zip_bytes.seek(0)
 
-        # Save to DB
+        # --- 4) Save results atomically ---
         with transaction.atomic():
-            ej = ExportJob.objects.select_for_update().get(pk=export_id)
-            ej.file_bytes = zip_bytes.getvalue()
-            ej.filename = filename
-            ej.status = ExportJob.Status.SUCCEEDED
-            ej.finished_at = timezone.now()
-            ej.progress = 100
-            ej.save(update_fields=["file_bytes","filename","status","finished_at","progress"])
+            ej_done = ExportJob.objects.select_for_update().get(pk=export_id)
+            ej_done.file_bytes = zip_bytes.getvalue()
+            ej_done.filename = filename
+            ej_done.status = ExportJob.Status.SUCCEEDED
+            ej_done.finished_at = timezone.now()
+            ej_done.progress = 100
+            ej_done.save(update_fields=[
+                "file_bytes", "filename", "status", "finished_at", "progress"
+            ])
 
-        # Notify user via email
-        if user.email:
-            EmailNotificationService().send_export_job_completed_notification(exportJob=ej)
-
+        # --- 5) Notify user ---
+        if ej.user and ej.user.email:
+            EmailNotificationService().send_export_job_completed_notification(exportJob=ej_done)
 
     except Exception as e:
         with transaction.atomic():
-            ej = ExportJob.objects.select_for_update().get(pk=export_id)
-            ej.status = ExportJob.Status.FAILED
-            ej.error_message = str(e)
-            ej.finished_at = timezone.now()
-            ej.save(update_fields=["status","error_message","finished_at"])
+            ej_fail = ExportJob.objects.select_for_update().get(pk=export_id)
+            ej_fail.status = ExportJob.Status.FAILED
+            ej_fail.error_message = str(e)
+            ej_fail.finished_at = timezone.now()
+            ej_fail.save(update_fields=["status", "error_message", "finished_at"])
         raise
