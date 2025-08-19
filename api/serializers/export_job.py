@@ -18,6 +18,7 @@ class ExportJobSerializer(serializers.ModelSerializer):
             'user',
             'customer',
             'filename',
+            'progress',
             'status',
             'params',
             'created_at',
