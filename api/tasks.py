@@ -237,7 +237,7 @@ def run_export(export_id: int):
         processed = 0
 
         # Use iterator() to keep memory low
-        for job in qs.iterator(chunk_size=1000):
+        for job in qs.iterator(chunk_size=500):
             # Cooperative cancel check
             ej_ref = ExportJob.objects.only("cancel_requested", "id").filter(pk=ej.pk).first()
             if ej_ref and ej_ref.cancel_requested:
