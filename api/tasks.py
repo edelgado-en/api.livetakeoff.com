@@ -310,7 +310,7 @@ def run_export(export_id: int):
         # If there were no rows, csv_buffer already only has headers (that’s fine)
 
         # --- 2) Build filenames (outer zip + inner csv) ---
-        filename = f"jobs_{datetime.datetime.utcnow().strftime('%Y-%m-%d_%H-%M-%S')}.zip"
+        filename = f"completed_jobs_report_{datetime.datetime.utcnow().strftime('%Y-%m-%d')}.zip"
         base_name = filename.rsplit(".", 1)[0]
         inner_filename = f"{base_name}.csv"
 

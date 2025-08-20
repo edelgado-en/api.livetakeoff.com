@@ -24,6 +24,7 @@ class ExportJob(models.Model):
     file_bytes = models.BinaryField(null=True, blank=True)      # zipped CSV
     filename = models.CharField(max_length=200, blank=True)     # e.g. jobs_2025-08-15.zip
     error_message = models.TextField(blank=True)
+    task_id = models.CharField(max_length=50, null=True, blank=True)
     cancel_requested = models.BooleanField(default=False)       # for cooperative cancel
     created_at = models.DateTimeField(auto_now_add=True)
     started_at = models.DateTimeField(null=True, blank=True)

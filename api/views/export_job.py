@@ -49,8 +49,14 @@ class ExportJobDetailView(APIView):
                 customer=customer
             )
 
+            def enqueue_once():
+                # Queue the task and save the task_id if it’s still empty
+                task_id = async_task("api.tasks.run_export", ej.id)
+                # Only set task_id if another concurrent request hasn't already set it
+                ExportJob.objects.filter(pk=ej.pk, task_id__isnull=True).update(task_id=task_id)
+
             # Enqueue ONLY AFTER the row is committed
-            transaction.on_commit(lambda: async_task("api.tasks.run_export", ej.id))
+            transaction.on_commit(enqueue_once)
 
         return Response(ExportJobSerializer(ej).data, status=status.HTTP_201_CREATED)
 

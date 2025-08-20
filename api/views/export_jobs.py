@@ -1,7 +1,9 @@
 from django.db.models import Q, F
 from django.shortcuts import get_object_or_404
+from django.http import Http404
 from rest_framework import (permissions, status)
 from rest_framework .response import Response
+from django_q.models import OrmQ, Task  # ORM broker queue + results
 
 from django.contrib.auth.models import User
 
@@ -47,8 +49,39 @@ class ExportJobsView(ListAPIView):
     
     
     def delete(self, request, *args, **kwargs):
-        exportJob = get_object_or_404(ExportJob, pk=kwargs['id'])
+        try:
+            ej = ExportJob.objects.get(pk=kwargs['id'])
+        except ExportJob.DoesNotExist:
+            raise Http404
 
-        exportJob.delete()
+        # If it’s queued but not started → remove from queue and delete the row
+        if ej.status == ExportJob.Status.PENDING:
+            if ej.task_id:
+                # Remove from the ORM broker if not yet picked up
+                OrmQ.objects.filter(key=ej.task_id).delete()
+            
+            ej.status = ExportJob.Status.CANCELED
+            ej.save(update_fields=["status"])
+            ej.delete()
+            
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        # If it’s running → request cooperative cancel; do NOT delete yet
+        if ej.status == ExportJob.Status.RUNNING:
+            if not ej.cancel_requested:
+                ej.cancel_requested = True
+                ej.save(update_fields=["cancel_requested"])
+            
+            # Option A: return 409 and tell UI “Cancel requested; job will stop shortly”
+            return Response(
+                {"detail": "Cancel requested. Job will stop shortly; you can delete it after it stops."},
+                status=status.HTTP_200_OK,
+            )
+
+        # If it already finished/canceled/failed → safe to delete
+        if ej.task_id:
+            Task.objects.filter(id=ej.task_id).delete()
+        
+        ej.delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
