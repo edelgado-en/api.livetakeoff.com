@@ -206,7 +206,11 @@ def run_export(export_id: int):
         qs = Job.objects.all()
         qs = _apply_filters(qs, ej.params or {}, user)
 
+        ExportJob.objects.filter(pk=ej.pk).update(progress=1)
+
         total = qs.count()
+
+        ExportJob.objects.filter(pk=ej.pk).update(progress=2)
 
         # Determine price visibility
         show_job_price = True
@@ -233,7 +237,7 @@ def run_export(export_id: int):
         processed = 0
 
         # Use iterator() to keep memory low
-        for job in qs.iterator(chunk_size=2000):
+        for job in qs.iterator(chunk_size=1000):
             # Cooperative cancel check
             ej_ref = ExportJob.objects.only("cancel_requested", "id").filter(pk=ej.pk).first()
             if ej_ref and ej_ref.cancel_requested:

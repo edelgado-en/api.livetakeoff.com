@@ -154,13 +154,18 @@ DEFAULT_FROM_EMAIL = 'mailgun@sandboxbce98d27da5647048777272edbfc6ef2.mailgun.or
 
 #qcluster will work locally without adding another dyno or Redis on Heroku with the following settings
 Q_CLUSTER = {
-    "name": "livetakeoff",
-    "workers": 1,
+    "name": "Livetakeoff",
+    "workers": 1,           # keep 1 on a single web dyno
     "recycle": 500,
-    "timeout": 60,
+    "timeout": 900,         # 15 minutes per task
+    "retry": 120,           # requeue delay if worker dies
+    "max_attempts": 1,      # don't keep retrying forever while you debug
     "queue_limit": 50,
-    "bulk": 10,
-    "orm": "default",  # use the ORM broker
+    "bulk": 1,
+    "save_limit": 0,        # don't store result objects (lighter DB)
+    "guard_cycle": 5,
+    "compress": True,
+    "orm": "default",
 }
 
 CORS_ALLOW_ALL_ORIGINS = False
