@@ -157,7 +157,7 @@ Q_CLUSTER = {
     "name": "Livetakeoff",
     "workers": 1,           # keep 1 on a single web dyno
     "recycle": 500,
-    "timeout": 900,         # 15 minutes per task
+    "timeout": 6 * 60 * 60,   # 6 hours
     "retry": 120,           # requeue delay if worker dies
     "max_attempts": 1,      # don't keep retrying forever while you debug
     "queue_limit": 50,
