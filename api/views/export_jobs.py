@@ -30,9 +30,9 @@ class ExportJobsView(ListAPIView):
             qs = qs.filter(status=status)
 
 
-        # if the current user is a customer, only show estimates for that customer
+        # if the current user is a customer, only show export jobs created by the current user
         if self.request.user.profile.customer:
-            qs = qs.filter(customer=self.request.user.profile.customer)
+            qs = qs.filter(user=self.request.user)
         else:
             if customer != 'All':
                 qs = qs.filter(customer_id=customer)

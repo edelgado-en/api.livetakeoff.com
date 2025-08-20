@@ -20,6 +20,24 @@ class ExportJobDetailView(APIView):
     serializer_class = ExportJobSerializer
 
     def post(self, request):
+        # Normalize params once
+        params = request.data or {}
+
+        # If this user already has an identical export in progress, just return it
+        # (Postgres JSONField supports equality comparisons)
+        existing = (
+            ExportJob.objects
+            .filter(
+                user=request.user,
+                status__in=[ExportJob.Status.PENDING, ExportJob.Status.RUNNING],
+                params=params,
+            )
+            .order_by("-created_at")
+            .first()
+        )
+        if existing:
+            return Response(ExportJobSerializer(existing).data, status=status.HTTP_200_OK)
+
         customer = None
         if request.user.profile.customer: 
             customer = request.user.profile.customer
@@ -27,7 +45,7 @@ class ExportJobDetailView(APIView):
         with transaction.atomic():
             ej = ExportJob.objects.create(
                 user=request.user,
-                params=request.data or {},
+                params=params,
                 customer=customer
             )
 

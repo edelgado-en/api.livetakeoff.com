@@ -195,6 +195,11 @@ def run_export(export_id: int):
     # --- 1) Flip to RUNNING inside a short transaction/lock ---
     with transaction.atomic():
         ej_running = ExportJob.objects.select_for_update().get(pk=export_id)
+
+        # If someone re-queued or we already finished, bail out
+        if ej_running.status == ExportJob.Status.SUCCEEDED:
+            return
+
         ej_running.status = ExportJob.Status.RUNNING
         ej_running.started_at = timezone.now()
         ej_running.progress = 0
@@ -323,13 +328,16 @@ def run_export(export_id: int):
             ej_done.status = ExportJob.Status.SUCCEEDED
             ej_done.finished_at = timezone.now()
             ej_done.progress = 100
+            
+            # only send once; mark it
+            if not ej_done.notified_at and ej_done.user.email:
+                # send email here
+                EmailNotificationService().send_export_job_completed_notification(exportJob=ej_done)
+                ej_done.notified_at = timezone.now()
+            
             ej_done.save(update_fields=[
-                "file_bytes", "filename", "status", "finished_at", "progress"
+                "file_bytes", "filename", "status", "finished_at", "progress", "notified_at"
             ])
-
-        # --- 5) Notify user ---
-        if ej.user and ej.user.email:
-            EmailNotificationService().send_export_job_completed_notification(exportJob=ej_done)
 
     except Exception as e:
         with transaction.atomic():

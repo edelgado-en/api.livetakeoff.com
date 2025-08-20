@@ -28,6 +28,7 @@ class ExportJob(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     started_at = models.DateTimeField(null=True, blank=True)
     finished_at = models.DateTimeField(null=True, blank=True)
+    notified_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"ExportJob #{self.pk} ({self.status})"
