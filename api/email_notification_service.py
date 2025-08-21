@@ -562,7 +562,26 @@ class EmailNotificationService():
         for email_address in emails:
             email_util.send_email(email_address, subject, body)
 
+    def send_create_job_error_notification(self, tailNumber, error_message: str):
+        internal_users = UserProfile.objects.filter(user__is_active=True,
+                                                    email_notifications=True,
+                                                    user__in=User.objects.filter(Q(is_superuser=True)
+                                                                         | Q(is_staff=True)
+                                                                         ))
+        
+        unique_emails = self.get_unique_emails(internal_users)
 
+        email_util = EmailUtil()
+
+        subject = f'Error Creating Job {tailNumber}'
+        body = f'''
+                <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">Error Creating Job</div>
+                <p>{error_message}</p>
+                <p>Tail Number: {tailNumber}</p>
+                '''
+
+        for email in unique_emails:
+            email_util.send_email(email, subject, body)
 
     def get_unique_emails(self, user_profiles: [UserProfile], customer_id: int = None):
         unique_emails = []
