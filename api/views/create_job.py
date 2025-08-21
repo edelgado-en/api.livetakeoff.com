@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from datetime import (date, datetime, timedelta)
 import pytz
 from email.utils import parsedate_tz, mktime_tz
+import traceback
 
 from api.pricebreakdown_service import PriceBreakdownService
 from api.email_notification_service import EmailNotificationService
@@ -468,7 +469,38 @@ class CreateJobView(APIView):
                 EmailNotificationService().send_create_job_notification_to_followers(job, services, retainer_services)
         
         except Exception as ex:
-            EmailNotificationService().send_create_job_error_notification(tailNumber, str(ex))
+            # Get full traceback
+            tb = traceback.format_exc()
+
+            # Try to grab request payload safely
+            try:
+                if hasattr(request, "data"):
+                    request_data = dict(request.data)  # works for DRF Request
+                elif hasattr(request, "POST"):
+                    request_data = dict(request.POST)
+                else:
+                    request_data = request.body.decode("utf-8", errors="ignore")
+            except Exception as parse_ex:
+                request_data = f"<unavailable: {parse_ex}>"
+
+            # Build a detailed error message
+            error_message = f"""
+            Failed to create job for tailNumber={tailNumber}
+            User={request.user.id if request.user else 'anonymous'}
+
+            Exception: {str(ex)}
+
+            Traceback:
+            {tb}
+
+            Request data:
+            {request_data}
+            """
+
+            # Send email with all details
+            EmailNotificationService().send_create_job_error_notification(
+                tailNumber, error_message
+            )
             return Response({"error": "Failed to create job"}, status=500)
 
         return Response(response, status.HTTP_201_CREATED)
