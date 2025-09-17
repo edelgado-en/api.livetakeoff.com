@@ -17,5 +17,6 @@ class CustomerSettingsSerializer(serializers.ModelSerializer):
             'special_instructions',
             'price_list',
             'enable_request_priority',
-            'enable_flight_based_scheduled_cleaning'
+            'enable_flight_based_scheduled_cleaning',
+            'hide_addons_services',
         )

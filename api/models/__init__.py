@@ -65,3 +65,5 @@ from .job_follower_email import JobFollowerEmail
 from .tail_ident import TailIdent
 from .customer_tail import CustomerTail
 from .export_job import ExportJob
+from .job_feedback import JobFeedback
+from .job_feedback_photos import JobFeedbackPhotos

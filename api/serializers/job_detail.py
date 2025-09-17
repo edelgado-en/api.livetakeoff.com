@@ -110,7 +110,8 @@ class JobDetailSerializer(serializers.ModelSerializer):
             'discounted_price',
             'follower_emails',
             'enable_flightaware_tracking',
-            'show_billing_info'
+            'show_billing_info',
+            'feedback_rating'
         )
 
 

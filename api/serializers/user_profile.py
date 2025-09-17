@@ -47,4 +47,5 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'about',
             'vendor',
             'customer',
+            'is_job_submitter_only'
         ]

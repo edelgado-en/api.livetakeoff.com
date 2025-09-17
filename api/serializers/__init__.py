@@ -48,3 +48,5 @@ from .customer_follower_email import CustomerFollowerEmailSerializer
 from .job_follower_email import JobFollowerEmailSerializer
 from .customer_tail import CustomerTailSerializer
 from .export_job import ExportJobSerializer
+from .job_feedback import JobFeedbackSerializer
+from .job_feedback_photos import JobFeedbackPhotosSerializer

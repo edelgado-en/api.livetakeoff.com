@@ -145,11 +145,13 @@ class JobFormInfoView(APIView):
         customer_id = None
 
         is_enable_request_priority = False
+        hide_addons_services = False
 
         if is_customer:
             customer_id = user_profile.customer.id
             is_enable_request_priority = user_profile.customer.customer_settings.enable_request_priority
-        
+            hide_addons_services = user_profile.customer.customer_settings.hide_addons_services
+
         response = {
             'customers': customer_dtos,
             'aircraft_types': aircraft_type_dtos,
@@ -158,6 +160,7 @@ class JobFormInfoView(APIView):
             'tags': tag_dtos,
             'customer_id': customer_id,
             'is_enable_request_priority': is_enable_request_priority,
+            'hide_addons_services': hide_addons_services,
             'vendors': vendor_dtos,
         }
 

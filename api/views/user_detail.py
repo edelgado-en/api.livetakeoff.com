@@ -88,6 +88,7 @@ class UserDetailView(APIView):
         user.profile.enable_confirm_jobs = request.data.get('enable_confirm_jobs', user.profile.enable_confirm_jobs)
         user.profile.prompt_requested_by = request.data.get('prompt_requested_by', user.profile.prompt_requested_by)
         user.profile.enable_invoice = request.data.get('enable_invoice', user.profile.enable_invoice)
+        user.profile.is_job_submitter_only = request.data.get('is_job_submitter_only', user.profile.is_job_submitter_only)
 
         # if user.profile.email_notifications is false, then disabled all email notificaitons for this user
         if not email_notifications:

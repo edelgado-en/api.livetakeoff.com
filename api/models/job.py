@@ -119,5 +119,8 @@ class Job(models.Model):
 
     enable_flightaware_tracking = models.BooleanField(default=False)
 
+    feedback_rating = models.PositiveIntegerField(blank=True, null=True, help_text='Rating from 1 to 5 given by the customer once the job is completed')
+    feedback_author = models.ForeignKey('auth.User', on_delete=models.PROTECT, blank=True, null=True, related_name='feedbacks_given')
+
     def __str__(self) -> str:
         return str(self.id) + ' - ' + self.tailNumber + ' - ' + self.airport.initials + ' - ' + self.aircraftType.name

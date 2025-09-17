@@ -7,7 +7,6 @@ class CustomerSettings(models.Model):
     show_spending_info = models.BooleanField(default=False)
     allow_cancel_job = models.BooleanField(default=False)
     retainer_amount = models.DecimalField(max_digits=9, decimal_places=2, blank=True, null=True)
-    #TODO: add retainer_contract as PDF. Configure Cloudinary to allow PDF upload
     show_job_price = models.BooleanField(default=False)
     special_instructions = models.TextField(blank=True, null=True)
     price_list = models.ForeignKey(PriceList, on_delete=models.CASCADE, related_name='customer_settings', null=True)
@@ -22,6 +21,8 @@ class CustomerSettings(models.Model):
         default=False,
         help_text='If enabled, a daily job will be run to check which tail numbers require cleaning based on the number of flights completed since last service. Admins will receive an email notification with the list of tails that require cleaning.'
     )
+
+    hide_addons_services = models.BooleanField(default=False, help_text='If enabled, all users flagged as Submitters Only that belong to this customer will not see addons services when creating a job.')
 
     def __str__(self) -> str:
         return self.customer.name
