@@ -923,6 +923,58 @@ class EmailNotificationService():
                     JobAcceptanceNotification.objects.create(job=job, project_manager=project_manager, attempt=attempt)
 
 
+    def send_job_feedback_notification(self, job: Job, comment: str):
+        internal_users = UserProfile.objects.filter(user__is_active=True,
+                                                    email_notifications=True,
+                                                    user__in=User.objects.filter(Q(is_superuser=True)
+                                                                         | Q(is_staff=True)
+                                                                         | Q(groups__name='Account Managers')
+                                                                         | Q(groups__name='Internal Coordinators')))
+        
+        unique_emails = self.get_unique_emails(internal_users, job.customer.id)
+
+        subject = f'Feedback Received for {job.tailNumber} - {job.feedback_rating} stars'
+
+        email_util = EmailUtil()
+
+        body = f'''
+                <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">Job Feedback Received</div>
+                <table style="border-collapse: collapse">
+                    <tr>
+                        <td style="padding:15px">Rating</td>
+                        <td style="padding:15px">{job.feedback_rating} starts</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:15px">Customer</td>
+                        <td style="padding:15px">{job.customer.name}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:15px">Tail</td>
+                        <td style="padding:15px">{job.tailNumber}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:15px">Airport</td>
+                        <td style="padding:15px">{job.airport.name}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:15px">FBO</td>
+                        <td style="padding:15px">{job.fbo.name}</td>
+                    </tr>
+                    
+                </table>
+                '''
+        if comment:
+            body += f'''
+                    <div style="margin-top:20px;padding:5px;font-weight: 700;">Comment</div>
+                    <div style="padding:5px">{comment}</div>
+                    '''
+
+        body += email_util.getEmailSignature()
+
+        for email in unique_emails:
+            email_util.send_email(email, subject, body)
+
+
     def send_export_job_completed_notification(self, exportJob: ExportJob):
         email_util = EmailUtil()
         subject = f'Export Job Completed'

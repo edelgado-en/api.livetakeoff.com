@@ -127,3 +127,4 @@ from .user_push_token import UserPushTokenView
 from .reset_password import ResetPasswordView
 from .export_job import ExportJobDetailView
 from .export_jobs import ExportJobsView
+from .job_feedback import JobFeedbackView

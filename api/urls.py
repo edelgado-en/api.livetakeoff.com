@@ -126,7 +126,8 @@ from .views import (
         UserPushTokenView,
         ResetPasswordView,
         ExportJobDetailView,
-        ExportJobsView
+        ExportJobsView,
+        JobFeedbackView
     )
 
 urlpatterns = [
@@ -139,6 +140,9 @@ urlpatterns = [
     path('jobs/export/async/<int:id>/', ExportJobDetailView.as_view()),
     path('jobs/exports', ExportJobsView.as_view()),
     path('jobs/exports/<int:id>/', ExportJobsView.as_view()),
+
+    path('jobs/feedback/<int:id>/', JobFeedbackView.as_view()),
+    path('jobs/feedback', JobFeedbackView.as_view()),
     
     path('jobs/can-complete/<int:id>/', JobCompleteCheck.as_view()),
     path('jobs/completed', CompletedJobsListView.as_view()),

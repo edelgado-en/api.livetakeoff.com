@@ -37,6 +37,8 @@ class JobDetailSerializer(serializers.ModelSerializer):
 
     show_billing_info = serializers.SerializerMethodField()
 
+    feedback_author = BasicUserSerializer(read_only=True)
+
     def get_files(self, obj):
         # if the current user is_admin or is_staff, or belong to the group Account Managers then return all the files for this job
         user = self.context['request'].user
@@ -111,7 +113,8 @@ class JobDetailSerializer(serializers.ModelSerializer):
             'follower_emails',
             'enable_flightaware_tracking',
             'show_billing_info',
-            'feedback_rating'
+            'feedback_rating',
+            'feedback_author'
         )
 
 
