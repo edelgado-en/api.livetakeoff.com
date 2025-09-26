@@ -3,6 +3,8 @@ from api.notification_util import NotificationUtil
 
 from django.contrib.auth.models import User
 
+import requests
+
 from api.models import (
     UserProfile,
     Job,
@@ -210,6 +212,7 @@ class SMSNotificationService():
     def send_job_comment_added_notification(self, job: Job):
         # get all phone numbers for all project managers assigned to this job
         unique_phone_numbers = []
+        unique_expo_tokens = []
         
         job_service_assignments = JobServiceAssignment.objects \
                                                         .select_related('project_manager').filter(job=job)
@@ -221,6 +224,10 @@ class SMSNotificationService():
                 if user.profile.phone_number not in unique_phone_numbers:
                     unique_phone_numbers.append(user.profile.phone_number)
 
+            if user and user.profile.expo_push_token:
+                if user.profile.expo_push_token not in unique_expo_tokens:
+                    unique_expo_tokens.append(user.profile.expo_push_token)
+
         job_retainer_service_assignments = JobRetainerServiceAssignment.objects \
                                                         .select_related('project_manager').filter(job=job)
         
@@ -231,6 +238,10 @@ class SMSNotificationService():
                 if user.profile.phone_number not in unique_phone_numbers:
                     unique_phone_numbers.append(user.profile.phone_number)
 
+            if user and user.profile.expo_push_token:
+                if user.profile.expo_push_token not in unique_expo_tokens:
+                    unique_expo_tokens.append(user.profile.expo_push_token)
+
         notification_util = NotificationUtil()
 
         message = 'Important note was added to this job'
@@ -238,6 +249,10 @@ class SMSNotificationService():
 
         for phone_number in unique_phone_numbers:
             notification_util.send(message, phone_number.as_e164)
+
+        # send push notifications
+        for expo_token in unique_expo_tokens:
+            self.send_push_notification(expo_token, message)
 
 
     def send_job_estimate_notification(self, job_estimate: JobEstimate):
@@ -256,4 +271,16 @@ class SMSNotificationService():
         notification_util = NotificationUtil()
 
         notification_util.send(message, phone_number.as_e164)
+
+
+    def send_push_notification(self, expo_token, message):
+        payload = {
+            "to": expo_token,
+            "sound": "default",
+            "title": message,
+            "body": message,
+            "sound": "default"
+        }
+        
+        requests.post("https://exp.host/--/api/v2/push/send", json=payload)
     

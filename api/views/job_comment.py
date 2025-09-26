@@ -153,7 +153,7 @@ class JobCommentView(ListCreateAPIView):
                                                                                      is_external_project_manager)
 
     
-        if job.created_by.profile.expo_push_token and send_email:
+        if job.created_by.profile.expo_push_token and (send_email or send_sms):
             message = f'New comment on job {job.tailNumber}: {comment[:100]}'
             if len(message) > 100:
                 message = message[:97] + '...'

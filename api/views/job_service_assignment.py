@@ -4,9 +4,8 @@ from rest_framework import (permissions, status)
 from rest_framework .response import Response
 from rest_framework.views import APIView
 from django.contrib.auth.models import User
-
 import base64
-
+import requests
 import threading
 
 from ..models import (
@@ -14,9 +13,7 @@ from ..models import (
     Job,
     JobRetainerServiceAssignment,
     JobStatusActivity,
-    EstimatedServiceTime,
     Service,
-    RetainerService,
     ServiceActivity,
     UserAvailableAirport,
     JobTag,
@@ -36,8 +33,6 @@ from ..serializers import (
                     JobRetainerServiceAssignmentSerializer,
                     BasicUserSerializer
                 )
-
-from api.email_util import EmailUtil
 
 class JobServiceAssignmentView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
@@ -161,6 +156,7 @@ class JobServiceAssignmentView(APIView):
         unique_phone_numbers = []
         unique_emails = []
         unique_project_manager_ids_notified = []
+        unique_expo_tokens = []
 
         service_names = ''
         retainer_service_names = ''
@@ -184,6 +180,10 @@ class JobServiceAssignmentView(APIView):
                     if user.profile.phone_number:
                         if user.profile.phone_number not in unique_phone_numbers:
                             unique_phone_numbers.append(user.profile.phone_number)
+
+                    if user.profile.expo_push_token:
+                        if user.profile.expo_push_token not in unique_expo_tokens:
+                            unique_expo_tokens.append(user.profile.expo_push_token)
 
                     if user.profile.enable_accept_jobs:
                         if user.email not in unique_emails:
@@ -230,6 +230,10 @@ class JobServiceAssignmentView(APIView):
                     if user.profile.phone_number:
                         if user.profile.phone_number not in unique_phone_numbers:
                             unique_phone_numbers.append(user.profile.phone_number)
+
+                    if user.profile.expo_push_token:
+                        if user.profile.expo_push_token not in unique_expo_tokens:
+                            unique_expo_tokens.append(user.profile.expo_push_token)
 
                     if user.profile.enable_accept_jobs:
                         if user.email not in unique_emails:
@@ -290,6 +294,11 @@ class JobServiceAssignmentView(APIView):
         SMSNotificationService().send_job_assigned_notification(job, unique_phone_numbers)
 
         EmailNotificationService().send_job_assigned_notification(job, unique_emails, service_names, retainer_service_names)
+
+        # send push notifications
+        message = f'Job ASSIGNED to you • {job.airport.initials} • {job.tailNumber} • {job.fbo.name}'
+        for expo_token in unique_expo_tokens:
+            self.send_push_notification(expo_token, message)
 
         if unique_project_manager_ids_notified:
             LastProjectManagersNotified.objects.filter(job=job).delete()
@@ -486,5 +495,16 @@ class JobServiceAssignmentView(APIView):
     
     def schedule_acceptance_emails(self, job_id):
         EmailNotificationService().schedule_acceptance_emails(job_id)
+
+    def send_push_notification(self, expo_token, message):
+        payload = {
+            "to": expo_token,
+            "sound": "default",
+            "title": message,
+            "body": message,
+            "sound": "default"
+        }
+        
+        requests.post("https://exp.host/--/api/v2/push/send", json=payload)
 
     
