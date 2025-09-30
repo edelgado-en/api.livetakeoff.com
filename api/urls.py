@@ -127,8 +127,7 @@ from .views import (
         ResetPasswordView,
         ExportJobDetailView,
         ExportJobsView,
-        JobFeedbackView,
-        UploadUsersView
+        JobFeedbackView
     )
 
 urlpatterns = [
@@ -257,8 +256,6 @@ urlpatterns = [
     path('users/available-airports/<int:id>/', UserAvailableAirportsView.as_view()),
     path('users/customers', UserCustomersView.as_view()),
     path('users/customers/<int:id>/', UserCustomersView.as_view()),
-
-    path('users/upload', UploadUsersView.as_view()),
 
     path('customers/available-services', CustomerAvailableServiceView.as_view()),
     path('customers/available-services/<int:id>/', CustomerAvailableServiceView.as_view()),
