@@ -34,26 +34,4 @@ class JobScheduleListView(ListAPIView):
 
 
     def post(self, request, *args, **kwargs):
-
-        json_path = Path(__file__).resolve().parent / "users.json"
-        if not json_path.exists():
-            raise FileNotFoundError(str(json_path))
-
-        with open(json_path, "r") as f:
-            payload = json.load(f)
-
-        users = payload.get("users", [])
-
-        # iterate over users and search User by username = user['email']
-        for user in users:
-            try:
-                u = User.objects.get(username=user['email'])
-                profile = UserProfile.objects.get(user=u)
-                profile.is_job_submitter_only = True
-                profile.save()
-            except User.DoesNotExist:
-                print(f"User {user['email']} does not exist")
-            except UserProfile.DoesNotExist:
-                print(f"UserProfile for {user['email']} does not exist")
-
         return self.list(request, *args, **kwargs)
