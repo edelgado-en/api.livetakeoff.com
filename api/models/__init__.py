@@ -67,3 +67,5 @@ from .customer_tail import CustomerTail
 from .export_job import ExportJob
 from .job_feedback import JobFeedback
 from .job_feedback_photos import JobFeedbackPhotos
+from .customer_category import CustomerCategory
+from .job_category import JobCategory

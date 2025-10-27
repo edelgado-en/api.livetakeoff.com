@@ -127,7 +127,9 @@ from .views import (
         ResetPasswordView,
         ExportJobDetailView,
         ExportJobsView,
-        JobFeedbackView
+        JobFeedbackView,
+        CustomerCategoriesView,
+        CustomerCategoryView,
     )
 
 urlpatterns = [
@@ -240,6 +242,9 @@ urlpatterns = [
     path('customers/retainers-services/<int:id>/', CustomerRetainersServicesView.as_view()),
     path('customers/follower-emails', CustomerFollowerEmailsView.as_view()),
     path('customers/follower-emails/<int:id>/', CustomerFollowerEmailView.as_view()),
+
+    path('customers/categories/<int:id>/', CustomerCategoryView.as_view()),
+    path('customers/categories', CustomerCategoriesView.as_view()),
 
     path('customers/tails', CustomerTailListView.as_view()),
     path('customers/tails/stats', CustomerTailStatsView.as_view()),

@@ -52,7 +52,9 @@ from api.models import (
     RetainerServiceActivity,
     CustomerTail,
     TailAircraftLookup,
-    ExportJob
+    ExportJob,
+    JobCategory,
+    CustomerCategory
 )
 
 class UserProfileInline(admin.StackedInline):
@@ -410,3 +412,13 @@ class ExportJobAdmin(admin.ModelAdmin):
     search_fields = ['user__username', 'status']
 
 
+@admin.register(JobCategory)
+class JobCategoryAdmin(admin.ModelAdmin):
+    list_display = ['id', 'customer_category', 'created_by', 'created_at' ]
+    list_per_page = 100
+
+
+@admin.register(CustomerCategory)
+class CustomerCategoryAdmin(admin.ModelAdmin):
+    list_display = ['id', 'customer', 'name', 'is_active' ]
+    list_per_page = 100

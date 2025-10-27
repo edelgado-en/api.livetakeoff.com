@@ -50,3 +50,4 @@ from .customer_tail import CustomerTailSerializer
 from .export_job import ExportJobSerializer
 from .job_feedback import JobFeedbackSerializer
 from .job_feedback_photos import JobFeedbackPhotosSerializer
+from .customer_category import CustomerCategorySerializer

@@ -128,3 +128,5 @@ from .reset_password import ResetPasswordView
 from .export_job import ExportJobDetailView
 from .export_jobs import ExportJobsView
 from .job_feedback import JobFeedbackView
+from .customer_categories import CustomerCategoriesView
+from .customer_category import CustomerCategoryView
