@@ -10,6 +10,7 @@ from .basic_user import BasicUserSerializer
 from .job_tag import JobTagSerializer
 from .job_file import JobFileSerializer
 from .job_follower_email import JobFollowerEmailSerializer
+from .job_category import JobCategorySerializer
 
 class JobDetailSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
@@ -31,6 +32,8 @@ class JobDetailSerializer(serializers.ModelSerializer):
     encoded_id = serializers.CharField(max_length=100, read_only=True, required=False)
     tags = JobTagSerializer(many=True)
     follower_emails = JobFollowerEmailSerializer(many=True)
+    categories = JobCategorySerializer(many=True)
+
     discounted_price = serializers.DecimalField(max_digits=9, decimal_places=2, read_only=True, required=False)
 
     files = serializers.SerializerMethodField()
@@ -111,6 +114,7 @@ class JobDetailSerializer(serializers.ModelSerializer):
             'complete_before_formatted_date',
             'discounted_price',
             'follower_emails',
+            'categories',
             'enable_flightaware_tracking',
             'show_billing_info',
             'feedback_rating',

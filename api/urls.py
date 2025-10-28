@@ -130,6 +130,7 @@ from .views import (
         JobFeedbackView,
         CustomerCategoriesView,
         CustomerCategoryView,
+        JobCategoryView,
     )
 
 urlpatterns = [
@@ -146,6 +147,8 @@ urlpatterns = [
     path('jobs/feedback/<int:id>/', JobFeedbackView.as_view()),
     path('jobs/feedback', JobFeedbackView.as_view()),
     
+    path('jobs/category', JobCategoryView.as_view()),
+
     path('jobs/can-complete/<int:id>/', JobCompleteCheck.as_view()),
     path('jobs/completed', CompletedJobsListView.as_view()),
     path('jobs/completed/<int:id>/', CompletedJobsListView.as_view()),

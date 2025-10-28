@@ -51,3 +51,4 @@ from .export_job import ExportJobSerializer
 from .job_feedback import JobFeedbackSerializer
 from .job_feedback_photos import JobFeedbackPhotosSerializer
 from .customer_category import CustomerCategorySerializer
+from .job_category import JobCategorySerializer

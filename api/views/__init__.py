@@ -130,3 +130,4 @@ from .export_jobs import ExportJobsView
 from .job_feedback import JobFeedbackView
 from .customer_categories import CustomerCategoriesView
 from .customer_category import CustomerCategoryView
+from .job_category import JobCategoryView
