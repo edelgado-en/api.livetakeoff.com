@@ -3,6 +3,7 @@ from .aircraft_type import AircraftTypeSerializer
 from .airport import AirportSerializer
 from .fbo import FBOSerializer
 from .customer import CustomerSerializer
+from .job_category import JobCategorySerializer
 from ..models import (Job, JobCommentCheck, JobComments)
 from .job_service_assignment import (
         JobServiceAssignmentSerializer,
@@ -27,6 +28,7 @@ class JobAdminSerializer(serializers.ModelSerializer):
     job_service_assignments = JobServiceAssignmentSerializer(many=True)
     job_retainer_service_assignments = JobRetainerServiceAssignmentSerializer(many=True)
     tags = JobTagSerializer(many=True)
+    categories = JobCategorySerializer(many=True)
     created_by = BasicUserSerializer(read_only=True)
     completion_date = serializers.DateTimeField(format="%m/%d %H:%M", read_only=True)
     comments_count = serializers.SerializerMethodField()
@@ -85,5 +87,6 @@ class JobAdminSerializer(serializers.ModelSerializer):
             'arrival_formatted_date',
             'departure_formatted_date',
             'complete_before_formatted_date',
-            'discounted_price'
+            'discounted_price',
+            'categories'
             )

@@ -3,6 +3,7 @@ from .aircraft_type import AircraftTypeSerializer
 from .airport import AirportSerializer
 from .fbo import FBOSerializer
 from .customer import CustomerSerializer
+from .job_category import JobCategorySerializer
 from ..models import (Job, JobCommentCheck, JobComments)
 
 from .job_tag import JobTagSerializer
@@ -19,6 +20,7 @@ class JobSerializer(serializers.ModelSerializer):
     estimatedETD = serializers.DateTimeField(format="%m/%d %H:%M")
     completion_date = serializers.DateTimeField(format="%m/%d %H:%M")
     tags = JobTagSerializer(many=True)
+    categories = JobCategorySerializer(many=True)
     comments_count = serializers.SerializerMethodField()
 
     def get_comments_count(self, obj):
@@ -67,6 +69,7 @@ class JobSerializer(serializers.ModelSerializer):
             'comments_count',
             'arrival_formatted_date',
             'departure_formatted_date',
-            'complete_before_formatted_date'
+            'complete_before_formatted_date',
+            'categories'
             )
 
