@@ -19,9 +19,6 @@ class JobCategoryView(APIView):
         job_id = request.data.get('job_id')
         customer_category_ids = request.data.get('customer_category_ids', [])
 
-        if not customer_category_ids:
-            return Response({'detail': 'customer_category_ids is required'}, status=status.HTTP_400_BAD_REQUEST)
-
         job = get_object_or_404(Job, pk=job_id)
 
         JobCategory.objects.filter(job=job).delete()
