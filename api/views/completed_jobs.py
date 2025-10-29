@@ -39,6 +39,7 @@ class CompletedJobsListView(ListAPIView):
         fbo = self.request.data.get('fbo')
         customer = self.request.data.get('customer')
         additionalFees = self.request.data.get('additionalFees', [])
+        customerCategories = self.request.data.get('customerCategories', [])
 
         requestedDateFrom = self.request.data.get('requestedDateFrom')
         requestedDateTo = self.request.data.get('requestedDateTo')
@@ -58,6 +59,10 @@ class CompletedJobsListView(ListAPIView):
         qs = Job.objects.all()
         
         user_profile = self.request.user.profile
+
+        # customerCategories is an array of customer category IDs
+        if customerCategories:
+            qs = qs.filter(categories__customer_category_id__in=customerCategories).distinct()
         
         for additionalFee in additionalFees:
             if additionalFee == 'A':
