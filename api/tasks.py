@@ -22,6 +22,7 @@ def _apply_filters(base_qs, params: dict, user):
     fbo = params.get("fbo")
     customer = params.get("customer")
     additional_fees = params.get("additionalFees", []) or []
+    customer_categories = params.get("customerCategories", []) or []
 
     requested_from = params.get("requestedDateFrom")
     requested_to   = params.get("requestedDateTo")
@@ -51,6 +52,10 @@ def _apply_filters(base_qs, params: dict, user):
             qs = qs.filter(management_fees_amount_applied__gt=0)
         elif fee == "V":
             qs = qs.filter(vendor_higher_price_amount_applied__gt=0)
+
+    # ----- customer categories -----
+    if customer_categories:
+        qs = qs.filter(categories__customer_category_id__in=customer_categories).distinct()
 
     # ----- per-user visibility (customer vs staff/internal, etc.) -----
     user_profile = getattr(user, "profile", None)
@@ -233,7 +238,7 @@ def run_export(export_id: int):
             "P.O","Customer","Request Date","Tail Number","Aircraft","Airport","FBO",
             "Arrival Date","Departure Date","Complete By Date","Completion Date",
             "Travel Fees","FBO Fees","Vendor Price Diff","Management Fees","Price",
-            "Services","Retainers"
+            "Services","Retainers", "Categories", "Requested By"
         ]
         csv_buffer = io.StringIO()
         writer = csv.DictWriter(csv_buffer, fieldnames=headers)
@@ -266,6 +271,10 @@ def run_export(export_id: int):
             for r in job.job_retainer_service_assignments.all():
                 retainers += f"{r.retainer_service.name} | "
 
+            categories = ""
+            for c in job.categories.all():
+                categories += f"{c.customer_category.name} | "
+
             row_common = {
                 "P.O": job.purchase_order,
                 "Customer": job.customer.name,
@@ -280,6 +289,8 @@ def run_export(export_id: int):
                 "Completion Date": completionDate,
                 "Services": services,
                 "Retainers": retainers,
+                "Categories": categories,
+                "Requested By": job.requested_by or "",
             }
 
             if show_job_price:

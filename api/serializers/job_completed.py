@@ -73,5 +73,5 @@ class JobCompletedSerializer(serializers.ModelSerializer):
             'arrival_formatted_date',
             'departure_formatted_date',
             'complete_before_formatted_date',
-            'comments_count'
+            'comments_count',
             )
